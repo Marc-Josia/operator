@@ -1,0 +1,30 @@
+{
+  "name": "@marcjosia/operator",
+  "version": "0.1.0",
+  "description": "Operator — an agent-agnostic toolkit that makes AI coding agents work like a senior engineering team. The human decides, Operator organizes, agents execute.",
+  "type": "module",
+  "bin": {
+    "operator": "src/bin/operator.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": "github:MarcJosia/operator",
+  "keywords": [
+    "ai",
+    "agents",
+    "agentic-engineering",
+    "claude-code",
+    "codex",
+    "opencode",
+    "spec-driven-development",
+    "toolkit"
+  ],
+  "scripts": {
+    "test": "node --test src/test/",
+    "build:manifest": "node src/lib/manifest.mjs build"
+  }
+}
