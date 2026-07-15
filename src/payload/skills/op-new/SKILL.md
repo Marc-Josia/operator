@@ -87,16 +87,22 @@ worst moment. Worked example — request: "Add an `--json` flag to the CLI `stat
 Honest: two "yes" → standard lane; a short spec-lite is written and approved before code, once.
 Dishonest: all "no" → quick lane; the real diff lands at 4 files and ~120 lines (command,
 formatter, tests, README), the build gate fails `diff-within-lane-caps` against the 3/80 caps,
-and you must escalate mid-build, backfill the spec anyway, and re-plan — while the append-only
-journal permanently shows `GATE build FAILED` and `ESCALATED` for the operator to read. Lying
-buys nothing: same spec, written later, plus rework and a visible failure record.
+and you must escalate mid-build, backfill the spec anyway, and re-plan. The gate failure prints
+to the console and changes nothing, while the append-only journal permanently records the
+`ESCALATED` line for the operator to read. Lying buys nothing: same spec, written later, plus
+rework and a visible escalation record.
 
 ### 4. Create the work item
 
 1. Choose the id `NNN-slug`: `NNN` = highest existing `NNN` in `.operator/work/` + 1,
    zero-padded to three digits (`001` in an empty directory); slug = 2–4 kebab-case words from
    the title. Existing `001-login-form`, `002-csv-export` → new item is `003-json-status-flag`.
-2. Record the base: run `git rev-parse HEAD`. The build gate measures the diff from this commit.
+2. Record the base: run `git rev-parse HEAD`. The build gate measures the diff from this commit,
+   so `base` must point at a clean starting state — everything changed since `base` is attributed
+   to this work item. Before recording it, make sure the working tree holds no unrelated pending
+   changes; commit or stash them first. On the very first work item in a project this includes the
+   Operator install itself: commit it (e.g. `git add -A && git commit -m "chore: install Operator"`)
+   so the scaffolding does not show up in your work diff.
 3. Copy `.operator/templates/workitem.md` to `.operator/work/<id>/workitem.md` and instantiate
    **every** `{{placeholder}}` — the gate checker treats leftover `{{…}}` as empty content, so
    none may remain: `{{id}}`, `{{title}}`, `{{lane}}`, `{{base-sha}}` (from step 2), `{{date}}`

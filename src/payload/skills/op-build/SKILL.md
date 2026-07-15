@@ -163,8 +163,11 @@ Pass advances the item to `review`; the next procedure is `op-ship`.
   silent widening the gate exists to catch. Revert the out-of-scope hunks, or escalate/re-plan
   (Step 3) so the widened Scope carries an operator approval.
 - **`tests-pass` fails with "configure testCommand"** — ask the operator for the project's
-  real test command and set it in `.operator/config.json`. Only the operator can waive tests,
-  and the waiver must be journaled quoting them: `- <ISO date> WAIVER tests: "<their words>"`.
+  real test command and set it in `.operator/config.json`. Waiving tests takes two steps, both
+  required: the operator sets `"testCommand": false` in `.operator/config.json` AND the waiver is
+  journaled quoting them: `- <ISO date> WAIVER tests: "<their words>"`. The journal line has no
+  effect while `testCommand` is `null` — the gate keeps reporting "configure testCommand" until
+  `testCommand` is set to `false`.
 - **A task no longer applies** — a re-plan made it obsolete. Update the Tasks list through
   `op-plan` (Tasks is editable; only the Journal is append-only). Never tick a box for work
   that was not done — `tasks-complete` checks the boxes, but the review reads the diff.

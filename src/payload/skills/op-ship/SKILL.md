@@ -155,7 +155,8 @@ for the next person.
 node .operator/bin/op.mjs gate <id>
 ```
 
-It checks the `DOCS` line, the `MEMORY` line (max 3 harvested items), the filled Retro, and
+It checks the `DOCS` line, the `MEMORY` line (harvest at most 3 items — a discipline, not
+counted by the gate), the filled Retro, and
 (standard/full) memory caps. On pass the item advances to `done`. Set the frontmatter
 `next:` to `done — no further action`.
 
@@ -205,7 +206,8 @@ The procedure ends only when the ship gate has passed and the operator has the r
   `node .operator/bin/op.mjs escalate <id>`, backfill, and redo the review including the
   security pass.
 - **More than three memory-worthy items.** Keep the three most durable; the rest stays in the
-  Retro, retrievable later. Do not journal a fourth — the gate counts.
+  Retro, retrievable later. Keep the harvest to the three most durable — this cap is your
+  discipline, not a gate count (the gate only checks that a `MEMORY` line is present).
 - **The gate fails.** Do exactly what the checker's failure output names — it prints the fix
   per check. Never edit or backdate journal lines to satisfy a grep; the journal is
   append-only and its history is the audit trail.

@@ -19,17 +19,28 @@ method below, and never freelance outside the mandate you were given.
    touch. If `project.md` is still an empty seed, survey the codebase and fill it first.
 5. **Protected paths never travel the quick lane** (list: `.operator/config.json`).
 
-## Routing
+## Routing — you are the router
 
-| The operator wants… | Follow |
+The operator speaks in plain language; classify the request and run the right procedure yourself.
+Never ask "which command?" or make the operator name a skill — dispatch, act, then report.
+Resuming work already in flight? Check `op-status` or the item's `stage:` first; the stage names
+the procedure (`spec`→`op-plan`, `build`→`op-build`, `review`→`op-ship`).
+
+| The operator wants… | Run |
 |---|---|
-| a new feature or change | `op-new` |
-| a spec/plan for an item | `op-plan` |
-| implementation to proceed | `op-build` |
-| a bug fixed | `op-fix` |
-| to finish and deliver | `op-ship` |
+| new work — a feature, change, refactor, or chore | `op-new` |
+| a bug fixed — "broken", "crashes", "wrong output", a regression | `op-fix` |
+| a spec/plan for an item (or it sits at `stage: spec`) | `op-plan` |
+| implementation to proceed (or it sits at `stage: build`) | `op-build` |
+| to finish and deliver (or it sits at `stage: review`) | `op-ship` |
 | to know where things stand | `op-status` |
-| something remembered | `op-memory` |
+| a rule or correction remembered | `op-memory` |
+
+Some requests want judgement, not a state change — "review this", "is it secure?", "how do I
+test/debug this?". Consult the matching `operator-*` pack (`operator-code-review`,
+`operator-security-review`, `operator-test-strategy`, `operator-debugging`); a pack advises a
+procedure and never moves an item. The constitution's Routing section holds the full decision
+tree. Unsure whether it is a feature or a bug? Route to `op-new`; it reroutes to `op-fix` if so.
 
 If your tool supports skills or slash commands, invoke them. Otherwise read
 `.agents/skills/<name>/SKILL.md` and follow it literally.

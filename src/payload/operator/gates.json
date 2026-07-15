@@ -64,7 +64,7 @@
     "security-review-if-protected": "if the diff touches protectedPaths, journal contains a `REVIEW security` line",
     "dod-complete": "every checkbox in the Definition of done section is checked",
     "docs-updated-or-waived": "journal contains `DOCS updated:` or `DOCS no-impact:` with a reason",
-    "memory-harvest": "journal contains `MEMORY harvested:` (max 3 items) or `MEMORY none:` with a reason",
+    "memory-harvest": "journal contains a `MEMORY harvested:` or `MEMORY none:` line with a reason",
     "memory-caps": "no memory file exceeds its configured line cap",
     "retro-filled": "Retro section is non-empty and contains no TBD"
   }

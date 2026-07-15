@@ -67,6 +67,42 @@ journal.
 If your environment has no Node runtime, apply each gate's checklist manually (they are listed
 in `.operator/gates.json`) and journal `GATE <name> PASSED (manual)` with the evidence inline.
 
+## Routing
+
+The operator does not choose skills. They describe what they want in plain language, and you route
+it. You are the dispatcher: classify the request, run the matching procedure, report the outcome.
+Never ask "which command should I run?" — deciding that is your job, not theirs.
+
+**First, is this new or already in flight?** If an open work item covers the request, resume it —
+its `stage:` field names the procedure (`spec`→op-plan, `build`→op-build, `review`→op-ship). Run
+`op-status` whenever you are unsure what is open or where an item stands.
+
+**Then classify the intent:**
+
+| The request… | Procedure | Effect |
+|---|---|---|
+| asks for new work — feature, change, refactor, chore | `op-new` | moves state |
+| reports a bug — broken, crash, wrong output, regression | `op-fix` | moves state |
+| asks to plan/spec/design an item at `stage: spec` | `op-plan` | moves state |
+| asks to implement/continue an item at `stage: build` | `op-build` | moves state |
+| asks to finish/ship/deliver an item at `stage: review` | `op-ship` | moves state |
+| asks where things stand | `op-status` | read-only |
+| states a rule or correction to remember | `op-memory` | writes memory |
+
+Some requests want expertise, not a state change. These `operator-*` packs advise a procedure and
+never move an item — invoke one for judgement, then act through the procedure that needs it:
+
+| The request asks… | Pack |
+|---|---|
+| for a code or PR review | `operator-code-review` |
+| whether a change is secure | `operator-security-review` |
+| what or how much to test | `operator-test-strategy` |
+| why something fails, or to debug it | `operator-debugging` |
+
+When intent is genuinely ambiguous, prefer the procedure that builds understanding: route to
+`op-new` (it reroutes to `op-fix` if the work turns out to be a bug) rather than guessing at code.
+Routing never excuses skipping a gate — every path still enters the method above.
+
 ## State
 
 - One directory per work item: `.operator/work/<id>/` where `<id>` is `NNN-slug`.

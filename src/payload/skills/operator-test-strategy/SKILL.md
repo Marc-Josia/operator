@@ -1,6 +1,6 @@
 ---
 name: operator-test-strategy
-description: Expertise pack — what to test, at which level of the pyramid, and when to stop. Covers per-lane test depth (quick/standard/full), mapping acceptance criteria to tests, what NOT to test, the flaky-test policy, and how to choose the single best regression test for a bug fix. Consumed by op-build (planning each task's proof) and op-fix (picking the reproduction test). Consult it whenever you are about to write tests, decide how much coverage a change needs, judge whether a test is worth writing at all, or handle a flaky test — read it before writing the first test, not after. Advise only: it returns a test plan to the procedure that invoked it and never moves work-item state.
+description: Expertise pack — what to test, at which level of the pyramid, and when to stop. Covers per-lane test depth (quick/standard/full), mapping acceptance criteria to tests, what NOT to test, the flaky-test policy, and how to choose the single best regression test for a bug fix. Consumed by op-build (planning each task's proof) and op-fix (picking the reproduction test). Consult it whenever you are about to write tests, decide how much coverage a change needs, judge whether a test is worth writing at all, or handle a flaky test — read it before writing the first test, not after. Advise only — it returns a test plan to the procedure that invoked it and never moves work-item state.
 ---
 
 # operator-test-strategy

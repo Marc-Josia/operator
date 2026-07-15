@@ -41,7 +41,8 @@ discovery twice.
    - Scope includes the test location, not just the suspect source files.
    - Most fixes honestly score **quick**. But triage rules still apply in full: a bug in a
      protected path (`.operator/config.json`) is **never quick** — the intake gate's
-     `protected-paths-lane` check will reject it, so triage it standard from the start. A fix
+     intake gate will reject it — the triage scorecard routes any protected-path "yes" straight
+     to the full lane, so triage it full from the start. A fix
      that needs a schema migration or crosses module boundaries follows the normal lane rule.
    - Run `node .operator/bin/op.mjs gate <id>` to pass intake. On standard/full lanes, continue
      through `op-plan` (spec + operator approval) before any fix work; the repro test in step 3
@@ -159,7 +160,7 @@ never edit the stage by hand.
 - **Deleting or weakening the regression test** after it passes ("cleanup", "duplicate
   coverage"). The test is the fix's contract; removing it is undoing the fix.
 - **Protected-path fix rushed through the quick lane.** The intake and build gates both reject
-  it; triage it standard from the start instead of losing the work at the gate.
+  it; triage it full from the start instead of losing the work at the gate.
 - **Bundled refactors.** They widen the diff past caps and past Scope, and they hide the fix
   from the reviewer. New work item.
 - **"Untestable" as a shortcut.** A waiver without the operator's quoted words and manual repro

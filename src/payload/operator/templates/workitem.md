@@ -53,8 +53,11 @@ next: {{next-action}}
 ## Journal
 
 <!-- Append-only. One line per event, newest last. Never edit or delete a previous line.
-     Event vocabulary: CREATED, GATE <name> PASSED/FAILED, APPROVAL, REVIEW, ESCALATED,
-     WAIVER, DOCS, MEMORY, BLOCKED, RESUMED. -->
+     Each line is date-prefixed: `- <ISO date> <EVENT> <details>`.
+     Event vocabulary: CREATED, TASK, GATE <name> PASSED, APPROVAL, REVIEW, REPRO,
+     ESCALATED, WAIVER, DOCS, MEMORY, BLOCKED, RESUMED.
+     (The checker writes the GATE PASSED line itself on a passing gate; a gate failure prints
+     to the console and is never journaled — do not write GATE lines by hand.) -->
 
 - {{date}} CREATED lane={{lane}}
 

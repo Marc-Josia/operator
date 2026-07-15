@@ -11,7 +11,9 @@ it into every prompt.
 Operator is agent-agnostic. It works with any tool that reads `AGENTS.md` and skill files —
 Claude Code, Codex, OpenCode, Cursor, Gemini CLI. You remain the tech lead (Operator calls you
 **the operator**): you decide what gets built and approve plans. The agent follows written
-procedures. A small script checks that the evidence behind each claim is real.
+procedures. A small script checks that the evidence behind each claim is real. You never pick a
+skill — you describe what you want in plain language, and the always-loaded block classifies the
+request and runs the matching procedure.
 
 Concretely, `init` installs three things: a managed block (under 60 lines) injected into your
 project's `AGENTS.md` between `<!-- operator:begin -->` / `<!-- operator:end -->` markers — it

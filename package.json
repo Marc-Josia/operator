@@ -24,7 +24,7 @@
     "toolkit"
   ],
   "scripts": {
-    "test": "node --test src/test/",
+    "test": "node --test \"src/test/**/*.test.mjs\"",
     "build:manifest": "node src/lib/manifest.mjs build"
   }
 }
