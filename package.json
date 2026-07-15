@@ -12,7 +12,7 @@
   "engines": {
     "node": ">=18"
   },
-  "repository": "github:MarcJosia/operator",
+  "repository": "github:Marc-Josia/operator",
   "keywords": [
     "ai",
     "agents",

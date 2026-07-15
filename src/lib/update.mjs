@@ -32,7 +32,7 @@ import { payloadSkillNames } from './init.mjs';
 
 /** The one true fix for a stale npx cache serving an old package version. */
 export const NPX_CACHE_FIX =
-  'rm -rf "$(npm config get cache)/_npx" && npx --yes github:MarcJosia/operator update';
+  'rm -rf "$(npm config get cache)/_npx" && npx --yes github:Marc-Josia/operator update';
 
 /** Map of managed target path (posix, project-relative) -> absolute payload source. */
 function managedFileMap(payload) {

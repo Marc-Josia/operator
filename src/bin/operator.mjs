@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // operator — installer CLI for the Operator toolkit.
-// Zero dependencies. ESM. Node >= 18. Runs via `npx --yes github:MarcJosia/operator <cmd>`.
+// Zero dependencies. ESM. Node >= 18. Runs via `npx --yes github:Marc-Josia/operator <cmd>`.
 
 import fs from 'node:fs';
 import path from 'node:path';
