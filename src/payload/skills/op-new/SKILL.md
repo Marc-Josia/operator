@@ -16,6 +16,10 @@ downstream — spec, diff measurement, review, ship — keys off what is created
 
 - The operator asked for new work, and no open item in `.operator/work/` already covers it
   (check with `node .operator/bin/op.mjs status`).
+- The request is precise enough to restate in one sentence and triage. If it is still vague or
+  exploratory — you cannot yet state the Problem or answer the scorecard — back up to
+  `.agents/skills/op-discover/SKILL.md` first; it interviews the operator into a confirmed problem
+  brief and hands it back here.
 - The request is not a bug with known-good past behavior — those follow
   `.agents/skills/op-fix/SKILL.md`, which reproduces first and then triages through intake.
 - You have read `.operator/constitution.md` (required when starting a work item).
@@ -44,6 +48,11 @@ Then ask only the questions whose answers would change the lane, the scope, or t
 Decide everything else yourself: pointless confirmation wastes the operator's time and violates
 the autonomy policy. "Should the limit apply per user or per API key?" changes the design —
 ask it. "Should I write tests?" never changes anything — the answer is always yes.
+
+This is *light* clarification on an already-precise request, not problem discovery. If you cannot
+even restate the request because it is genuinely vague or exploratory, you skipped a step: stop,
+run `.agents/skills/op-discover/SKILL.md` to interview the operator into a shared problem, and come
+back with its confirmed brief.
 
 ### 3. Triage into a lane
 

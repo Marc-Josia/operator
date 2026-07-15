@@ -49,7 +49,7 @@ preset the command with `--test-cmd "npm test"`), and writes:
 ```
 AGENTS.md              managed block injected between markers; your content is untouched
 CLAUDE.md              ensured to contain `@AGENTS.md` (only when Claude Code is detected)
-.agents/skills/        11 skills: 7 op-* procedures + 4 operator-* expertise packs
+.agents/skills/        12 skills: 8 op-* procedures + 4 operator-* expertise packs
 .claude/skills/        copy of the skills, for Claude Code (only when detected)
 .gemini/settings.json  context file setting (only when .gemini/ already exists)
 .operator/
@@ -329,7 +329,7 @@ npx --yes github:MarcJosia/operator remove          # keeps work/ and memory/
 npx --yes github:MarcJosia/operator remove --purge  # removes those too
 ```
 
-`remove` deletes the managed block (your `AGENTS.md` content stays), the 11 skill directories
+`remove` deletes the managed block (your `AGENTS.md` content stays), the 12 skill directories
 (including the `.claude/skills/` mirror), and `.operator/` — except your work items and memory,
 which are kept unless you `--purge`. `CLAUDE.md` is removed only if it is exactly the generated
 one-line import; in `.gemini/settings.json` only the key Operator added is reverted. It prints

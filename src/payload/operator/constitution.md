@@ -77,11 +77,20 @@ Never ask "which command should I run?" — deciding that is your job, not their
 its `stage:` field names the procedure (`spec`→op-plan, `build`→op-build, `review`→op-ship). Run
 `op-status` whenever you are unsure what is open or where an item stands.
 
+**Is the problem even clear yet?** A precise request — one you could restate in a sentence and
+triage now — goes straight to op-new. A vague, exploratory, or problem-shaped one ("onboarding
+feels bad", "we should speed up the dashboard") goes first to `op-discover`, which interviews the
+operator into a shared, confirmed problem statement and then hands it to op-new. Discovery is the
+first two Laws made operational — understand before you build; it defines the problem, creates no
+work item, and passes no gate. Bugs skip both and go to op-fix, which pins a fuzzy defect down by
+reproducing it.
+
 **Then classify the intent:**
 
 | The request… | Procedure | Effect |
 |---|---|---|
-| asks for new work — feature, change, refactor, chore | `op-new` | moves state |
+| is vague or exploratory — problem-shaped, not a precise change | `op-discover` | no state (→ op-new) |
+| asks for new work, already precise — feature, change, refactor, chore | `op-new` | moves state |
 | reports a bug — broken, crash, wrong output, regression | `op-fix` | moves state |
 | asks to plan/spec/design an item at `stage: spec` | `op-plan` | moves state |
 | asks to implement/continue an item at `stage: build` | `op-build` | moves state |
