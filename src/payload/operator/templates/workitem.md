@@ -7,6 +7,8 @@ base: {{base-sha}}
 created: {{date}}
 updated: {{date}}
 next: {{next-action}}
+project:
+milestone:
 ---
 
 # {{title}}

@@ -1,6 +1,6 @@
 ---
 name: op-status
-description: Read-only orientation across all Operator work items — reads every workitem.md's frontmatter and latest journal lines, then reports a narrative status with the exact next action for each item and flags anything blocked or inconsistent. Use it whenever the operator asks "where are we", "what's next", "what's in flight", "what happened to <item>", or "is X done yet"; at the start of any session that resumes earlier work; after a long break, a handoff, or loss of context; and before choosing which work item to pick up. It changes nothing — no journal lines, no frontmatter edits — so it is always safe to run, in any state.
+description: Read-only orientation across all Operator work items — reads every workitem.md's frontmatter and latest journal lines, then reports a narrative status with the exact next action for each item and flags anything blocked or inconsistent, and rolls up any project roadmaps by milestone. Use it whenever the operator asks "where are we", "what's next", "what's in flight", "what happened to <item>", "is X done yet", or "how far along is <project>"; at the start of any session that resumes earlier work; after a long break, a handoff, or loss of context; and before choosing which work item to pick up. It changes nothing — no journal lines, no frontmatter edits — so it is always safe to run, in any state.
 ---
 
 # op-status — orient without touching anything
@@ -25,16 +25,21 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
 
 ## Steps
 
-1. **Enumerate the work items.** List `.operator/work/*/workitem.md`. If the directory is
-   missing or empty, that is the status: report "no work items yet" and point the operator at
-   `op-new` to open the first one. Stop here.
+1. **Enumerate the work.** List `.operator/work/*/workitem.md` and, if present,
+   `.operator/projects/*/roadmap.md`. If both are missing or empty, that is the status: report "no
+   work items yet" and point the operator at `op-new` (or `op-roadmap` for a large effort) to open
+   the first one. Stop here.
 
 2. **Read each item from disk — not from what you remember doing.** For every `workitem.md`:
-   - frontmatter: `id`, `title`, `lane`, `stage`, `updated`, `next`;
+   - frontmatter: `id`, `title`, `lane`, `stage`, `updated`, `next`, and `project`/`milestone`
+     if the item belongs to a project;
    - the last 3–5 journal lines — the most recent events are what actually happened last;
    - progress counts: checked vs total boxes in Tasks and in Definition of done;
    - for standard/full items at `spec` or later: whether the lane's spec document
      (`spec-lite.md` / `spec.md`) exists in the item directory, and its `status:` line.
+   - for each `roadmap.md`: frontmatter `status:` and the Milestones section — which milestone is
+     active and, per milestone, how many of its work items have reached `done` (join by the items'
+     `project`/`milestone` fields). The roadmap's own Progress section is the operator's summary.
 
 3. **Classify each item.**
    - **done** — `stage: done`.
@@ -71,6 +76,10 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
    ```
    ## Status — 2026-07-14
 
+   ### Projects
+   - **001-airbnb-clone** (active) — M1 MVP: 3/4 items shipped; M2–M4 not started.
+     Active item: 014-search (build). Roadmap: .operator/projects/001-airbnb-clone/roadmap.md
+
    ### Active
    - **003-rate-limiting** (standard, build) — updated 2026-07-12
      4/6 tasks checked; last event: GATE spec PASSED.
@@ -88,8 +97,9 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
    Mechanical view: node .operator/bin/op.mjs status
    ```
 
-   If several items are active, restate the rule: one active agent per item — parallel agents
-   take different items.
+   Omit the Projects section when no `.operator/projects/` exist; when they do, lead with it — it is
+   the operator's altitude — then the per-item detail below. If several items are active, restate
+   the rule: one active agent per item — parallel agents take different items.
 
 7. **Recommend the mechanical view.** `node .operator/bin/op.mjs status` prints the same facts
    as a deterministic table straight from the frontmatter, plus the active item's last journal

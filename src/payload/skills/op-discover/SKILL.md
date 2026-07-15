@@ -1,6 +1,6 @@
 ---
 name: op-discover
-description: "Problem-discovery interview that runs BEFORE op-new when a request is vague, exploratory, or problem-shaped rather than a precise change. Grill the operator one question at a time — recommending an answer to each, and researching facts from the codebase and memory instead of asking them — until you both share one clear, confirmed statement of the real problem, then hand that understanding to op-new for triage. Use it whenever the ask is fuzzy or open-ended — 'I think our onboarding is bad', 'we should probably do something about performance', 'can you look into the billing flow', 'help me think this through', 'grill me on this idea' — or the operator is thinking out loud and the underlying need is unclear, or one request could mean several different things, or is really several problems bundled together. Skip it and go straight to op-new when the request is already a precise, discrete change you could restate in one sentence and triage. Skip it for bugs, defects, or regressions — those use op-fix, which reproduces first. Do not design the solution here — that is op-plan; discovery only defines the problem."
+description: "Problem-discovery interview that runs BEFORE op-new when a request is vague, exploratory, or problem-shaped rather than a precise change. Grill the operator one question at a time — recommending an answer to each, and researching facts from the codebase and memory instead of asking them — until you both share one clear, confirmed statement of the real problem, then hand that understanding to op-new for triage — or to op-roadmap when the effort is a whole project spanning several milestones. Use it whenever the ask is fuzzy or open-ended — 'I think our onboarding is bad', 'we should probably do something about performance', 'can you look into the billing flow', 'help me think this through', 'grill me on this idea' — or the operator is thinking out loud and the underlying need is unclear, or one request could mean several different things, or is really several problems bundled together. Skip it and go straight to op-new when the request is already a precise, discrete change you could restate in one sentence and triage. Skip it for bugs, defects, or regressions — those use op-fix, which reproduces first. Do not design the solution here — that is op-plan; discovery only defines the problem."
 ---
 
 # op-discover — frame the problem before intake
@@ -108,15 +108,22 @@ Likely shape: a rough sense of size/risk for triage (not a lane decision)
 If discovery uncovered several distinct problems, list one brief per problem and recommend the
 order to tackle them.
 
-### 6. Confirm alignment, then hand to op-new
+### 6. Confirm alignment, then hand off by size
 
 Present the brief and get an explicit "yes, that's the problem" — this confirmation *is* the shared
-understanding the whole procedure exists to produce; do not proceed on a guess. Then route to
-`.agents/skills/op-new/SKILL.md`, which triages the confirmed problem into a lane and creates the
-work item, using this brief as the raw material for its Problem and Scope. One brief becomes one
-op-new intake (several briefs become several).
+understanding the whole procedure exists to produce; do not proceed on a guess. Then route by how
+big the confirmed problem really is:
 
-Invoke op-new as a skill if your host supports skills; otherwise read its SKILL.md and follow it.
+- **One work item, or a few:** go to `.agents/skills/op-new/SKILL.md`, which triages the confirmed
+  problem into a lane and creates the work item, using this brief as raw material for its Problem and
+  Scope. One brief becomes one op-new intake; a few unrelated problems become a few.
+- **Bigger than one work item — a project spanning several demonstrable phases:** go to
+  `.agents/skills/op-roadmap/SKILL.md`, which decomposes the confirmed problem into an ordered
+  roadmap of milestones and work items, gets the operator's approval, then feeds items to op-new one
+  at a time. Discovery framed the problem; op-roadmap sequences the work.
+
+Invoke the next procedure as a skill if your host supports skills; otherwise read its SKILL.md and
+follow it.
 
 ## Exit
 

@@ -85,11 +85,19 @@ first two Laws made operational — understand before you build; it defines the 
 work item, and passes no gate. Bugs skip both and go to op-fix, which pins a fuzzy defect down by
 reproducing it.
 
+**Is it bigger than one work item?** An ambition that spans several demonstrable phases — "build
+something like Airbnb", a whole subsystem, a v2 — is a *project*, not an issue. Route it to
+`op-roadmap`, which (after discovery) decomposes it into an ordered roadmap of milestones, each
+grouping issue-sized work items, approved by the operator before work begins. The roadmap plans and
+sequences; every work item it spawns still enters op-new and is gated in full. Like discovery, it
+moves no work-item state and passes no mechanical gate — the operator approves it, not `op.mjs`.
+
 **Then classify the intent:**
 
 | The request… | Procedure | Effect |
 |---|---|---|
 | is vague or exploratory — problem-shaped, not a precise change | `op-discover` | no state (→ op-new) |
+| is bigger than one work item — a project, many features, a v2 | `op-roadmap` | no state (→ op-new per item) |
 | asks for new work, already precise — feature, change, refactor, chore | `op-new` | moves state |
 | reports a bug — broken, crash, wrong output, regression | `op-fix` | moves state |
 | asks to plan/spec/design an item at `stage: spec` | `op-plan` | moves state |
@@ -116,8 +124,11 @@ Routing never excuses skipping a gate — every path still enters the method abo
 
 - One directory per work item: `.operator/work/<id>/` where `<id>` is `NNN-slug`.
 - `workitem.md` is the single source of truth: flat frontmatter (`id`, `title`, `lane`,
-  `stage`, `base`, `created`, `updated`, `next`) plus Problem, Triage, Scope, Tasks,
-  Definition of done, Journal, Retro.
+  `stage`, `base`, `created`, `updated`, `next`, and — when the item belongs to a project —
+  `project`, `milestone`) plus Problem, Triage, Scope, Tasks, Definition of done, Journal, Retro.
+- Large efforts get a **Project**: `.operator/projects/<id>/roadmap.md` groups ordered milestones,
+  which group work items. The roadmap is a planning artifact — approved by the operator, moving no
+  work-item state and passing no mechanical gate; the work items it spawns carry the full pipeline.
 - The **Journal is append-only**. Never edit or delete a previous line. Approvals, gate
   passages, escalations, waivers, and reviews all become journal lines — that is what makes
   process erosion visible in git history.

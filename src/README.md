@@ -49,7 +49,7 @@ preset the command with `--test-cmd "npm test"`), and writes:
 ```
 AGENTS.md              managed block injected between markers; your content is untouched
 CLAUDE.md              ensured to contain `@AGENTS.md` (only when Claude Code is detected)
-.agents/skills/        12 skills: 8 op-* procedures + 4 operator-* expertise packs
+.agents/skills/        13 skills: 9 op-* procedures + 4 operator-* expertise packs
 .claude/skills/        copy of the skills, for Claude Code (only when detected)
 .gemini/settings.json  context file setting (only when .gemini/ already exists)
 .operator/
@@ -57,9 +57,10 @@ CLAUDE.md              ensured to contain `@AGENTS.md` (only when Claude Code is
   gates.json           the pipeline: stages, lanes, and the checks each gate runs
   config.json          your knobs: test command, protected paths, lane caps, memory caps
   bin/op.mjs           the gate checker (single file, zero dependencies)
-  templates/           work item, spec-lite, spec, ADR
+  templates/           work item, spec-lite, spec, ADR, roadmap
   memory/              project facts, conventions, lessons, decision records
   work/                one directory per work item, created as you work
+  projects/            one roadmap per large multi-milestone effort, created by op-roadmap
 ```
 
 Commit all of it. The work-item journals in git history are your audit trail.
@@ -320,16 +321,16 @@ npx --yes github:MarcJosia/operator update
 For each managed file, `update` does a three-way comparison against the hashes recorded at
 install time (`.operator/.installed.json`): unmodified files are overwritten, files you modified
 are kept (new version written as `<file>.operator-new`), deleted files are restored. It never
-touches `work/`, `memory/`, or `config.json`, replaces only the marked block in `AGENTS.md`, and
+touches `work/`, `memory/`, `projects/`, or `config.json`, replaces only the marked block in `AGENTS.md`, and
 prints a full report. If npx served you a version older than the one installed, `update` warns
 and prints the cache-clearing command instead of downgrading.
 
 ```sh
-npx --yes github:MarcJosia/operator remove          # keeps work/ and memory/
+npx --yes github:MarcJosia/operator remove          # keeps work/, memory/, projects/
 npx --yes github:MarcJosia/operator remove --purge  # removes those too
 ```
 
-`remove` deletes the managed block (your `AGENTS.md` content stays), the 12 skill directories
+`remove` deletes the managed block (your `AGENTS.md` content stays), the 13 skill directories
 (including the `.claude/skills/` mirror), and `.operator/` — except your work items and memory,
 which are kept unless you `--purge`. `CLAUDE.md` is removed only if it is exactly the generated
 one-line import; in `.gemini/settings.json` only the key Operator added is reverted. It prints

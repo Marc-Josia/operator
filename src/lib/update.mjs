@@ -5,7 +5,7 @@
 //   unchanged since install -> overwrite with the new version
 //   user-modified           -> keep the user's file, write `<file>.operator-new`
 //   missing                 -> restore
-// `work/**`, `memory/**`, and `config.json` are user-owned and never touched.
+// `work/**`, `memory/**`, `projects/**`, and `config.json` are user-owned and never touched.
 // The AGENTS.md managed block is replaced marker-to-marker only.
 
 import fs from 'node:fs';
@@ -188,6 +188,6 @@ export async function update(opts = {}) {
   ) {
     log('  managed files: already up to date');
   }
-  log('  untouched by design: .operator/work/, .operator/memory/, .operator/config.json');
+  log('  untouched by design: .operator/work/, .operator/memory/, .operator/projects/, .operator/config.json');
   return report;
 }

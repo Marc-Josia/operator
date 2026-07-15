@@ -188,17 +188,20 @@ test('init warns (does not fail) outside a git repository', async (t) => {
   assert.ok(report.warnings.some((w) => /git/.test(w)));
 });
 
-test('remove keeps work/ and memory/ by default and strips only our block', async (t) => {
+test('remove keeps work/, memory/, and projects/ by default and strips only our block', async (t) => {
   const { pkg, proj } = makeFixture(t);
   fs.writeFileSync(path.join(proj, 'AGENTS.md'), '# Mine\n\nkeep me\n');
   await init({ cwd: proj, packageRoot: pkg, yes: true, tools: 'claude', log: noop });
   fs.mkdirSync(path.join(proj, '.operator', 'work', '001-a'), { recursive: true });
   fs.writeFileSync(path.join(proj, '.operator', 'work', '001-a', 'workitem.md'), 'item\n');
+  fs.mkdirSync(path.join(proj, '.operator', 'projects', '001-app'), { recursive: true });
+  fs.writeFileSync(path.join(proj, '.operator', 'projects', '001-app', 'roadmap.md'), 'roadmap\n');
 
   const report = await remove({ cwd: proj, log: noop });
 
   assert.ok(fs.existsSync(path.join(proj, '.operator', 'work', '001-a', 'workitem.md')), 'work/ is kept');
   assert.ok(fs.existsSync(path.join(proj, '.operator', 'memory', 'project.md')), 'memory/ is kept');
+  assert.ok(fs.existsSync(path.join(proj, '.operator', 'projects', '001-app', 'roadmap.md')), 'projects/ is kept');
   assert.ok(!fs.existsSync(path.join(proj, '.operator', 'constitution.md')));
   assert.ok(!fs.existsSync(path.join(proj, '.operator', 'gates.json')));
   assert.ok(!fs.existsSync(path.join(proj, '.agents', 'skills', 'op-new')));
@@ -207,15 +210,20 @@ test('remove keeps work/ and memory/ by default and strips only our block', asyn
   const agents = read(proj, 'AGENTS.md');
   assert.ok(!/operator:begin/.test(agents), 'managed block removed');
   assert.ok(agents.includes('keep me'), 'user AGENTS.md content kept');
-  assert.ok(report.kept.some((k) => /work/.test(k)) && report.kept.some((k) => /memory/.test(k)));
+  assert.ok(
+    report.kept.some((k) => /work/.test(k)) &&
+      report.kept.some((k) => /memory/.test(k)) &&
+      report.kept.some((k) => /projects/.test(k))
+  );
 });
 
 test('remove --purge deletes .operator entirely; user CLAUDE.md survives', async (t) => {
   const { pkg, proj } = makeFixture(t);
   fs.writeFileSync(path.join(proj, 'CLAUDE.md'), '# my notes\n');
   await init({ cwd: proj, packageRoot: pkg, yes: true, tools: 'claude', log: noop });
+  fs.mkdirSync(path.join(proj, '.operator', 'projects', '001-app'), { recursive: true });
   await remove({ cwd: proj, purge: true, log: noop });
-  assert.ok(!fs.existsSync(path.join(proj, '.operator')));
+  assert.ok(!fs.existsSync(path.join(proj, '.operator')), 'projects/ and all else gone under --purge');
   assert.ok(fs.existsSync(path.join(proj, 'CLAUDE.md')), 'a CLAUDE.md with user content is never deleted');
 });
 

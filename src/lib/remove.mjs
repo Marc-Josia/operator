@@ -1,7 +1,7 @@
 // `operator remove` — uninstall Operator from a project, conservatively.
 //
 // Removed: the managed AGENTS.md block, the installed skill directories (and
-// their .claude/skills mirrors), and `.operator/` EXCEPT `work/` and `memory/`
+// their .claude/skills mirrors), and `.operator/` EXCEPT `work/`, `memory/`, and `projects/`
 // — those hold the project's history and knowledge and are kept unless
 // `--purge`. CLAUDE.md is deleted only when it is exactly our generated
 // content; the gemini settings key is reversed entry-by-entry.
@@ -78,10 +78,10 @@ export async function remove(opts = {}) {
   // .operator/: keep work/ and memory/ unless --purge --------------------------------
   if (opts.purge) {
     fs.rmSync(operatorDir, { recursive: true, force: true });
-    report.removed.push('.operator/ entirely, including work/ and memory/ (--purge)');
+    report.removed.push('.operator/ entirely, including work/, memory/, and projects/ (--purge)');
   } else {
     for (const entry of fs.readdirSync(operatorDir)) {
-      if (entry === 'work' || entry === 'memory') continue;
+      if (entry === 'work' || entry === 'memory' || entry === 'projects') continue;
       fs.rmSync(path.join(operatorDir, entry), { recursive: true, force: true });
       report.removed.push(`.operator/${entry}`);
     }
@@ -90,6 +90,9 @@ export async function remove(opts = {}) {
     }
     if (fs.existsSync(path.join(operatorDir, 'memory'))) {
       report.kept.push('.operator/memory/ — your project knowledge; delete it with `operator remove --purge`');
+    }
+    if (fs.existsSync(path.join(operatorDir, 'projects'))) {
+      report.kept.push('.operator/projects/ — your project roadmaps; delete them with `operator remove --purge`');
     }
     rmdirIfEmpty(operatorDir);
   }

@@ -116,7 +116,9 @@ rework and a visible escalation record.
    **every** `{{placeholder}}` — the gate checker treats leftover `{{…}}` as empty content, so
    none may remain: `{{id}}`, `{{title}}`, `{{lane}}`, `{{base-sha}}` (from step 2), `{{date}}`
    (today, `YYYY-MM-DD`), `{{next-action}}` (`op-build: implement the tasks` on quick,
-   `op-plan: write the spec` otherwise), `{{first-task}}`.
+   `op-plan: write the spec` otherwise), `{{first-task}}`. Leave the `project:` and `milestone:`
+   frontmatter fields blank for standalone work; if you arrived here from op-roadmap, set `project:`
+   to the roadmap id and `milestone:` to the milestone (e.g. `M1`) so op-status can roll the item up.
 4. Fill the sections:
    - **Problem** — what is asked, in the requester's terms, and why it matters. 3–10 lines on
      the quick lane (it doubles as the acceptance criterion); shorter elsewhere — the spec

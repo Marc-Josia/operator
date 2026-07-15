@@ -29,6 +29,7 @@ the procedure (`spec`→`op-plan`, `build`→`op-build`, `review`→`op-ship`).
 | The operator wants… | Run |
 |---|---|
 | a vague or exploratory ask — problem-shaped, unclear, "help me think this through" | `op-discover`, then `op-new` |
+| a big multi-feature effort — "build an app like X", a whole system, a v2 | `op-roadmap`, then `op-new` per item |
 | new work, already precise — a feature, change, refactor, or chore | `op-new` |
 | a bug fixed — "broken", "crashes", "wrong output", a regression | `op-fix` |
 | a spec/plan for an item (or it sits at `stage: spec`) | `op-plan` |
@@ -37,8 +38,9 @@ the procedure (`spec`→`op-plan`, `build`→`op-build`, `review`→`op-ship`).
 | to know where things stand | `op-status` |
 | a rule or correction remembered | `op-memory` |
 
-Too fuzzy to restate in one sentence and triage? Start with `op-discover` — interview the operator
-into one confirmed problem statement, then hand it to `op-new`. A precise ask skips straight to it.
+Right-size by scale: too fuzzy to restate? `op-discover`. Bigger than one work item — a whole
+project? `op-roadmap` breaks it into milestones of work items. Both converge on `op-new` per item; a
+precise single change goes straight there.
 
 Some requests want judgement, not a state change — "review this", "is it secure?", "how do I
 test/debug this?". Consult the matching `operator-*` pack (`operator-code-review`,
