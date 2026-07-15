@@ -32,6 +32,15 @@ status: draft
 <!-- Each serious alternative considered, and the concrete reason it lost.
      "We didn't think of another way" is an answer — write it if true. -->
 
+## Non-functional constraints
+
+<!-- Standing targets the result must satisfy regardless of this change, each written
+     as a measurable, testable met/not-met criterion — performance budget, accessibility,
+     internationalization (no hard-coded user-facing strings), security (no secrets in
+     logs/output). These are constraints, not a description; where useful, map them to a
+     test in operator-test-strategy. Write `None — <reason>` when there are genuinely none.
+     Distinct from Impact below, which assesses the effect of *this* change. -->
+
 ## Impact
 
 | Dimension | Impact | Notes |

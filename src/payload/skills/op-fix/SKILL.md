@@ -99,14 +99,30 @@ discovery twice.
    `node .operator/bin/op.mjs escalate <id>`, backfill the spec via `op-plan`, and get the
    operator's approval before continuing. Never silently widen Scope.
 
-6. **Keep the regression test.** The test written in step 3 stays in the suite, in the suite's
+   Attempt discipline — never shotgun to green. Each time a fix fails its test and you retry,
+   journal `- <date> ATTEMPT <task> failed: <reason>`. At `postmortemThreshold` ATTEMPTs
+   (default 3, in `.operator/config.json`) since the last postmortem, the build gate's
+   `postmortem-if-thrashing` check blocks — correctly: repeated failure means the *method*, not
+   just the bug, needs examining. Stop, copy `.operator/templates/postmortem.md` to
+   `.operator/work/<id>/postmortem-NNN.md`, name why the approach kept missing, journal
+   `- <date> POSTMORTEM postmortem-NNN.md: <one line>` (this resets the counter), then escalate
+   or ask the operator before trying again.
+
+6. **Assess the blast radius.** Before locking the fix in, check what else the change touches:
+   read the call sites and other users of the code you changed (via `operator-code-review`'s
+   "read the callers the diff does not show", or `operator-debugging`), and confirm no other path
+   relied on the buggy behavior. If a sibling path shares the same latent cause, add a test for it
+   or note it as a follow-up — do not silently widen Scope into a refactor. Keep this light and
+   within the lane's caps.
+
+7. **Keep the regression test.** The test written in step 3 stays in the suite, in the suite's
    normal location, permanently — it is the proof of the fix and the guard against the bug's
    return. Never delete, skip, or weaken it once it passes. Run the full test command from
    `.operator/config.json` to confirm nothing else broke. On a waived repro, re-run the manual
    steps instead and journal the outcome
    (`- <date> REPRO manual steps re-run after fix: bug no longer reproduces`).
 
-7. **Record the lesson.** For every **non-obvious** root cause, append an `L-NNN` entry to
+8. **Record the lesson.** For every **non-obvious** root cause, append an `L-NNN` entry to
    `.operator/memory/lessons.md` in the file's exact format:
 
    ```
@@ -125,7 +141,7 @@ discovery twice.
    - 2026-07-14 MEMORY lesson recorded: L-004 (native Date offset parsing)
    ```
 
-8. **Close the build stage.** Tick every completed task checkbox, set frontmatter `next:` to
+9. **Close the build stage.** Tick every completed task checkbox, set frontmatter `next:` to
    the review step, and run the exit gate below. Then hand the item to
    `.agents/skills/op-ship/SKILL.md` for review, delivery, and the memory harvest — op-fix does
    not ship.
@@ -167,4 +183,4 @@ never edit the stage by hand.
   steps in the journal does not count — and most such bugs were testable one level down.
 - **Lesson skipped — or lesson spam.** A non-obvious cause with no `L-NNN` wastes the debugging
   effort you just spent; a trivial one recorded anyway buries real lessons. Apply the
-  non-obvious test from step 7 honestly.
+  non-obvious test from step 8 honestly.

@@ -584,6 +584,27 @@ function chkRetro(ctx) {
   return { pass: true, evidence: 'retro filled' };
 }
 
+function chkThrashing(ctx) {
+  const threshold = ctx.config.postmortemThreshold ?? 3;
+  if (!(threshold > 0)) return { pass: true, evidence: 'postmortem threshold disabled' };
+  // Count ATTEMPT lines recorded since the last POSTMORTEM (a postmortem resets the counter).
+  let attempts = 0;
+  for (const l of journalLines(ctx.content)) {
+    if (/\bPOSTMORTEM\b/.test(l)) attempts = 0;
+    else if (/\bATTEMPT\b/.test(l)) attempts += 1;
+  }
+  if (attempts >= threshold) {
+    return {
+      pass: false,
+      fix: `${attempts} failed ATTEMPT(s) on this item without a postmortem — stop re-trying: copy .operator/templates/postmortem.md to .operator/work/${ctx.id}/postmortem-<NNN>.md, fill it, journal \`- <date> POSTMORTEM <file>: <one line>\`, then escalate or ask the operator`,
+    };
+  }
+  return {
+    pass: true,
+    evidence: attempts ? `${attempts} attempt(s) since last postmortem, under threshold ${threshold}` : 'no thrashing',
+  };
+}
+
 const CHECKS = {
   'workitem-sections': chkWorkitemSections,
   'triage-scorecard': chkTriage,
@@ -593,6 +614,7 @@ const CHECKS = {
   'acceptance-criteria-present': chkAcceptance,
   'operator-approval': chkApproval,
   'tasks-complete': chkAllChecked('Tasks', 'task'),
+  'postmortem-if-thrashing': chkThrashing,
   'tests-pass': chkTests,
   'diff-within-lane-caps': chkLaneCaps,
   'diff-within-scope': chkScope,

@@ -99,12 +99,12 @@ plus `decisions/` (ADRs) et `archive/`.
   `node src/lib/manifest.mjs build`, puis vérifier avec `node src/lib/manifest.mjs verify` avant de
   committer (il signale toute dérive ; il n'y a pas encore de CI pour l'attraper à ta place).
 - **Avant de conclure** → lancer la suite : `npm test`
-  (`node --test "src/test/**/*.test.mjs"`, 90 tests). Toute nouvelle behavior de `src/lib`/`op.mjs`
+  (`node --test "src/test/**/*.test.mjs"`, 95 tests). Toute nouvelle behavior de `src/lib`/`op.mjs`
   mérite un test.
 - **Le bloc `src/payload/agents-block.md` reste ≤ 60 lignes** (il est chargé à chaque tour) — le
   détail va dans `constitution.md`, dont le bloc est le résumé.
-- **Décision d'architecture significative** → un ADR dans `docs/adr/` (`NNNN-slug.md`). 15 ADRs
-  existent (0001–0015) ; ne pas réécrire un ADR accepté, en ajouter un nouveau qui le supersède.
+- **Décision d'architecture significative** → un ADR dans `docs/adr/` (`NNNN-slug.md`). 16 ADRs
+  existent (0001–0016) ; ne pas réécrire un ADR accepté, en ajouter un nouveau qui le supersède.
 - **Zéro dépendance runtime, jamais de réseau** dans le toolkit (installeur comme `op.mjs`) : Node
   builtins uniquement.
 - **Agent-agnostique** : toute évolution doit fonctionner sur Claude Code, Codex, OpenCode, Cursor

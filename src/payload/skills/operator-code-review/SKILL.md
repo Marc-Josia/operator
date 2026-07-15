@@ -97,6 +97,14 @@ invoking procedure knows the review's actual coverage.
 - [ ] The interface is honest about nullability and error behavior (types and docs match
       reality)
 
+**Cross-file consistency**
+
+- [ ] A capability the codebase already has is reused, not reimplemented a new way — the change
+      does not add a component, helper, or pattern that duplicates an existing one
+- [ ] Behavior added in more than one place (routes, pages, handlers) is done the same way in each,
+      not implemented independently per site — look across files, not only within the diff
+- [ ] Naming, error handling, and structure match the sibling code the change sits next to
+
 **Naming and readability**
 
 - [ ] Names say what things are — no shadowing, no `data2`/`newFoo`, no comments that lie
@@ -180,6 +188,11 @@ code — calibrate for it:
   exists in the version this project actually depends on — check the manifest/lockfile and
   search the dependency or its docs. Generated code confidently calls functions that merely
   look idiomatic, or that exist only in a different major version.
+- **Reimplementation instead of reuse.** An agent builds each site in isolation and cannot feel
+  the codebase's existing shape, so it re-solves problems already solved — a second date helper, a
+  third bespoke fetch wrapper, the "same" screen coded three different ways. Consistency is not in
+  its field of view; check for it explicitly (see the Cross-file consistency checklist group) and
+  point reuse at the existing implementation.
 - **Over-abstraction.** Interfaces with one implementation, parameters nothing passes, layers
   that only forward calls, generalization "for future flexibility" — flag against Simplicity
   (Laws 8 and 9): every abstraction must justify its existence today. Suggest the concrete

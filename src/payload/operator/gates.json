@@ -25,9 +25,9 @@
     "build": {
       "advancesTo": { "quick": "review", "standard": "review", "full": "review" },
       "checks": {
-        "quick": ["tasks-complete", "tests-pass", "diff-within-lane-caps", "diff-within-scope", "protected-paths-lane"],
-        "standard": ["tasks-complete", "tests-pass", "diff-within-scope"],
-        "full": ["tasks-complete", "tests-pass", "diff-within-scope"]
+        "quick": ["tasks-complete", "postmortem-if-thrashing", "tests-pass", "diff-within-lane-caps", "diff-within-scope", "protected-paths-lane"],
+        "standard": ["tasks-complete", "postmortem-if-thrashing", "tests-pass", "diff-within-scope"],
+        "full": ["tasks-complete", "postmortem-if-thrashing", "tests-pass", "diff-within-scope"]
       }
     },
     "review": {
@@ -56,6 +56,7 @@
     "acceptance-criteria-present": "spec has a numbered Acceptance criteria list with at least one entry",
     "operator-approval": "journal contains an `APPROVAL plan granted by operator:` line quoting the operator",
     "tasks-complete": "every checkbox in the Tasks section is checked",
+    "postmortem-if-thrashing": "fewer than config postmortemThreshold `ATTEMPT` journal lines since the last `POSTMORTEM` (repeated failure forces a method postmortem)",
     "tests-pass": "config testCommand exits 0 (testCommand false = explicitly waived, journaled)",
     "diff-within-lane-caps": "measured diff since `base` is within config lane caps (files, changed lines)",
     "diff-within-scope": "every file in the measured diff matches the Scope section's declared paths",

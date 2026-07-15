@@ -35,6 +35,7 @@ This table is the whole policy:
 | A real design decision (alternative considered and rejected) | op-plan, at the spec stage | an ADR in `.operator/memory/decisions/` |
 | A non-obvious root cause | op-fix, when the fix lands | an `L-NNN` lesson in `lessons.md` |
 | Ship-time harvest | op-ship, at the ship stage | at most 3 durable items (`L-NNN`, `C-NNN`, or a `project.md` fact) |
+| Repeated failure on one item (the build gate forced a pause) | op-fix / op-build, when thrashing | a `postmortem-NNN.md` under the work item — a method postmortem, harvested to `L-NNN`/`C-NNN` at ship |
 | **The operator corrects you or states a rule** | **op-memory record — immediately** | `C-NNN` or `L-NNN`, cited |
 
 The operator-correction row is the one exception to gate-binding: a correction is the most
@@ -130,6 +131,11 @@ to what you were doing.
    `C-NNN` convention capturing the rule, cite the source lessons and their work items, and
    move the constituent `L-NNN` entries to archive with a `promoted to C-NNN` note. This is
    the pipeline from experience to law — it is why lessons are worth recording at all.
+
+   The same rule applies to postmortems: when three postmortems point at the same method defect
+   (a recurring blockage, not three unrelated bugs), the method itself is the problem. Promote it
+   to a `C-NNN` convention that changes how the work is done — or, when it is structural, raise it
+   with the operator as an ADR (a meta-postmortem that revises the method, not just a rule).
 
 5. **Archive the stale.** An entry is stale when its `paths:` no longer exist, the practice it
    guards against is gone, or the fact is obsolete. Move it — never delete — by appending it

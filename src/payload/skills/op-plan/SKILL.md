@@ -71,6 +71,18 @@ runs.
 - Good: `1. A client sending more than 100 requests within 60s receives HTTP 429 with a
   Retry-After header; request 100 still succeeds.`
 
+**Non-functional constraints** (both lanes) are the standing targets the result must satisfy
+regardless of this change — a performance budget, accessibility, internationalization (no
+hard-coded user-facing strings), no secrets in logs. Write each as a measurable met/not-met
+criterion so `operator-test-strategy` can map the non-trivial ones to a test, exactly as it does
+acceptance criteria. When there are genuinely none, write `None — <reason>`; the gate requires the
+section to be non-empty. Keep these distinct from the full-lane `Impact` table, which assesses the
+effect of *this* change rather than a target the result must hold.
+
+- Bad: `Should be fast and accessible.`
+- Good: `First contentful paint < 1.5s on the staging profile; all interactive text meets WCAG AA
+  contrast; no user-facing string is hard-coded (i18n catalog only).`
+
 **Full lane additions:**
 
 - **Architecture & decisions** — components touched or created, data flow, contracts between

@@ -15,6 +15,7 @@
   "lanes": {
     "quick": { "maxFiles": 3, "maxChangedLines": 80 }
   },
+  "postmortemThreshold": 3,
   "memoryCaps": {
     "project": 120,
     "conventions": 200,

@@ -157,6 +157,7 @@ function writeSpec(dir, name, opts = {}) {
       `## Problem & goal\n\n${secBody('Users hit a crash; done means no crash on empty input.')}\n\n` +
       `## Acceptance criteria\n\n${acText}\n\n` +
       `## Approach\n\n${secBody('Guard the empty-input branch and add a regression test.')}\n\n` +
+      `## Non-functional constraints\n\n${secBody('None — a small internal guard, no perf/i18n/security surface.')}\n\n` +
       `## Out of scope\n\n${secBody('Any redesign of the input widget.')}\n\n` +
       `## Risks & assumptions\n\n${secBody('Assumes the validator is the only caller.')}\n`;
   } else {
@@ -166,6 +167,7 @@ function writeSpec(dir, name, opts = {}) {
       `## Acceptance criteria\n\n${acText}\n\n` +
       `## Architecture & decisions\n\n${secBody('A single guard clause in the validator module.')}\n\n` +
       `## Rejected alternatives\n\n${secBody('A framework upgrade — too large for this need.')}\n\n` +
+      `## Non-functional constraints\n\n${secBody('First paint < 1.5s on staging; no hard-coded user-facing strings.')}\n\n` +
       `## Impact\n\n${secBody('Security: none. Performance: none. Docs: none.')}\n\n` +
       `## Out of scope\n\n${secBody('Widget redesign.')}\n\n` +
       `## Risks & assumptions\n\n${secBody('Assumes the validator is the only caller.')}\n`;
@@ -480,6 +482,56 @@ test('build gate counts untracked files in the measured diff', (t) => {
   assert.equal(r.status, 1);
   assert.match(r.out, /diff-within-scope/);
   assert.match(r.out, /src\/new\.js/);
+});
+
+// =============================================================================
+// build gate — postmortem-if-thrashing (repeated ATTEMPTs force a postmortem)
+// =============================================================================
+
+const CREATED = '- 2026-07-15 CREATED lane=quick';
+const ATTEMPT = (n) => `- 2026-07-15 ATTEMPT fix-crash failed: hypothesis ${n} wrong`;
+
+test('build gate passes with zero ATTEMPT lines (no thrashing)', (t) => {
+  const { root } = setup(t);
+  const dir = buildQuick(root, { journal: [CREATED] });
+  const r = op(root, ['gate', '001-fix']);
+  assert.equal(r.status, 0, r.out);
+  assert.match(readItem(dir), /^stage: review$/m);
+});
+
+test('build gate passes under the postmortem threshold', (t) => {
+  const { root } = setup(t);
+  buildQuick(root, { journal: [CREATED, ATTEMPT(1), ATTEMPT(2)] }); // 2 < default 3
+  const r = op(root, ['gate', '001-fix']);
+  assert.equal(r.status, 0, r.out);
+});
+
+test('postmortem-if-thrashing fails at the threshold without a postmortem', (t) => {
+  const { root } = setup(t);
+  const dir = buildQuick(root, { journal: [CREATED, ATTEMPT(1), ATTEMPT(2), ATTEMPT(3)] });
+  const r = op(root, ['gate', '001-fix']);
+  assert.equal(r.status, 1);
+  assert.match(r.out, /postmortem-if-thrashing/);
+  assert.match(r.out, /postmortem/i);
+  assert.match(readItem(dir), /^stage: build$/m); // unchanged on failure
+});
+
+test('a POSTMORTEM line resets the counter and the gate passes', (t) => {
+  const { root } = setup(t);
+  const dir = buildQuick(root, {
+    journal: [CREATED, ATTEMPT(1), ATTEMPT(2), ATTEMPT(3), '- 2026-07-15 POSTMORTEM postmortem-001.md: wrong mental model of the parser', ATTEMPT(4)],
+  });
+  const r = op(root, ['gate', '001-fix']);
+  assert.equal(r.status, 0, r.out); // only 1 ATTEMPT since the postmortem
+  assert.match(readItem(dir), /^stage: review$/m);
+});
+
+test('postmortemThreshold is configurable (0 disables the check)', (t) => {
+  const { root } = setup(t);
+  buildQuick(root, { journal: [CREATED, ATTEMPT(1), ATTEMPT(2), ATTEMPT(3), ATTEMPT(4)] });
+  setConfig(root, { postmortemThreshold: 0 });
+  const r = op(root, ['gate', '001-fix']);
+  assert.equal(r.status, 0, r.out);
 });
 
 // =============================================================================

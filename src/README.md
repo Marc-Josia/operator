@@ -57,7 +57,7 @@ CLAUDE.md              ensured to contain `@AGENTS.md` (only when Claude Code is
   gates.json           the pipeline: stages, lanes, and the checks each gate runs
   config.json          your knobs: test command, protected paths, lane caps, memory caps
   bin/op.mjs           the gate checker (single file, zero dependencies)
-  templates/           work item, spec-lite, spec, ADR, roadmap
+  templates/           work item, spec-lite, spec, ADR, roadmap, postmortem
   memory/              project facts, conventions, lessons, decision records
   work/                one directory per work item, created as you work
   projects/            one roadmap per large multi-milestone effort, created by op-roadmap

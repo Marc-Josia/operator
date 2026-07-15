@@ -64,6 +64,16 @@ a third file, a design choice, a protected path — stop, escalate, and backfill
 artifacts before the next gate. De-escalation requires the operator's quoted instruction in the
 journal.
 
+A spec declares more than acceptance criteria: it declares the **non-functional constraints** the
+result must hold — performance budgets, accessibility, internationalization, no leaked secrets —
+each as a checkable met/not-met criterion, so they are verified rather than assumed.
+
+Repeated failure is a signal, not a reason to try harder. Log each failed fix or build attempt as
+an `ATTEMPT`; when they reach the configured threshold, the build gate stops you and requires a
+**postmortem** — an analysis of why the *method* stalled, not just the bug. Three postmortems on
+the same defect are promoted to a convention or a method change. Never shotgun changes until the
+suite happens to go green.
+
 If your environment has no Node runtime, apply each gate's checklist manually (they are listed
 in `.operator/gates.json`) and journal `GATE <name> PASSED (manual)` with the evidence inline.
 
@@ -194,8 +204,9 @@ the work, not for a log file.
 ## Continuous improvement
 
 Every error must improve the system — as a lesson, a convention, or a better SOP. Every success
-must become a method. Improve the skills, the gates, and the memory as you go, through the
-sanctioned channels: memory files and `.operator/config.json`.
+must become a method. Repeated failure earns a postmortem, and recurring postmortems revise the
+method itself. Improve the skills, the gates, and the memory as you go, through the sanctioned
+channels: memory files and `.operator/config.json`.
 
 ## The ultimate criterion
 

@@ -78,7 +78,13 @@ continue. The Journal is append-only: never edit or delete an earlier line.
 
 When a failure resists quick diagnosis, apply `operator-debugging`
 (`.agents/skills/operator-debugging/SKILL.md`): reproduce, isolate, verify the root cause.
-Do not shotgun changes until the suite happens to pass.
+Do not shotgun changes until the suite happens to pass. Each time an attempt on the same task
+fails and you retry, journal `- <ISO date> ATTEMPT <task> failed: <reason>`. At
+`postmortemThreshold` ATTEMPTs (default 3, in `.operator/config.json`) since the last postmortem,
+the build gate's `postmortem-if-thrashing` check blocks: stop, copy
+`.operator/templates/postmortem.md` to `.operator/work/<id>/postmortem-NNN.md`, name why the
+*method* stalled (not just the code), journal `- <ISO date> POSTMORTEM postmortem-NNN.md: <line>`
+(this resets the counter), then escalate or ask the operator.
 
 ### 3. Escalation tripwires — stop, never widen silently
 

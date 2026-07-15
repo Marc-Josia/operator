@@ -75,6 +75,14 @@ One AC often needs more than one test — the boundary case and the error path a
 tests. The reverse is a smell: a single test asserting several ACs fails as a blob and tells
 the reader nothing about which promise broke.
 
+Apply the same mapping to the spec's **Non-functional constraints**. A non-trivial NFR is a
+promise too, so it earns a test wherever it is objectively checkable: no hard-coded user-facing
+strings (a lint/scan test over the i18n boundary), no secrets in logs (a redaction assertion), a
+performance budget (a threshold check on a representative profile). Return these under `mapping:`
+keyed by the constraint, exactly like an AC. NFRs that resist a deterministic test — a subjective
+look, a hard-to-reproduce load profile — say so plainly and flag them `for the operator:` rather
+than shipping a flaky guard (see Flaky tests below).
+
 ## What NOT to test
 
 Every test is permanent maintenance surface; a low-signal test taxes every future change and

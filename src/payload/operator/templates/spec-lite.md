@@ -24,6 +24,12 @@ status: draft
 <!-- The intended solution in a few paragraphs: what changes, what stays untouched,
      and why this approach over the obvious alternative. -->
 
+## Non-functional constraints
+
+<!-- Standing targets the result must satisfy regardless of this change, each a measurable
+     met/not-met criterion — performance, accessibility, i18n (no hard-coded user-facing
+     strings), no secrets in logs. Write `None — <reason>` when there are genuinely none. -->
+
 ## Out of scope
 
 <!-- Explicitly excluded work. Prevents silent scope creep during build. -->
