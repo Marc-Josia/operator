@@ -5,7 +5,7 @@
 
 ## Context
 
-The toolkit must be installable with something like `npx github:MarcJosia/operator init`
+The toolkit must be installable with something like `npx github:Marc-Josia/operator init`
 (AGENTS.md requirement), while the toolkit itself must live entirely under `/src`. npm git
 specifiers require `package.json` at the repository **root**; subdirectory installs are not
 portable across npm versions. When installing from git, npm (≥7) runs `npm pack`, so the
@@ -16,7 +16,7 @@ scripts, and caches git resolutions (stale-version gotcha).
 
 Keep a minimal `package.json` at the repo root as distribution glue only: `bin` →
 `src/bin/operator.mjs`, `files: ["src"]`, `engines.node >= 18`, **zero runtime dependencies,
-zero lifecycle scripts**. Documented invocation is `npx --yes github:MarcJosia/operator init`
+zero lifecycle scripts**. Documented invocation is `npx --yes github:Marc-Josia/operator init`
 (tag-pinned `#vX.Y.Z` variant for reproducibility). Publishing to the npm registry as
 `@marcjosia/operator` is a post-v1 second channel.
 

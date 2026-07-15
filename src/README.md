@@ -31,13 +31,13 @@ back.
 ## Install
 
 ```sh
-npx --yes github:MarcJosia/operator init
+npx --yes github:Marc-Josia/operator init
 ```
 
 To pin a specific release instead of the latest `main`:
 
 ```sh
-npx --yes "github:MarcJosia/operator#v0.1.0" init
+npx --yes "github:Marc-Josia/operator#v0.1.0" init
 ```
 
 Requirements: Node ≥ 18 (for the installer and the gate checker) and a git repository (the gate
@@ -253,7 +253,7 @@ Code adapter is applied anyway — it is the most common host — and `init` say
 ### Installer (runs via npx, from the project root)
 
 ```sh
-npx --yes github:MarcJosia/operator <command>
+npx --yes github:Marc-Josia/operator <command>
 ```
 
 | Command | What it does |
@@ -315,7 +315,7 @@ merging.
 ## Updating & removing
 
 ```sh
-npx --yes github:MarcJosia/operator update
+npx --yes github:Marc-Josia/operator update
 ```
 
 For each managed file, `update` does a three-way comparison against the hashes recorded at
@@ -326,8 +326,8 @@ prints a full report. If npx served you a version older than the one installed, 
 and prints the cache-clearing command instead of downgrading.
 
 ```sh
-npx --yes github:MarcJosia/operator remove          # keeps work/, memory/, projects/
-npx --yes github:MarcJosia/operator remove --purge  # removes those too
+npx --yes github:Marc-Josia/operator remove          # keeps work/, memory/, projects/
+npx --yes github:Marc-Josia/operator remove --purge  # removes those too
 ```
 
 `remove` deletes the managed block (your `AGENTS.md` content stays), the 13 skill directories
@@ -363,7 +363,7 @@ the package. Clear it and re-run:
 
 ```sh
 rm -rf "$(npm config get cache)/_npx"
-npx --yes github:MarcJosia/operator update
+npx --yes github:Marc-Josia/operator update
 ```
 
 **`init` refuses: `.operator/ already exists`.** The project is already installed — run `update`

@@ -6,7 +6,7 @@ engineering team: the human decides, Operator organizes, agents execute.
 **→ Toolkit documentation, installation, and usage: [`src/README.md`](src/README.md)**
 
 ```bash
-npx --yes github:MarcJosia/operator init
+npx --yes github:Marc-Josia/operator init
 ```
 
 ## Repository layout

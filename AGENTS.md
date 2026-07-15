@@ -43,7 +43,7 @@ les scripts de dev, etc.) et ne fait PAS partie du toolkit.
 Le toolkit est construit et testé. Carte pour s'orienter avant de contribuer.
 
 **Distribution.** Paquet `@marcjosia/operator` (v0.1.0), ESM, **zéro dépendance runtime**,
-Node ≥ 18. Installé via `npx --yes github:MarcJosia/operator <cmd>`. CLI installeur
+Node ≥ 18. Installé via `npx --yes github:Marc-Josia/operator <cmd>`. CLI installeur
 (`src/bin/operator.mjs`) : **5 sous-commandes** — `init`, `update`, `doctor`, `status`, `remove`.
 `update` est un three-way merge sans réseau qui ne touche jamais `work/`, `memory/`, `projects/`,
 `config.json`. **5 adapters** (`src/lib/adapters/`) : `claude` et `gemini` écrivent (import

@@ -12,7 +12,7 @@ path to a zero-dependency CLI.
 ## Decision
 
 `operator update` uses the payload of the **package it is running from** — the freshly
-invoked `npx --yes github:MarcJosia/operator#vX.Y.Z` *is* the new version; no network needed.
+invoked `npx --yes github:Marc-Josia/operator#vX.Y.Z` *is* the new version; no network needed.
 Staleness is handled by documenting pinned invocation and by `update` warning when its own
 version is older than the project's installed version (with the exact cache-clearing fix).
 
