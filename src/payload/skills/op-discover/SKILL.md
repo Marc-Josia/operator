@@ -54,6 +54,12 @@ code, config, and tools so you arrive informed. Every question you can answer yo
 question the operator should never have to answer — asking what you could have looked up erodes
 their trust and their time.
 
+**Prior-rejection check.** As part of grounding, scan `.operator/memory/out-of-scope/` (if it has
+entries). Matching is by concept similarity, not keyword — "night theme" matches `dark-mode.md`.
+If the ask overlaps a rejected concept, surface it before interviewing: name the file, quote the
+recorded reason, and ask whether the operator wants to reopen it. The record is memory, not a
+veto — **the operator decides**; if they reopen, continue discovery and update or delete the file.
+
 From that grounding, form a **hypothesis of the real problem**: what outcome the operator is
 actually after, and why now. You will test it, not assume it.
 
@@ -107,6 +113,11 @@ Likely shape: a rough sense of size/risk for triage (not a lane decision)
 
 If discovery uncovered several distinct problems, list one brief per problem and recommend the
 order to tackle them.
+
+When the interview *deliberately discarded* a direction — the operator considered an idea and
+said no, not just "not in this item" — record that rejection via op-memory into
+`.operator/memory/out-of-scope/` (concept, reason, the original ask) so it is never re-litigated
+from zero. Deferrals stay in the brief's `Out of scope` line; only considered "no"s are recorded.
 
 ### 6. Confirm alignment, then hand off by size
 

@@ -56,6 +56,15 @@ back with its confirmed brief.
 
 ### 3. Triage into a lane
 
+**Prior-rejection check first.** Scan `.operator/memory/out-of-scope/` (if it has entries) for a
+concept this request overlaps — match by concept similarity, not keyword. On a match, stop and
+surface it: name the file, quote the recorded reason, and ask whether the operator wants to
+reopen. The record signals; **the operator decides**. If they stand by the rejection, add this
+request to the file's `Prior requests` list and close the intake — no work item. If they reopen,
+update or delete the file and triage normally. If instead the operator rejects *this* request
+after triage discussion, record it there via op-memory (concept, reason, the quoted ask) — but
+never record "already implemented": point to where the behavior lives instead.
+
 Fill the Triage scorecard — every row gets a yes or no, no blanks, no "maybe":
 
 | Question | Answer |
