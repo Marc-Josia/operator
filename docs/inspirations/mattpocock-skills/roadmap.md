@@ -16,8 +16,8 @@ contraire.
 
 | # | Item | Brief | ADR ? | Statut |
 |---|---|---|---|---|
-| 01 | Mémoire des refus (`out-of-scope`) | `items/01-memoire-des-refus.md` | oui | todo |
-| 08 | Test « le routeur ne ment jamais » | `items/08-test-routeur-ne-ment-jamais.md` | non | todo |
+| 01 | Mémoire des refus (`out-of-scope`) | `items/01-memoire-des-refus.md` | oui | done (2026-07-18) |
+| 08 | Test « le routeur ne ment jamais » | `items/08-test-routeur-ne-ment-jamais.md` | non | done (2026-07-18) |
 
 ## M2 — Qualité d'authoring (avant toute réécriture de skill)
 
