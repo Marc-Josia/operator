@@ -1,6 +1,6 @@
 ---
 name: operator-code-review
-description: Expertise pack for reviewing code the way a senior engineer does — read the spec and acceptance criteria before the diff, review against intent with priority correctness > security > maintainability > style, walk a concrete defect checklist (error paths, edge cases, concurrency, resource cleanup, API contracts, naming, dead code, test quality), grade findings on a blocker/major/minor/nit severity ladder with promotion rules, and apply specific tactics for AI-generated code (plausible-but-wrong logic, hallucinated APIs, over-abstraction). Consult it every time a diff, pull request, or work item is reviewed — op-ship's review stage consumes it (via a reviewer sub-agent or a fresh-context pass), and op-build consults it to self-check a task before the build gate. Advisory only — it returns findings to the procedure that invoked it and never changes work-item stage, lane, or journal.
+description: "Expertise pack for reviewing a diff like a senior engineer: intent before code, priority correctness > security > maintainability > style, a concrete defect checklist, a blocker/major/minor/nit severity ladder, and tactics specific to AI-generated code. Consult it whenever a diff, pull request, or work item is reviewed — op-ship's review stage consumes it, and op-build self-checks with it before the build gate. Advisory only: it returns findings and never moves work-item state."
 ---
 
 # operator-code-review — reviewing like a senior engineer

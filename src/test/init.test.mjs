@@ -126,6 +126,22 @@ test('init --force reinstalls managed files but keeps config, memory, and work',
   assert.ok(fs.existsSync(path.join(proj, '.operator', 'constitution.md')), 'managed files are restored');
 });
 
+test('init seeds the out-of-scope memory and --force keeps existing rejection files', async (t) => {
+  const { pkg, proj } = makeFixture(t);
+  await init({ cwd: proj, packageRoot: pkg, yes: true, tools: 'none', log: noop });
+
+  // A fresh install carries the format contract, including the poison-pill rule.
+  const readme = read(proj, '.operator', 'memory', 'out-of-scope', 'README.md');
+  assert.match(readme, /one file per \*\*rejected concept\*\*/i);
+  assert.match(readme, /already implemented/i);
+
+  // Rejection files are user-owned like the rest of memory/: --force keeps them.
+  const rejection = path.join(proj, '.operator', 'memory', 'out-of-scope', 'dark-mode.md');
+  fs.writeFileSync(rejection, 'MY REJECTION\n');
+  await init({ cwd: proj, packageRoot: pkg, yes: true, tools: 'none', force: true, log: noop });
+  assert.equal(read(rejection), 'MY REJECTION\n', 'rejection files must be preserved');
+});
+
 test('--test-cmd presets the test command in config.json', async (t) => {
   const { pkg, proj } = makeFixture(t);
   await init({ cwd: proj, packageRoot: pkg, yes: true, tools: 'none', testCmd: 'npm test', log: noop });

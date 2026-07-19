@@ -118,6 +118,22 @@ test('update never touches work/, memory/, or config.json', async (t) => {
   );
 });
 
+test('update never touches out-of-scope rejection files, even when the payload seed changes', async (t) => {
+  const { pkg, payload, proj } = makeFixture(t);
+  await init({ cwd: proj, packageRoot: pkg, yes: true, tools: 'none', log: noop });
+  const dir = path.join(proj, '.operator', 'memory', 'out-of-scope');
+  fs.writeFileSync(path.join(dir, 'dark-mode.md'), 'MY REJECTION\n');
+  fs.appendFileSync(path.join(dir, 'README.md'), '\nMY LOCAL NOTE\n');
+  bumpPayload(payload, '0.2.0', { file: 'operator/memory/out-of-scope/README.md', append: '\nNEW SEED LINE\n' });
+
+  await update({ cwd: proj, packageRoot: pkg, log: noop });
+
+  assert.equal(read(dir, 'dark-mode.md'), 'MY REJECTION\n', 'rejection files preserved');
+  assert.match(read(dir, 'README.md'), /MY LOCAL NOTE/, 'the installed README is user-owned');
+  assert.ok(!read(dir, 'README.md').includes('NEW SEED LINE'), 'the new seed is not synced into memory/');
+  assert.ok(!fs.existsSync(path.join(dir, 'README.md.operator-new')), 'no .operator-new offered in memory/');
+});
+
 test('update replaces only the marked AGENTS.md block and preserves user content', async (t) => {
   const { pkg, payload, proj } = makeFixture(t);
   fs.writeFileSync(path.join(proj, 'AGENTS.md'), '# Mine\n\nkeep me\n');

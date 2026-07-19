@@ -1,6 +1,6 @@
 ---
 name: op-new
-description: "Intake for all new work: survey project memory on first run, restate the request, triage it into a lane (quick/standard/full) with the honest scorecard, create the work item, pass the intake gate, and route to op-plan or op-build. Use this whenever the operator asks for a feature, change, refactor, chore, or improvement that no existing work item covers — even a 'tiny' or 'one-line' request, and even when they never say 'work item'. All development work enters through this procedure; writing code without an intake-gated work item violates iron rule 1. For a bug or regression, use op-fix instead — it reproduces first, then comes back through this triage."
+description: "Intake for all new work: restate the request, triage it into a lane (quick/standard/full) with the honest scorecard, create the work item, pass the intake gate, and route to op-plan or op-build. Use it whenever the operator asks for a feature, change, refactor, or chore that no existing work item covers — even a 'tiny' one-line request; all development work enters here. Bugs and regressions go to op-fix instead, which reproduces first and then comes back through this triage."
 ---
 
 # op-new — intake
@@ -55,6 +55,15 @@ run `.agents/skills/op-discover/SKILL.md` to interview the operator into a share
 back with its confirmed brief.
 
 ### 3. Triage into a lane
+
+**Prior-rejection check first.** Scan `.operator/memory/out-of-scope/` (if it has entries) for a
+concept this request overlaps — match by concept similarity, not keyword. On a match, stop and
+surface it: name the file, quote the recorded reason, and ask whether the operator wants to
+reopen. The record signals; **the operator decides**. If they stand by the rejection, add this
+request to the file's `Prior requests` list and close the intake — no work item. If they reopen,
+update or delete the file and triage normally. If instead the operator rejects *this* request
+after triage discussion, record it there via op-memory (concept, reason, the quoted ask) — but
+never record "already implemented": point to where the behavior lives instead.
 
 Fill the Triage scorecard — every row gets a yes or no, no blanks, no "maybe":
 

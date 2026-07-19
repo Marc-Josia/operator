@@ -1,6 +1,6 @@
 ---
 name: operator-security-review
-description: Expertise pack for security review of a diff — surface-driven checklists covering input validation and injection (SQL, command, path, template), authentication and authorization, secrets and credential handling, dependency risk, data exposure and logging, and CI/CD supply chain, with severity mapped to the constitution's value ranking (security outranks everything and is never traded for speed). Mandatory whenever the measured diff or the declared Scope touches any protectedPaths entry in .operator/config.json — op-ship runs it then as a separate review pass; also consult it from op-build before writing code in auth, session, payment, migration, upload, or CI workflow files, and whenever the operator asks whether a change is safe. Advisory only — it returns findings to the procedure that invoked it and never changes work-item stage, lane, or journal.
+description: "Expertise pack for security review of a diff: surface-driven checklists (injection, authentication and authorization, secrets, dependency risk, data exposure, CI/CD supply chain), with severity mapped to the constitution's ranking — security outranks everything. Mandatory whenever the diff or Scope touches a protectedPaths entry; op-ship runs it then as a separate pass. Also consult it before building in auth, payment, migration, upload, or CI files, and when the operator asks whether a change is safe. Advisory only: it returns findings and never moves work-item state."
 ---
 
 # operator-security-review — surface-driven security review

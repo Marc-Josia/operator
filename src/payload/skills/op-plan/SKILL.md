@@ -1,6 +1,6 @@
 ---
 name: op-plan
-description: Specify and architect a work item before any code is written. Use whenever a standard- or full-lane work item sits at the spec stage — right after op-new hands one off, when the operator asks for a plan, spec, design, or architecture for an item, or when an escalated item needs its spec document backfilled. Produces the lane's spec document with testable acceptance criteria, updates the work item's Scope and Tasks, then stops for the operator's approval — the one mandatory human gate in the pipeline. Invoke it before op-build every time the lane requires a spec; never implement without it.
+description: "Specify and architect a work item before any code: write the lane's spec document with testable acceptance criteria, update Scope and Tasks, then STOP for the operator's approval — the one mandatory human gate. Use it when a standard- or full-lane item sits at stage spec, when the operator asks for a plan, spec, or design, or when an escalated item needs its spec backfilled. Never implement without it."
 ---
 
 # op-plan — specify and architect

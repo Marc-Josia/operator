@@ -1,6 +1,6 @@
 ---
 name: op-memory
-description: Maintain Operator's durable memory in `.operator/memory/` — three modes — record (capture a convention, lesson, or durable fact immediately), consolidate (dedupe entries, promote lessons seen three times into conventions, archive stale entries), and gc (enforce the configured line caps by moving overflow to archive/). Use record the moment the operator corrects you or states a rule — "no, always use X", "we don't do that here", "remember this", "stop doing Y" — corrections that wait for a gate get lost. Use consolidate or gc whenever a memory file is at or over its cap, when the ship gate's memory-caps check fails, when op-fix or op-ship needs room to append, or when memory looks duplicated or stale. Never for work-item state, specs, or transient notes.
+description: "Maintain Operator's durable memory in .operator/memory/ — three modes: record (capture a convention, lesson, or durable fact), consolidate (dedupe, promote repeated lessons into conventions, archive stale entries), and gc (enforce the line caps). Record the moment the operator corrects you or states a rule — 'always use X', 'we don't do that here', 'remember this' — corrections that wait for a gate get lost. Consolidate or gc when a memory file is at or over its cap or the ship gate's memory-caps check fails. Never for work-item state, specs, or transient notes."
 ---
 
 # op-memory — record, consolidate, gc
@@ -37,6 +37,7 @@ This table is the whole policy:
 | Ship-time harvest | op-ship, at the ship stage | at most 3 durable items (`L-NNN`, `C-NNN`, or a `project.md` fact) |
 | Repeated failure on one item (the build gate forced a pause) | op-fix / op-build, when thrashing | a `postmortem-NNN.md` under the work item — a method postmortem, harvested to `L-NNN`/`C-NNN` at ship |
 | **The operator corrects you or states a rule** | **op-memory record — immediately** | `C-NNN` or `L-NNN`, cited |
+| The operator rejects a request or discards a direction | op-new (at triage) / op-discover (in the interview) | a concept file in `memory/out-of-scope/` |
 
 The operator-correction row is the one exception to gate-binding: a correction is the most
 expensive knowledge there is — the operator had to notice you doing it wrong — and one that
@@ -89,6 +90,17 @@ to what you were doing.
 
    - **A decision among alternatives** → not this file. File an ADR from
      `.operator/templates/adr.md` per `.operator/memory/decisions/README.md`.
+
+   - **A deliberate rejection** (the operator considered a request or direction and said no)
+     → one file per concept in `.operator/memory/out-of-scope/`, per its README: the concept
+     as a kebab-case filename, the durable reason, existing escape hatches, and the original
+     ask quoted under `Prior requests`. If a file for the concept already exists, append the
+     new request to its `Prior requests` list instead of creating a twin. **Never record
+     "already implemented"** — a request covered by existing behavior is a built feature, not
+     a rejection; recording it would poison the prior-rejection check. And never record
+     deferrals ("not now") — only considered rejections. No ID, no line cap; these files are
+     read by op-discover and op-new, and the operator can reopen a concept at any time by
+     deleting its file.
 
 4. **Number and cite.** Next `NNN` = highest existing number for that prefix across the live
    file **and** `archive/`, plus one — numbers are never reused, even after archiving,

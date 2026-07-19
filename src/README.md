@@ -223,8 +223,9 @@ picks the lane mechanically:
 
 **Skills** come in two kinds, and the distinction is a rule, not a naming scheme:
 
-- Procedures (`op-new`, `op-plan`, `op-build`, `op-fix`, `op-ship`, `op-status`, `op-memory`) —
-  the only things allowed to move work-item state.
+- Procedures (`op-discover`, `op-roadmap`, `op-new`, `op-plan`, `op-build`, `op-fix`, `op-ship`,
+  `op-status`, `op-memory`) — the only things allowed to move work-item state (`op-discover` and
+  `op-roadmap` move none themselves; they feed `op-new`).
 - Expertise packs (`operator-code-review`, `operator-security-review`,
   `operator-test-strategy`, `operator-debugging`) — advice consumed by the procedures; they
   never touch stage, lane, or journal.

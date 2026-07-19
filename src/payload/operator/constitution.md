@@ -174,11 +174,15 @@ Memory is a strategic asset. It lives in `.operator/memory/`:
   matching the files you are about to touch.
 - `lessons.md` — numbered `L-NNN` entries: *When «trigger», do «action», because «reason»*.
 - `decisions/` — one ADR per file, immutable once accepted, superseded by newer ADRs.
+- `out-of-scope/` — one file per deliberately rejected concept, with the reason. op-discover and
+  op-new check it before engaging; a match is surfaced, and the operator decides — never a veto.
+  Rejections only: never "already implemented", never deferrals.
 - `archive/` — pruned entries; moved, never deleted, never auto-loaded.
 
 Write triggers are gate-bound: op-plan files ADRs, op-fix records lessons, op-ship harvests at
-most three durable items. The one exception: when the operator corrects you, record the
-correction immediately via op-memory — corrections that wait for a gate get lost.
+most three durable items; op-new and op-discover record operator rejections to `out-of-scope/`
+as they happen. The one exception: when the operator corrects you, record the correction
+immediately via op-memory — corrections that wait for a gate get lost.
 
 Never memorize temporary information, intermediate states, or conversations. Never duplicate
 knowledge already recorded. Every entry cites the work item it came from.
