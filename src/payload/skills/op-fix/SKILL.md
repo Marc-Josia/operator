@@ -63,7 +63,10 @@ discovery twice.
 
    **If the bug is genuinely untestable, the bar is high.** Most "untestable" bugs are testable
    one level down: extract the logic from the framework, fake the clock, stub the network,
-   capture the race with a deterministic interleaving. Exhaust those options first. Only when
+   capture the race with a deterministic interleaving. When the failing test is not immediate,
+   walk the ordered loop-construction list in `operator-debugging` step 1 — failing test, HTTP
+   script, CLI diff, headless browser, trace replay, throwaway harness, and down — before
+   concluding anything is untestable. Exhaust those options first. Only when
    automation is truly impossible (e.g. a vendor-device-only rendering defect), ask the
    operator for an explicit waiver and journal it with the reason and numbered manual repro
    steps:
@@ -121,7 +124,11 @@ discovery twice.
    steps instead and journal the outcome
    (`- <date> REPRO manual steps re-run after fix: bug no longer reproduces`).
 
-8. **Record the lesson.** For every **non-obvious** root cause, append an `L-NNN` entry to
+8. **Record the lesson.** First ask the post-mortem question: **what would have prevented this
+   bug?** The answer routes the learning — a lesson (`L-NNN`) when the next agent needs the
+   knowledge, a `conventions.md` rule when a standing rule would have blocked it, a follow-up
+   work item when the prevention is architectural (a missing seam from the root-cause finding
+   goes here). For every **non-obvious** root cause, append an `L-NNN` entry to
    `.operator/memory/lessons.md` in the file's exact format:
 
    ```
