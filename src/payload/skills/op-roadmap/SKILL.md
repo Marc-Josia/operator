@@ -87,6 +87,12 @@ become one op-new intake and travel a lane. Three slice rules bound every item:
 Before slicing a hard change, look for the **prefactoring** item — the small preparatory item that
 makes the change easy, so the next item makes the easy change.
 
+Describe each item by observable behaviour and contract — a roadmap item may wait weeks before it
+is built, and the code it names will have moved by then. Good: "a guest can filter listings by
+date range". Bad: "add `filterByDate()` in `src/search/filters.ts`". Durability binds the roadmap
+only: a workitem's Scope and op-plan's Tasks cite real paths *by design* — the build gate measures
+the diff against Scope — because they live hours, not weeks.
+
 Declare each item's **blocked-by** edges: the sibling items that must ship before it can start,
 named on the item's own line (`blocked-by: <item names>`); omit it when the item can start
 immediately. Edges name roadmap items — never create work items just to point at them;

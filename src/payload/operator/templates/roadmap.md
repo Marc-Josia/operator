@@ -31,9 +31,10 @@ next: {{next-action}}
 - **Goal:** {{first-milestone-goal}}
 - **Done when:** <!-- demonstrable acceptance: what a person can see working when M1 ships -->
 - **Depends on:** none
-- **Work items:** <!-- one line each; blocked-by names the sibling items that must ship first,
-       omitted when the item can start immediately. Work the frontier: any item whose blockers
-       have all shipped. -->
+- **Work items:** <!-- one line each, described by observable behaviour ("a guest can filter
+       listings by date range"), never by paths or symbols of today's code — they go stale.
+       blocked-by names the sibling items that must ship first, omitted when the item can start
+       immediately. Work the frontier: any item whose blockers have all shipped. -->
   - [ ] {{first-work-item}} <!-- id filled at op-new intake; status: planned → in progress → shipped -->
   - [ ] {{second-work-item}} — blocked-by: {{first-work-item}}
 

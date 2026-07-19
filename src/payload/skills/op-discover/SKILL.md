@@ -109,7 +109,8 @@ items rather than forcing one.
 
 ### 5. Write the shared problem brief
 
-Summarise what you converged on, in the operator's terms:
+Summarise what you converged on, in the operator's terms, not the codebase's — behaviour and
+outcomes, no paths or symbols (the brief outlives today's code):
 
 ```
 Problem:      the real underlying problem/outcome, plainly stated
