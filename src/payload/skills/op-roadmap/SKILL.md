@@ -29,6 +29,9 @@ item it spawns is triaged and gated exactly as always.
   fits a single work item. A roadmap for a one-item effort is ceremony the lanes exist to avoid.
 - **Skip to op-plan** when a single, already-scoped work item just needs its spec.
 - **Skip to op-fix** for a bug.
+- **Skip to op-explore** when the problem is confirmed but the first milestone will not carve —
+  the decisions that would shape it are unresolved; exploration maps and resolves them, then
+  collapses back here.
 
 A few related work items on one theme do not automatically need a roadmap — three quick items are
 often better run as three op-new intakes. Reach for a project when *sequencing and phasing* is the
@@ -178,6 +181,9 @@ last milestone has shipped — record it and write a short project retro in Prog
   Each item still gets its own spec via op-plan on standard/full lanes.
 - **Skipping discovery.** Building a roadmap on an un-framed problem plans the wrong project
   confidently. If the problem is not yet confirmed, go back to op-discover first.
+- **Planning through fog.** If milestone one keeps refusing to carve because decisions are
+  unresolved, milestones are the wrong vocabulary — route to op-explore and return when it
+  collapses.
 - **A roadmap for a single item.** If it is really one work item, you added a layer for nothing —
   route to op-new. The lanes already right-size a single change.
 - **The roadmap frozen while reality moved.** A plan nobody updates becomes a lie. Re-plan openly

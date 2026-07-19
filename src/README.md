@@ -49,7 +49,7 @@ preset the command with `--test-cmd "npm test"`), and writes:
 ```
 AGENTS.md              managed block injected between markers; your content is untouched
 CLAUDE.md              ensured to contain `@AGENTS.md` (only when Claude Code is detected)
-.agents/skills/        13 skills: 9 op-* procedures + 4 operator-* expertise packs
+.agents/skills/        14 skills: 10 op-* procedures + 4 operator-* expertise packs
 .claude/skills/        copy of the skills, for Claude Code (only when detected)
 .gemini/settings.json  context file setting (only when .gemini/ already exists)
 .operator/
@@ -57,10 +57,10 @@ CLAUDE.md              ensured to contain `@AGENTS.md` (only when Claude Code is
   gates.json           the pipeline: stages, lanes, and the checks each gate runs
   config.json          your knobs: test command, protected paths, lane caps, memory caps
   bin/op.mjs           the gate checker (single file, zero dependencies)
-  templates/           work item, spec-lite, spec, ADR, roadmap, postmortem
+  templates/           work item, spec-lite, spec, ADR, roadmap, exploration map, postmortem
   memory/              project facts, conventions, lessons, decision records
   work/                one directory per work item, created as you work
-  projects/            one roadmap per large multi-milestone effort, created by op-roadmap
+  projects/            roadmaps and exploration maps for large efforts (op-roadmap, op-explore)
 ```
 
 Commit all of it. The work-item journals in git history are your audit trail.
@@ -223,9 +223,10 @@ picks the lane mechanically:
 
 **Skills** come in two kinds, and the distinction is a rule, not a naming scheme:
 
-- Procedures (`op-discover`, `op-roadmap`, `op-new`, `op-plan`, `op-build`, `op-fix`, `op-ship`,
-  `op-status`, `op-memory`) — the only things allowed to move work-item state (`op-discover` and
-  `op-roadmap` move none themselves; they feed `op-new`).
+- Procedures (`op-discover`, `op-explore`, `op-roadmap`, `op-new`, `op-plan`, `op-build`,
+  `op-fix`, `op-ship`, `op-status`, `op-memory`) — the only things allowed to move work-item
+  state (`op-discover`, `op-explore`, and `op-roadmap` move none themselves; discovery and the
+  roadmap feed `op-new`, exploration feeds `op-roadmap`).
 - Expertise packs (`operator-code-review`, `operator-security-review`,
   `operator-test-strategy`, `operator-debugging`) — advice consumed by the procedures; they
   never touch stage, lane, or journal.
@@ -331,7 +332,7 @@ npx --yes github:MarcJosia/operator remove          # keeps work/, memory/, proj
 npx --yes github:MarcJosia/operator remove --purge  # removes those too
 ```
 
-`remove` deletes the managed block (your `AGENTS.md` content stays), the 13 skill directories
+`remove` deletes the managed block (your `AGENTS.md` content stays), the 14 skill directories
 (including the `.claude/skills/` mirror), and `.operator/` — except your work items and memory,
 which are kept unless you `--purge`. `CLAUDE.md` is removed only if it is exactly the generated
 one-line import; in `.gemini/settings.json` only the key Operator added is reverted. It prints

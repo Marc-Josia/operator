@@ -45,7 +45,7 @@ contraire.
 
 | # | Item | Brief | ADR ? | Statut |
 |---|---|---|---|---|
-| 10 | `op-explore` : le mode fog of war / wayfinder | `items/10-op-explore-fog-of-war.md` | oui | todo |
+| 10 | `op-explore` : le mode fog of war / wayfinder | `items/10-op-explore-fog-of-war.md` | oui (ADR-0019) | done (2026-07-19) |
 
 ## Questions ouvertes (pas encore des items)
 

@@ -102,12 +102,20 @@ grouping issue-sized work items, approved by the operator before work begins. Th
 sequences; every work item it spawns still enters op-new and is gated in full. Like discovery, it
 moves no work-item state and passes no mechanical gate — the operator approves it, not `op.mjs`.
 
+**Is the path still unknowable?** A confirmed problem that resists planning — the first milestone
+will not carve because the decisions that would shape it are unresolved — goes to `op-explore`. It
+maps the open decisions in `.operator/projects/<id>/map.md`, resolves them one per session
+(research, throwaway prototypes whose code never ships, operator interviews), and collapses into
+`op-roadmap` once milestones are carvable. A decision is never a work item: like discovery,
+exploration moves no work-item state and passes no gate — the operator approves the map.
+
 **Then classify the intent:**
 
 | The request… | Procedure | Effect |
 |---|---|---|
 | is vague or exploratory — problem-shaped, not a precise change | `op-discover` | no state (→ op-new) |
 | is bigger than one work item — a project, many features, a v2 | `op-roadmap` | no state (→ op-new per item) |
+| is confirmed but unplannable — unknowns to resolve across sessions | `op-explore` | no state (→ op-roadmap) |
 | asks for new work, already precise — feature, change, refactor, chore | `op-new` | moves state |
 | reports a bug — broken, crash, wrong output, regression | `op-fix` | moves state |
 | asks to plan/spec/design an item at `stage: spec` | `op-plan` | moves state |
@@ -139,6 +147,9 @@ Routing never excuses skipping a gate — every path still enters the method abo
 - Large efforts get a **Project**: `.operator/projects/<id>/roadmap.md` groups ordered milestones,
   which group work items. The roadmap is a planning artifact — approved by the operator, moving no
   work-item state and passing no mechanical gate; the work items it spawns carry the full pipeline.
+- A confirmed-but-foggy effort first gets `map.md` in the same project directory — op-explore's
+  map of open decisions, worked one per session and collapsed into the roadmap once the path
+  clears. Same regime as the roadmap: operator-approved, never gated, decisions are not work items.
 - The **Journal is append-only**. Never edit or delete a previous line. Approvals, gate
   passages, escalations, waivers, and reviews all become journal lines — that is what makes
   process erosion visible in git history.

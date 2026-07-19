@@ -66,10 +66,11 @@ diff), `standard` (`spec-lite.md`), `full` (`spec.md` + ADRs). **Les gates sont 
 affirmées** : `node .operator/bin/op.mjs gate <id>` mesure le diff git réel, coche les preuves,
 puis avance l'étape lui-même. `op.mjs` a **3 sous-commandes** : `status`, `gate`, `escalate`.
 
-**Les skills — 13, sur deux contrats** (le mécanisme : ADR-0005 ; `op-discover` et `op-roadmap`
-ajoutés par ADR-0014/0015).
-- **9 procédures `op-*`** (seules autorisées à déplacer l'état d'un work item) :
-  `op-discover` (cadrer un besoin flou), `op-roadmap` (découper un projet en roadmap de
+**Les skills — 14, sur deux contrats** (le mécanisme : ADR-0005 ; `op-discover` et `op-roadmap`
+ajoutés par ADR-0014/0015, `op-explore` par ADR-0019).
+- **10 procédures `op-*`** (seules autorisées à déplacer l'état d'un work item) :
+  `op-discover` (cadrer un besoin flou), `op-explore` (naviguer un projet brumeux : carte de
+  décisions, collapse vers la roadmap), `op-roadmap` (découper un projet en roadmap de
   milestones), `op-new` (intake + triage), `op-plan` (spec), `op-build` (implémentation),
   `op-fix` (bug, repro d'abord), `op-ship` (revue + livraison + mémoire), `op-status`
   (lecture seule), `op-memory` (mémoire durable).
@@ -77,13 +78,14 @@ ajoutés par ADR-0014/0015).
   `operator-code-review`, `operator-security-review`, `operator-test-strategy`,
   `operator-debugging`.
 - **Routage automatique** : le bloc toujours chargé est le routeur — l'operateur parle en langage
-  naturel, l'agent classe et dispatche. Échelle de taille : flou → `op-discover`, projet →
-  `op-roadmap`, changement précis → `op-new` ; un bug → `op-fix`. La `constitution.md` fait
-  autorité ; le bloc en est le résumé.
+  naturel, l'agent classe et dispatche. Échelle de taille : flou → `op-discover`, confirmé mais
+  brumeux → `op-explore`, projet → `op-roadmap`, changement précis → `op-new` ; un bug →
+  `op-fix`. La `constitution.md` fait autorité ; le bloc en est le résumé.
 
 **État & mémoire.** `workitem.md` est la source de vérité d'un item (frontmatter plat dont
 `project`/`milestone`, Journal append-only). Un gros effort a un `.operator/projects/<id>/roadmap.md`
-(milestones → work items), approuvé par l'operateur mais **non gaté** mécaniquement. Mémoire
+(milestones → work items), précédé d'un `map.md` (carte de décisions `op-explore`) quand la voie
+est encore brumeuse — approuvés par l'operateur mais **non gatés** mécaniquement. Mémoire
 plafonnée dans `.operator/memory/` : `project.md` (120), `conventions.md` (200), `lessons.md` (150),
 plus `decisions/` (ADRs) et `archive/`.
 
@@ -102,7 +104,7 @@ plus `decisions/` (ADRs) et `archive/`.
      seule phrase-déclencheur ; les synonymes qui re-déclenchent la même branche sont de la
      duplication. Front-loader le leading word ; ne pas re-dire l'identité déjà dans le corps.
      Cible : 60–90 mots — la description est du context load permanent chez les hôtes à
-     model-invocation, multiplié par 13 skills.
+     model-invocation, multiplié par 14 skills.
   2. **Chaque étape finit sur un critère de complétion checkable.** Les étapes gatées l'ont via
      `op.mjs` ; une étape non gatée le dit en toutes lettres (« it ends when… »).
   3. **Test du no-op, phrase par phrase.** Une phrase qui ne change pas le comportement par

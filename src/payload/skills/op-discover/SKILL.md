@@ -143,6 +143,9 @@ big the confirmed problem really is:
   `.agents/skills/op-roadmap/SKILL.md`, which decomposes the confirmed problem into an ordered
   roadmap of milestones and work items, gets the operator's approval, then feeds items to op-new one
   at a time. Discovery framed the problem; op-roadmap sequences the work.
+- **Confirmed but the path unknowable — planning would stall on decisions no one can answer yet:**
+  go to `.agents/skills/op-explore/SKILL.md`, which maps those open decisions and resolves them one
+  session at a time before any roadmap is carved.
 
 Invoke the next procedure as a skill if your host supports skills; otherwise read its SKILL.md and
 follow it.
