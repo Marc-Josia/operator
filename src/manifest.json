@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "generatedAt": "2026-07-19T12:54:54.289Z",
+  "generatedAt": "2026-07-19T12:55:28.067Z",
   "files": {
     "src/payload/agents-block.md": "a5b9ca2f3620df3b27fce5fd6bbb8926cf606348014abf4192e6003dbc0ffe4a",
     "src/payload/operator/VERSION": "e9dd8507f4bf0c6f42458e41aea833ad0bd3f6127272335eee9bf4d58541ed67",
@@ -25,7 +25,7 @@
     "src/payload/skills/op-fix/SKILL.md": "47e092abdb25e5d2e0f519da8493526ae38355ac48ef92cc6f1dee777a4c5059",
     "src/payload/skills/op-memory/SKILL.md": "12cffb479a074a36d791e7cc04e03422ac1887f312dcfeec3d619c4f9eeba64f",
     "src/payload/skills/op-new/SKILL.md": "3c204b772f43967ec790afa94494117cf8e24d0b7f34ac3590a3634f098e241b",
-    "src/payload/skills/op-plan/SKILL.md": "d8e3929ec5cecc997673ec7a1876c8227fe148041a95df4ab67bab1c4216bce1",
+    "src/payload/skills/op-plan/SKILL.md": "ebf8f8578b1acfd5589c69740c740def9aa0dcb037a3a696d8fb2aaa5d5bb856",
     "src/payload/skills/op-roadmap/SKILL.md": "3b3f086e4663810d3d11890d5eac73838ed07bd832a283a48f47fed21a791667",
     "src/payload/skills/op-ship/SKILL.md": "85d296d7cc629f6949cf9d6156ec970cb5a3e8fd5413fc2676ec2ec4152f630c",
     "src/payload/skills/op-status/SKILL.md": "b7a36bdd5fbef0180259649daa46186335197064a8d6f71b3ced97b0b8e4f64b",

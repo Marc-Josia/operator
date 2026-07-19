@@ -85,13 +85,25 @@ effect of *this* change rather than a target the result must hold.
 
 **Full lane additions:**
 
+- **Design it twice** — before writing Architecture & decisions, for each decision significant
+  enough to merit an ADR *and* facing a real trade-off: sketch two or three designs under
+  deliberately opposed constraints (e.g. minimal interface / maximal flexibility / optimise the
+  common caller), each a few lines of prose — components, flow, contract, never code. If your
+  host runs sub-agents, produce each sketch in an isolated context; otherwise write them
+  sequentially and do not let the later sketches converge toward the first — the first idea is
+  rarely the best, and sketches that can see each other converge. Compare on named criteria —
+  interface simplicity, locality of change, testability at the seam, reversibility — then
+  recommend one. Skip the pattern when no credible alternative exists; the trigger is a real
+  trade-off, not the full lane itself.
 - **Architecture & decisions** — components touched or created, data flow, contracts between
   parts. Every significant decision gets a one-paragraph rationale.
-- **Rejected alternatives** — each serious alternative and the concrete reason it lost.
-  "We found no other credible approach" is a valid entry if true.
+- **Rejected alternatives** — each serious alternative and the concrete reason it lost. The
+  losing sketches from design-it-twice, with the real reason each lost the comparison, are
+  exactly these entries. "We found no other credible approach" is a valid entry if true.
 - **ADRs** — for every decision where a real alternative was considered and rejected, file
   `.operator/memory/decisions/ADR-NNN-short-slug.md` from `.operator/templates/adr.md`
-  (next NNN = highest existing + 1), cite the work item, and link it from the Architecture &
+  (next NNN = highest existing + 1), cite the work item — and the design-it-twice comparison
+  when one ran — and link it from the Architecture &
   decisions section. No ADR for choices that had no alternative — an ADR archive full of
   non-decisions buries the real ones. ADRs are immutable once accepted; to reverse one later,
   a new ADR supersedes it.
