@@ -1,6 +1,6 @@
 ---
 name: op-new
-description: "Intake for all new work: survey project memory on first run, restate the request, triage it into a lane (quick/standard/full) with the honest scorecard, create the work item, pass the intake gate, and route to op-plan or op-build. Use this whenever the operator asks for a feature, change, refactor, chore, or improvement that no existing work item covers — even a 'tiny' or 'one-line' request, and even when they never say 'work item'. All development work enters through this procedure; writing code without an intake-gated work item violates iron rule 1. For a bug or regression, use op-fix instead — it reproduces first, then comes back through this triage."
+description: "Intake for all new work: restate the request, triage it into a lane (quick/standard/full) with the honest scorecard, create the work item, pass the intake gate, and route to op-plan or op-build. Use it whenever the operator asks for a feature, change, refactor, or chore that no existing work item covers — even a 'tiny' one-line request; all development work enters here. Bugs and regressions go to op-fix instead, which reproduces first and then comes back through this triage."
 ---
 
 # op-new — intake

@@ -1,6 +1,6 @@
 ---
 name: op-roadmap
-description: "Decompose a large, ambitious, or multi-feature effort into a Project — an ordered roadmap of milestones, each a demonstrable slice, each holding issue-sized work items — before any single work item is triaged. This is to a whole project what op-plan is to one work item: op-plan specs a single item's solution; op-roadmap breaks a project into the sequence of items in the first place. Use it whenever the ask is bigger than one work item — 'build an app like Airbnb', 'add a whole billing system', 'ship a v2', 'this is really a project' — or when op-discover reveals a confirmed problem that spans several milestones. It creates .operator/projects/NNN-slug/roadmap.md, gets the operator's approval, links each work item to its project and milestone, then feeds items one at a time to op-new for triage. Do NOT use it for a single feature or a quick change (that is op-new), for specifying one already-scoped item (that is op-plan), or for a bug (op-fix). The roadmap plans; the existing pipeline still gates every work item."
+description: "Decompose an effort bigger than one work item — 'build an app like Airbnb', a whole subsystem, a v2, or a problem op-discover confirmed as project-sized — into a Project: an ordered roadmap of milestones, each a demonstrable slice grouping issue-sized work items, approved by the operator, then fed to op-new one item at a time. Skip it for a single feature or quick change (op-new), for one already-scoped item's spec (op-plan), and for a bug (op-fix). The roadmap plans; every item it spawns is still gated by the normal pipeline."
 ---
 
 # op-roadmap — decompose a project into milestones
@@ -49,9 +49,9 @@ hard part, not just the count.
 
 Start from the op-discover brief (the problem, success, constraints, out-of-scope) — do not
 re-interview what is already settled. Then research what already exists: the modules, services,
-data, and prior work items this project builds on or must not break. The operator asked to "start
-by understanding the bricks already in place" for a reason — a roadmap that re-plans what exists
-wastes everyone's time. Capture both in the roadmap's Vision and Existing bricks sections.
+data, and prior work items this project builds on or must not break — a roadmap that re-plans
+what exists wastes everyone's time. Capture both in the roadmap's Vision and Existing bricks
+sections.
 
 ### 2. Carve the milestones
 

@@ -23,7 +23,7 @@ contraire.
 
 | # | Item | Brief | ADR ? | Statut |
 |---|---|---|---|---|
-| 03 | Audit d'authoring des 13 skills + conventions | `items/03-audit-authoring-skills.md` | optionnel | todo |
+| 03 | Audit d'authoring des 13 skills + conventions | `items/03-audit-authoring-skills.md` | optionnel (aucun émis — pas de règle structurante changée) | done (2026-07-19) |
 
 ## M3 — Procédures enrichies (après 03)
 

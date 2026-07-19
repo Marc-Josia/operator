@@ -1,6 +1,6 @@
 {
   "version": "0.1.0",
-  "generatedAt": "2026-07-18T15:31:52.074Z",
+  "generatedAt": "2026-07-19T03:35:24.693Z",
   "files": {
     "src/payload/agents-block.md": "a5b9ca2f3620df3b27fce5fd6bbb8926cf606348014abf4192e6003dbc0ffe4a",
     "src/payload/operator/VERSION": "e9dd8507f4bf0c6f42458e41aea833ad0bd3f6127272335eee9bf4d58541ed67",
@@ -20,18 +20,18 @@
     "src/payload/operator/templates/spec-lite.md": "4cfacc8e19c915248453edf0d79859a2765b5aca7c8cca9d2cb50d911f422d8e",
     "src/payload/operator/templates/spec.md": "96f5833e8acc1a7eb7d6f6c5f9e986a393b26c9c8e0d8e83d9a821e0d055d1b2",
     "src/payload/operator/templates/workitem.md": "5da1f9ca7351046565a11dba5fe6d5b37c5c65bedd4e43ecfa11dd1ef6a842e8",
-    "src/payload/skills/op-build/SKILL.md": "9ebd71fae0f7d62f1aa726d8d8f3f528a27f1964c8354031e2e6dede9ba787b7",
-    "src/payload/skills/op-discover/SKILL.md": "a7e029aa44d0871c23212eedf9bc0a04d795f052d46e840f86ae6cc3a57bd501",
-    "src/payload/skills/op-fix/SKILL.md": "5c9896dbfd2f884bdbfd50eb604ab4daf71d12774af8c24338cb66a2983573e7",
-    "src/payload/skills/op-memory/SKILL.md": "16ff7e24bcc76de02b648e801b3ed2ce104d702ff313ccb806e3ce6c4b9adee3",
-    "src/payload/skills/op-new/SKILL.md": "945bed9c28b3ddfdc91940ddc904751583446e9e1f674774281215c345ad7686",
-    "src/payload/skills/op-plan/SKILL.md": "a30506ae13cd22d1211927547ff7e766a21da691bf4148cd39add01a42346e30",
-    "src/payload/skills/op-roadmap/SKILL.md": "532e0f985cc47174bd7b714dcd378e2e73501de24fc793d7be4b23170147cdcf",
-    "src/payload/skills/op-ship/SKILL.md": "993f07514e94c5c4bfaa38eb76faa28b4f954688c15192914e26a06c7febb8d7",
-    "src/payload/skills/op-status/SKILL.md": "7959cf0405fa224cd10cb0bc0e5ff3bc9d611b6800bca090b9bf27bdb84926c4",
-    "src/payload/skills/operator-code-review/SKILL.md": "9099b1aaaf24827f78eadd0b8031b2af7c73e00616128048e7250bdab67b1893",
-    "src/payload/skills/operator-debugging/SKILL.md": "120efc730a04eca516cfade8bd01d97b698a566dee552eb518dafb3bfa73fc1e",
-    "src/payload/skills/operator-security-review/SKILL.md": "b75032a399067778603e399037a8e106005b69a217a36785f66c79d656ed7f5b",
-    "src/payload/skills/operator-test-strategy/SKILL.md": "d60bca5e07ea4b74fbe953c75c12927a6d31f93d02f85574dd36cf79b79dd569"
+    "src/payload/skills/op-build/SKILL.md": "061b8a1a7215602e9d6deb3066fdbae88ac81815365916c5989d015f98df7329",
+    "src/payload/skills/op-discover/SKILL.md": "762a3d52b4fddfa561cd15458a923ce660aca3c6d10a4f89dd225281da0fdc26",
+    "src/payload/skills/op-fix/SKILL.md": "246f6f9bcd7da2331235c2321e726c44017cc5af28ab0bfe53c1a3108a250815",
+    "src/payload/skills/op-memory/SKILL.md": "12cffb479a074a36d791e7cc04e03422ac1887f312dcfeec3d619c4f9eeba64f",
+    "src/payload/skills/op-new/SKILL.md": "3c204b772f43967ec790afa94494117cf8e24d0b7f34ac3590a3634f098e241b",
+    "src/payload/skills/op-plan/SKILL.md": "33fccdd4e8f4941d0ceafa95b8ac457ff9cd3ea545b68c0b3ffe27c42b249a5c",
+    "src/payload/skills/op-roadmap/SKILL.md": "e38ecd1cb87a73a43cb3301e167c6d36dce59f420b2fbbece72d13e109290294",
+    "src/payload/skills/op-ship/SKILL.md": "85d296d7cc629f6949cf9d6156ec970cb5a3e8fd5413fc2676ec2ec4152f630c",
+    "src/payload/skills/op-status/SKILL.md": "9ea1508d445af7e8c22cd14f04aedfd9228749a01d8c76f91f290874bb793527",
+    "src/payload/skills/operator-code-review/SKILL.md": "8683393b1442015872479f83cd7035e4dcff17de06f3e11f90a166d6cdb0af34",
+    "src/payload/skills/operator-debugging/SKILL.md": "3b6a35a6eb8deb2c2698de2b21b2d76ad61ac1f7b9154942268b8d90fb519670",
+    "src/payload/skills/operator-security-review/SKILL.md": "b5e9fd6bc04b803bdd68b6613f99720aee7803b963084010c2f88dcb0ab1f6fc",
+    "src/payload/skills/operator-test-strategy/SKILL.md": "041f43835054d98a2ecdfedd437319b3103142d902160e11fc17992a693892ee"
   }
 }

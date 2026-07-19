@@ -1,6 +1,6 @@
 ---
 name: op-discover
-description: "Problem-discovery interview that runs BEFORE op-new when a request is vague, exploratory, or problem-shaped rather than a precise change. Grill the operator one question at a time — recommending an answer to each, and researching facts from the codebase and memory instead of asking them — until you both share one clear, confirmed statement of the real problem, then hand that understanding to op-new for triage — or to op-roadmap when the effort is a whole project spanning several milestones. Use it whenever the ask is fuzzy or open-ended — 'I think our onboarding is bad', 'we should probably do something about performance', 'can you look into the billing flow', 'help me think this through', 'grill me on this idea' — or the operator is thinking out loud and the underlying need is unclear, or one request could mean several different things, or is really several problems bundled together. Skip it and go straight to op-new when the request is already a precise, discrete change you could restate in one sentence and triage. Skip it for bugs, defects, or regressions — those use op-fix, which reproduces first. Do not design the solution here — that is op-plan; discovery only defines the problem."
+description: "Problem-discovery interview that runs BEFORE op-new when the ask is vague, exploratory, or problem-shaped — 'onboarding feels bad', 'help me think this through', or one request hiding several problems. Grill the operator one question at a time, recommending an answer to each and researching facts instead of asking them, until you share one confirmed problem statement; hand it to op-new for triage, or to op-roadmap when it spans several milestones. Skip it when the request is already precise enough to triage (op-new) and for bugs (op-fix, which reproduces first). Discovery defines the problem, never the solution (op-plan)."
 ---
 
 # op-discover — frame the problem before intake
@@ -50,9 +50,8 @@ already clear to me?* If yes, op-new. If no, discover.
 ### 1. Ground yourself before asking anything
 
 Facts are researched, not interviewed. Read `.operator/memory/project.md` and skim the relevant
-code, config, and tools so you arrive informed. Every question you can answer yourself is a
-question the operator should never have to answer — asking what you could have looked up erodes
-their trust and their time.
+code, config, and tools so you arrive informed — every question you could have answered yourself
+is one the operator should never see.
 
 **Prior-rejection check.** As part of grounding, scan `.operator/memory/out-of-scope/` (if it has
 entries). Matching is by concept similarity, not keyword — "night theme" matches `dark-mode.md`.

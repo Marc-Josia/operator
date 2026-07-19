@@ -1,6 +1,6 @@
 ---
 name: op-status
-description: Read-only orientation across all Operator work items — reads every workitem.md's frontmatter and latest journal lines, then reports a narrative status with the exact next action for each item and flags anything blocked or inconsistent, and rolls up any project roadmaps by milestone. Use it whenever the operator asks "where are we", "what's next", "what's in flight", "what happened to <item>", "is X done yet", or "how far along is <project>"; at the start of any session that resumes earlier work; after a long break, a handoff, or loss of context; and before choosing which work item to pick up. It changes nothing — no journal lines, no frontmatter edits — so it is always safe to run, in any state.
+description: "Read-only orientation across all work items and project roadmaps: reads every workitem.md's frontmatter and latest journal lines from disk, reports status with the exact next action per item, and flags anything blocked or inconsistent. Use it whenever the operator asks 'where are we', 'what's next', or 'is X done yet'; at the start of a session resuming earlier work; and before picking which item to work. It changes nothing, so it is always safe to run."
 ---
 
 # op-status — orient without touching anything
@@ -115,8 +115,7 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
 ## Exit gate
 
 None. op-status moves no work-item state, so there is nothing for the gate checker to verify —
-the procedure ends when the operator has the report. This is deliberate: a status check must
-never be a step anyone hesitates to run.
+the procedure ends when the operator has the report.
 
 ## Failure modes
 
