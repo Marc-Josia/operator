@@ -1,6 +1,6 @@
 ---
 name: op-discover
-description: "Problem-discovery interview that runs BEFORE op-new when the ask is vague, exploratory, or problem-shaped — 'onboarding feels bad', 'help me think this through', or one request hiding several problems. Grill the operator one question at a time, recommending an answer to each and researching facts instead of asking them, until you share one confirmed problem statement; hand it to op-new for triage, or to op-roadmap when it spans several milestones. Skip it when the request is already precise enough to triage (op-new) and for bugs (op-fix, which reproduces first). Discovery defines the problem, never the solution (op-plan)."
+description: "Problem-discovery interview that runs BEFORE op-new when the ask is vague, exploratory, or problem-shaped — 'onboarding feels bad', 'help me think this through', or one request hiding several problems. Grill the operator one question at a time, recommending an answer to each and researching facts instead of asking them, until you share one confirmed problem statement; hand it to op-new for triage, or to op-roadmap when it spans several milestones. When the operator asks to be asked everything at once or answers in batches, run the interview in frontier rounds instead. Skip it when the request is already precise enough to triage (op-new) and for bugs (op-fix, which reproduces first). Discovery defines the problem, never the solution (op-plan)."
 ---
 
 # op-discover — frame the problem before intake
@@ -72,8 +72,8 @@ guess surfaces disagreement faster than an open "so what do you want?" ever will
 
 Walk the problem down as a decision tree, resolving dependencies in order. This is the core loop:
 
-- **One question at a time.** Ask, wait for the answer, let it shape the next question. A wall of
-  simultaneous questions gets shallow answers and hides which answer drove what.
+- **One question at a time — the default rhythm.** Ask, wait for the answer, let it shape the next
+  question. A wall of simultaneous questions gets shallow answers and hides which answer drove what.
 - **Recommend an answer to every question.** Never ask blankly — propose your best guess and your
   reasoning so the operator can confirm with a word or correct with a sentence. You are a senior
   engineer thinking alongside them, not a form to fill in.
@@ -83,6 +83,17 @@ Walk the problem down as a decision tree, resolving dependencies in order. This 
 - **Chase the why.** Behind a requested feature is a need; behind the need, a goal. Ask "so that…?"
   until you reach the real objective — often the best solution serves the goal without the feature
   originally named.
+
+**Frontier mode — the batched variant.** When the operator asks to go fast or to be asked
+everything at once, or answers asynchronously with long gaps, switch rhythm: ask the whole
+**frontier** — every question whose prerequisites are already settled — as one round of numbered
+questions, each still carrying your recommended answer, so the operator can reply in one line
+("1a, 2 yes, 3 your call"). Each round of answers reshapes the tree: recompute the frontier and
+ask the next round; a question depending on an answer still open this round waits for a later
+one. Research facts without blocking the round — only the questions downstream of a fact wait
+for it. A frontier that has not shrunk over two rounds is the stop signal of step 4 applied per
+round. Everything else in this procedure is rhythm-independent — recommended answers, facts
+researched not asked, the stopping rule, and the confirmed brief of steps 5–6.
 
 Cover, as they apply: the underlying goal and who it is for; what success looks like in observable
 terms; hard constraints and non-negotiables; what is explicitly out of scope; and the rough shape

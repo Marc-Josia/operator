@@ -111,7 +111,9 @@ In `.operator/work/<id>/workitem.md`:
   Scope guarantees a failed gate, and a padded catch-all Scope defeats the check the operator
   relies on.
 - **Tasks** — replace the placeholder with small, ordered, verifiable steps. Each task names
-  its proof: how op-build will demonstrate it is done. Tasks map onto acceptance criteria.
+  its proof: how op-build will demonstrate it is done. When the proof is a test, name the
+  **seam** it attaches to (see `operator-test-strategy`) — approving the plan then approves
+  the test surfaces too. Tasks map onto acceptance criteria.
 
   - Bad: `- [ ] Implement rate limiting`
   - Good:

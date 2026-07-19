@@ -29,9 +29,9 @@ contraire.
 
 | # | Item | Brief | ADR ? | Statut |
 |---|---|---|---|---|
-| 02 | Boucle de feedback dans `op-fix`/`operator-debugging` | `items/02-op-fix-boucle-de-feedback.md` | non | todo |
-| 07 | Seams et surface de test dans `operator-test-strategy` | `items/07-seams-test-strategy.md` | non | todo |
-| 09 | Mode « frontière » optionnel dans `op-discover` | `items/09-discover-mode-frontiere.md` | non | todo |
+| 02 | Boucle de feedback dans `op-fix`/`operator-debugging` | `items/02-op-fix-boucle-de-feedback.md` | non | done (2026-07-19) |
+| 07 | Seams et surface de test dans `operator-test-strategy` | `items/07-seams-test-strategy.md` | non | done (2026-07-19) |
+| 09 | Mode « frontière » optionnel dans `op-discover` | `items/09-discover-mode-frontiere.md` | non | done (2026-07-19) |
 
 ## M4 — Couche projet et planification
 

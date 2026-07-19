@@ -20,13 +20,28 @@ not an experiment.
 
 Work the loop in order. Skipping ahead is how the anti-patterns at the bottom happen.
 
-1. **Reproduce deterministically.** Same input, same failure, every run — before you form any
-   opinion about the cause. Control the variables until it is deterministic: pin the clock,
-   seed randomness, stub the network, fix concurrency ordering. A bug that reproduces
-   "sometimes" is not yet reproduced, and the nondeterminism itself is a lead: intermittence
-   almost always means time, a race, or shared state. In op-fix, this step is the failing test
-   written before any fix (use `.agents/skills/operator-test-strategy/SKILL.md` to pick its
-   level); confirm it fails for the bug's own reason by reading the failure output.
+1. **Build the feedback loop — this step is most of the work of finding the bug.** The
+   deliverable is one **red-capable** command: a single invocation that drives the bug's code
+   path and asserts its exact symptom, deterministic (pin the clock, seed randomness, stub the
+   network, fix concurrency ordering), fast, runnable by you unattended — and **already run at
+   least once**, red output in hand. A bug that reproduces "sometimes" is not yet reproduced:
+   raise the reproduction rate (loop the trigger, parallelise, add stress, narrow the timing
+   window) until it is debuggable, and treat the nondeterminism itself as a lead — intermittence
+   almost always means time, a race, or shared state. Ways to construct the loop, in rough
+   order of preference: a failing test at the right seam → a curl/HTTP script against a dev
+   server → a CLI run with a fixture input, diffed against known-good output → a headless
+   browser script → replaying a captured trace (request, payload, event log) through the code
+   path in isolation → a throwaway harness around the suspect function → a property/fuzz loop
+   for "sometimes wrong" outputs → a bisection harness so `git bisect run` can drive it → a
+   differential run of old vs new version on the same input. In op-fix, this loop is the
+   failing test written before any fix (use `.agents/skills/operator-test-strategy/SKILL.md`
+   to pick its level); confirm it fails for the bug's own reason by reading the failure output.
+
+   **No red-capable command, no hypotheses.** If you catch yourself reading code to build a
+   theory before this command exists, stop — speculative code-reading is the exact failure this
+   method prevents. When no loop is honestly constructible, escalate to the operator: list what
+   you tried, and ask for what would unblock one — access to the reproducing environment, a
+   captured artifact (HAR, log dump, recording), or leave to add temporary instrumentation.
 
 2. **Isolate — shrink the search space before explaining anything.** Halving the haystack five
    times beats inspecting straws. Bisect along whichever axis moves fastest:
@@ -61,7 +76,11 @@ Work the loop in order. Skipping ahead is how the anti-patterns at the bottom ha
 6. **Prove it with the regression test.** The failing test from step 1 now passes, and the
    full suite stays green. If the test still fails, your verified mechanism was incomplete —
    return to step 3 with the new evidence. The test stays in the suite permanently; op-fix
-   owns that rule.
+   owns that rule. The test guards the bug only if it sits at a correct **seam** — one that
+   exercises the real bug pattern as it occurs at the call site; a test at a too-shallow seam
+   gives false confidence. **If no correct seam exists, that absence is itself the finding**:
+   report it in the `seam:` line below so the invoking procedure files the architecture work
+   as its own item via op-new — never as a silent widening of the current Scope.
 
 ## When to add observability instead of guessing
 
@@ -70,15 +89,19 @@ cannot attach a debugger, or when intermittence has no visible pattern — stop 
 instrument:
 
 - Add targeted, structured log lines at the boundaries of the suspect region: inputs, outputs,
-  timings, and identifiers that correlate events across the flow.
+  timings, and identifiers that correlate events across the flow. Tag every throwaway line
+  with one unique prefix you pick for this investigation (e.g. `[DEBUG-a4f2]`) — cleanup
+  becomes a single grep instead of a re-read; untagged lines are the ones that survive by
+  accident.
 - Assert the invariants you believe hold ("this list is sorted", "this id is unique here").
   A failing assertion converts a belief into evidence at the exact moment it breaks.
 - Re-run the repro, read what actually happened, and go back to step 3 with real data.
 
 Two rounds of instrumentation beat ten rounds of guessing, because each round produces
-observations instead of opinions. Treat diagnostic instrumentation as scaffolding: remove it
-after diagnosis, or, if it has durable operational value, tell the invoking procedure so it
-can be kept deliberately as part of the declared work — never leave it behind by accident.
+observations instead of opinions. Treat diagnostic instrumentation as scaffolding: grep your
+tag and remove it after diagnosis, or, if a line has durable operational value, tell the
+invoking procedure so it can be kept deliberately as part of the declared work — never leave
+it behind by accident.
 
 ## Anti-patterns — refuse these by name
 
@@ -126,6 +149,7 @@ ROOT-CAUSE FINDING (operator-debugging)
 root cause: <mechanism in 1–2 lines: X does Y under condition Z, producing the observed failure>
 evidence: <the confirming observation — bisect verdict, log line, debugger value, minimal repro>
 fix location: <file/function where the mechanism breaks — not where the error surfaces>
+seam: <exists — regression test attached | missing — no seam exercises the real bug pattern; recommend a follow-up work item>
 ruled out: <hypotheses eliminated, and by which experiment>
 lesson-worthy: <yes + one-line draft if the cause was non-obvious | no — trivial once seen>
 ```
