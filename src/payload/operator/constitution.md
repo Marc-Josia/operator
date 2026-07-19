@@ -175,6 +175,15 @@ Capabilities differ across host tools. Degrade gracefully, never silently skip a
 | Web access | Verify external assumptions (APIs, versions, docs) | Record each unverified assumption in the spec's Risks section |
 | Shell / Node | Run the gate checker and tests | Apply gate checklists manually and journal the evidence |
 
+Context is a consumable: a window holds its best judgement early — that is why an item fits one
+fresh session and a spec is approved before building begins. Gate boundaries are the natural
+hand-off points: on-disk state is complete there, and a fresh session resumes losslessly via
+op-status. Late in a long session, finish the current gate and stop rather than open a new stage.
+No host reports its context reliably, so watch behavioural signals, not numbers: the harness
+compacted or summarised the conversation, you are re-reading files you already read, or
+re-deciding decisions already journaled. On any of these, trust the disk over your recollection —
+re-read `workitem.md` and the spec before continuing — and hand off at the next gate.
+
 ## Memory
 
 Memory is a strategic asset. It lives in `.operator/memory/`:

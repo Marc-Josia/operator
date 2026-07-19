@@ -1,12 +1,12 @@
 {
   "version": "0.1.0",
-  "generatedAt": "2026-07-19T13:16:17.626Z",
+  "generatedAt": "2026-07-19T13:25:11.395Z",
   "files": {
     "src/payload/agents-block.md": "9165862c48b5326162aadfe5f9b927147493e6bfaf0d8deaadc35944aea0bd48",
     "src/payload/operator/VERSION": "e9dd8507f4bf0c6f42458e41aea833ad0bd3f6127272335eee9bf4d58541ed67",
     "src/payload/operator/bin/op.mjs": "99612c532202599ea457fe0709b6ca91bfd3f19d1dac807ec2ccc421b37ebcb2",
     "src/payload/operator/config.json": "0c91ba10584408125ede2191fbd622600d780780dd56ab57f17b0725f9eb735b",
-    "src/payload/operator/constitution.md": "cf26a7b60be92995fb32706dce7553331ec5a339c43410e183d34f863973630c",
+    "src/payload/operator/constitution.md": "53bf05fa44ccef43e753d2256b596a52a2dd980c6c5f6ef12c68a12182fce7e1",
     "src/payload/operator/gates.json": "7d6ea3e07c7b455046663253bd7a2d734f08fbf7c766da419663bebf4c9c34ac",
     "src/payload/operator/memory/archive/README.md": "e09c5a8f12ddf5ee52d7dc16b09fdea1859fdc1f8c414328c7a52fffc3377dfd",
     "src/payload/operator/memory/conventions.md": "688012ca82208056c2c85723acfe0e268a22e4f30f80a026e1d2a3bcc064cb2d",
@@ -21,7 +21,7 @@
     "src/payload/operator/templates/spec-lite.md": "4cfacc8e19c915248453edf0d79859a2765b5aca7c8cca9d2cb50d911f422d8e",
     "src/payload/operator/templates/spec.md": "96f5833e8acc1a7eb7d6f6c5f9e986a393b26c9c8e0d8e83d9a821e0d055d1b2",
     "src/payload/operator/templates/workitem.md": "5da1f9ca7351046565a11dba5fe6d5b37c5c65bedd4e43ecfa11dd1ef6a842e8",
-    "src/payload/skills/op-build/SKILL.md": "061b8a1a7215602e9d6deb3066fdbae88ac81815365916c5989d015f98df7329",
+    "src/payload/skills/op-build/SKILL.md": "7f8b76d434226e541a0aa18f58f08ee73b2dd322f07c57c881bf4729b47c72b3",
     "src/payload/skills/op-discover/SKILL.md": "89653908c05a4b713a341a2f429407cd6b680ccb5adc56d66ffd8bb877d41d50",
     "src/payload/skills/op-explore/SKILL.md": "640aa8df4da123615c5c6d7ac013dcc311b17cb03ff132baa183989eb958801b",
     "src/payload/skills/op-fix/SKILL.md": "47e092abdb25e5d2e0f519da8493526ae38355ac48ef92cc6f1dee777a4c5059",

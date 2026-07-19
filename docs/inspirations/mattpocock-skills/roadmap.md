@@ -47,11 +47,15 @@ contraire.
 |---|---|---|---|---|
 | 10 | `op-explore` : le mode fog of war / wayfinder | `items/10-op-explore-fog-of-war.md` | oui (ADR-0019) | done (2026-07-19) |
 
+## M6 — Hygiène de contexte
+
+| # | Item | Brief | ADR ? | Statut |
+|---|---|---|---|---|
+| 11 | Hygiène de contexte (signaux, hand-off aux gates) | `items/11-hygiene-de-contexte.md` | non | done (2026-07-19) |
+
 ## Questions ouvertes (pas encore des items)
 
-- **Hygiène de contexte** (« smart zone », quand hand-off vs continuer) : guidance
-  potentiellement utile dans la constitution, mais dépendante des harnais — à trancher quand
-  les items M3 seront livrés.
+Plus aucune — fog of war est devenue l'item 10 (M5), l'hygiène de contexte l'item 11 (M6).
 
 ## Coordination entre agents
 
