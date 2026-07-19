@@ -31,15 +31,19 @@ next: {{next-action}}
 - **Goal:** {{first-milestone-goal}}
 - **Done when:** <!-- demonstrable acceptance: what a person can see working when M1 ships -->
 - **Depends on:** none
-- **Work items:**
+- **Work items:** <!-- one line each; blocked-by names the sibling items that must ship first,
+       omitted when the item can start immediately. Work the frontier: any item whose blockers
+       have all shipped. -->
   - [ ] {{first-work-item}} <!-- id filled at op-new intake; status: planned → in progress → shipped -->
+  - [ ] {{second-work-item}} — blocked-by: {{first-work-item}}
 
 <!-- Add M2, M3, … below as the project grows. Later milestones may hold only a goal and a
      rough item list until you plan them properly — coarse is honest, false precision is not. -->
 
 ## Sequencing & dependencies
 
-<!-- Cross-milestone ordering and hard dependencies. What must land before what, and why. -->
+<!-- Cross-milestone ordering and hard dependencies only — what must land before what, and why.
+     Intra-milestone order lives on the items' blocked-by lines, not here. -->
 
 ## Out of scope
 
