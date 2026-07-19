@@ -66,10 +66,11 @@ diff), `standard` (`spec-lite.md`), `full` (`spec.md` + ADRs). **Les gates sont 
 affirmées** : `node .operator/bin/op.mjs gate <id>` mesure le diff git réel, coche les preuves,
 puis avance l'étape lui-même. `op.mjs` a **3 sous-commandes** : `status`, `gate`, `escalate`.
 
-**Les skills — 13, sur deux contrats** (le mécanisme : ADR-0005 ; `op-discover` et `op-roadmap`
-ajoutés par ADR-0014/0015).
-- **9 procédures `op-*`** (seules autorisées à déplacer l'état d'un work item) :
-  `op-discover` (cadrer un besoin flou), `op-roadmap` (découper un projet en roadmap de
+**Les skills — 14, sur deux contrats** (le mécanisme : ADR-0005 ; `op-discover` et `op-roadmap`
+ajoutés par ADR-0014/0015, `op-explore` par ADR-0019).
+- **10 procédures `op-*`** (seules autorisées à déplacer l'état d'un work item) :
+  `op-discover` (cadrer un besoin flou), `op-explore` (naviguer un projet brumeux : carte de
+  décisions, collapse vers la roadmap), `op-roadmap` (découper un projet en roadmap de
   milestones), `op-new` (intake + triage), `op-plan` (spec), `op-build` (implémentation),
   `op-fix` (bug, repro d'abord), `op-ship` (revue + livraison + mémoire), `op-status`
   (lecture seule), `op-memory` (mémoire durable).
@@ -77,13 +78,14 @@ ajoutés par ADR-0014/0015).
   `operator-code-review`, `operator-security-review`, `operator-test-strategy`,
   `operator-debugging`.
 - **Routage automatique** : le bloc toujours chargé est le routeur — l'operateur parle en langage
-  naturel, l'agent classe et dispatche. Échelle de taille : flou → `op-discover`, projet →
-  `op-roadmap`, changement précis → `op-new` ; un bug → `op-fix`. La `constitution.md` fait
-  autorité ; le bloc en est le résumé.
+  naturel, l'agent classe et dispatche. Échelle de taille : flou → `op-discover`, confirmé mais
+  brumeux → `op-explore`, projet → `op-roadmap`, changement précis → `op-new` ; un bug →
+  `op-fix`. La `constitution.md` fait autorité ; le bloc en est le résumé.
 
 **État & mémoire.** `workitem.md` est la source de vérité d'un item (frontmatter plat dont
 `project`/`milestone`, Journal append-only). Un gros effort a un `.operator/projects/<id>/roadmap.md`
-(milestones → work items), approuvé par l'operateur mais **non gaté** mécaniquement. Mémoire
+(milestones → work items), précédé d'un `map.md` (carte de décisions `op-explore`) quand la voie
+est encore brumeuse — approuvés par l'operateur mais **non gatés** mécaniquement. Mémoire
 plafonnée dans `.operator/memory/` : `project.md` (120), `conventions.md` (200), `lessons.md` (150),
 plus `decisions/` (ADRs) et `archive/`.
 
@@ -94,7 +96,33 @@ plus `decisions/` (ADRs) et `archive/`.
 - **Créer un skill** → toujours via `/skill-creator`. Écrire en anglais, sous
   `src/payload/skills/<name>/SKILL.md`. Préfixe = contrat : `op-*` = procédure, `operator-*` =
   expertise. Éviter le piège YAML du deux-points-espace (`": "`) dans une `description:` non quotée
-  — il casse les parseurs stricts (Codex/OpenCode/Cursor/Gemini) ; quoter ou reformuler.
+  — il casse les parseurs stricts (Codex/OpenCode/Cursor/Gemini) ; quoter ou reformuler. Suivre
+  les règles « Écrire un skill » ci-dessous.
+- **Écrire un skill** — six règles d'authoring (théorie et baseline :
+  `docs/inspirations/mattpocock-skills/`, item 03 et son rapport) :
+  1. **Description = déclencheurs, une phrase par branche.** Chaque branche de comportement a une
+     seule phrase-déclencheur ; les synonymes qui re-déclenchent la même branche sont de la
+     duplication. Front-loader le leading word ; ne pas re-dire l'identité déjà dans le corps.
+     Cible : 60–90 mots — la description est du context load permanent chez les hôtes à
+     model-invocation, multiplié par 14 skills.
+  2. **Chaque étape finit sur un critère de complétion checkable.** Les étapes gatées l'ont via
+     `op.mjs` ; une étape non gatée le dit en toutes lettres (« it ends when… »).
+  3. **Test du no-op, phrase par phrase.** Une phrase qui ne change pas le comportement par
+     rapport au défaut du modèle se supprime entière — jamais raccourcie mot à mot.
+  4. **Positif d'abord.** Formuler le comportement cible ; une interdiction ne reste que comme
+     garde-fou dur et finit toujours par le geste à faire à la place (le format des sections
+     « Failure modes »).
+  5. **Leading words comme tokens.** Les concepts récurrents du payload — *honest*, *fresh*,
+     *append-only*, *mandate*, *escalate*, *shotgun*, *harvest*, *grill* — se répètent comme
+     tokens, jamais paraphrasés. Préférer un mot pré-entraîné à un mot inventé.
+  6. **Single source of truth inter-fichiers.** La constitution fait autorité, le bloc en est le
+     résumé ; un skill ne re-dit une politique qu'au point d'exécution où elle s'applique. Pas
+     d'axe user-invoked/model-invoked (`disable-model-invocation`) dans le payload sans ADR
+     dédié — le contrat `op-*`/`operator-*` est notre équivalent agent-agnostique.
+
+  Nota : le `/skill-creator` (outil de dev, non distribué) conseille des descriptions « pushy » ;
+  pour le payload Operator, les règles ci-dessus priment — le routage vit dans le bloc toujours
+  chargé (ADR-0013), la description n'est qu'un second filet.
 - **Après toute modif sous `src/payload/`** → régénérer le manifest :
   `node src/lib/manifest.mjs build`, puis vérifier avec `node src/lib/manifest.mjs verify` avant de
   committer (il signale toute dérive ; il n'y a pas encore de CI pour l'attraper à ta place).

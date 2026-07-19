@@ -1,6 +1,6 @@
 {
   "name": "@marcjosia/operator",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Operator — an agent-agnostic toolkit that makes AI coding agents work like a senior engineering team. The human decides, Operator organizes, agents execute.",
   "type": "module",
   "bin": {

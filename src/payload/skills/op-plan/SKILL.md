@@ -1,6 +1,6 @@
 ---
 name: op-plan
-description: Specify and architect a work item before any code is written. Use whenever a standard- or full-lane work item sits at the spec stage — right after op-new hands one off, when the operator asks for a plan, spec, design, or architecture for an item, or when an escalated item needs its spec document backfilled. Produces the lane's spec document with testable acceptance criteria, updates the work item's Scope and Tasks, then stops for the operator's approval — the one mandatory human gate in the pipeline. Invoke it before op-build every time the lane requires a spec; never implement without it.
+description: "Specify and architect a work item before any code: write the lane's spec document with testable acceptance criteria, update Scope and Tasks, then STOP for the operator's approval — the one mandatory human gate. Use it when a standard- or full-lane item sits at stage spec, when the operator asks for a plan, spec, or design, or when an escalated item needs its spec backfilled. Never implement without it."
 ---
 
 # op-plan — specify and architect
@@ -85,13 +85,25 @@ effect of *this* change rather than a target the result must hold.
 
 **Full lane additions:**
 
+- **Design it twice** — before writing Architecture & decisions, for each decision significant
+  enough to merit an ADR *and* facing a real trade-off: sketch two or three designs under
+  deliberately opposed constraints (e.g. minimal interface / maximal flexibility / optimise the
+  common caller), each a few lines of prose — components, flow, contract, never code. If your
+  host runs sub-agents, produce each sketch in an isolated context; otherwise write them
+  sequentially and do not let the later sketches converge toward the first — the first idea is
+  rarely the best, and sketches that can see each other converge. Compare on named criteria —
+  interface simplicity, locality of change, testability at the seam, reversibility — then
+  recommend one. Skip the pattern when no credible alternative exists; the trigger is a real
+  trade-off, not the full lane itself.
 - **Architecture & decisions** — components touched or created, data flow, contracts between
   parts. Every significant decision gets a one-paragraph rationale.
-- **Rejected alternatives** — each serious alternative and the concrete reason it lost.
-  "We found no other credible approach" is a valid entry if true.
+- **Rejected alternatives** — each serious alternative and the concrete reason it lost. The
+  losing sketches from design-it-twice, with the real reason each lost the comparison, are
+  exactly these entries. "We found no other credible approach" is a valid entry if true.
 - **ADRs** — for every decision where a real alternative was considered and rejected, file
   `.operator/memory/decisions/ADR-NNN-short-slug.md` from `.operator/templates/adr.md`
-  (next NNN = highest existing + 1), cite the work item, and link it from the Architecture &
+  (next NNN = highest existing + 1), cite the work item — and the design-it-twice comparison
+  when one ran — and link it from the Architecture &
   decisions section. No ADR for choices that had no alternative — an ADR archive full of
   non-decisions buries the real ones. ADRs are immutable once accepted; to reverse one later,
   a new ADR supersedes it.
@@ -111,7 +123,9 @@ In `.operator/work/<id>/workitem.md`:
   Scope guarantees a failed gate, and a padded catch-all Scope defeats the check the operator
   relies on.
 - **Tasks** — replace the placeholder with small, ordered, verifiable steps. Each task names
-  its proof: how op-build will demonstrate it is done. Tasks map onto acceptance criteria.
+  its proof: how op-build will demonstrate it is done. When the proof is a test, name the
+  **seam** it attaches to (see `operator-test-strategy`) — approving the plan then approves
+  the test surfaces too. Tasks map onto acceptance criteria.
 
   - Bad: `- [ ] Implement rate limiting`
   - Good:

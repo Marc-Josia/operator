@@ -1,6 +1,6 @@
 ---
 name: op-status
-description: Read-only orientation across all Operator work items — reads every workitem.md's frontmatter and latest journal lines, then reports a narrative status with the exact next action for each item and flags anything blocked or inconsistent, and rolls up any project roadmaps by milestone. Use it whenever the operator asks "where are we", "what's next", "what's in flight", "what happened to <item>", "is X done yet", or "how far along is <project>"; at the start of any session that resumes earlier work; after a long break, a handoff, or loss of context; and before choosing which work item to pick up. It changes nothing — no journal lines, no frontmatter edits — so it is always safe to run, in any state.
+description: "Read-only orientation across all work items and project roadmaps: reads every workitem.md's frontmatter and latest journal lines from disk, reports status with the exact next action per item, and flags anything blocked or inconsistent. Use it whenever the operator asks 'where are we', 'what's next', or 'is X done yet'; at the start of a session resuming earlier work; and before picking which item to work. It changes nothing, so it is always safe to run."
 ---
 
 # op-status — orient without touching anything
@@ -39,7 +39,9 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
      (`spec-lite.md` / `spec.md`) exists in the item directory, and its `status:` line.
    - for each `roadmap.md`: frontmatter `status:` and the Milestones section — which milestone is
      active and, per milestone, how many of its work items have reached `done` (join by the items'
-     `project`/`milestone` fields). The roadmap's own Progress section is the operator's summary.
+     `project`/`milestone` fields). Within the active milestone, derive the **frontier** — the
+     unshipped items whose `blocked-by` edges have all shipped — so the report can name what is
+     workable now. The roadmap's own Progress section is the operator's summary.
 
 3. **Classify each item.**
    - **done** — `stage: done`.
@@ -78,7 +80,8 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
 
    ### Projects
    - **001-airbnb-clone** (active) — M1 MVP: 3/4 items shipped; M2–M4 not started.
-     Active item: 014-search (build). Roadmap: .operator/projects/001-airbnb-clone/roadmap.md
+     Active item: 014-search (build). Frontier: "guest can book a listing".
+     Roadmap: .operator/projects/001-airbnb-clone/roadmap.md
 
    ### Active
    - **003-rate-limiting** (standard, build) — updated 2026-07-12
@@ -115,8 +118,7 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
 ## Exit gate
 
 None. op-status moves no work-item state, so there is nothing for the gate checker to verify —
-the procedure ends when the operator has the report. This is deliberate: a status check must
-never be a step anyone hesitates to run.
+the procedure ends when the operator has the report.
 
 ## Failure modes
 

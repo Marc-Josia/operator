@@ -1,6 +1,6 @@
 ---
 name: op-ship
-description: Review, deliver, and learn from a completed work item — fresh-context code review (plus security review when the diff touches protected paths), findings resolved or waived, docs updated, memory harvested, retro written, and the review and ship gates passed. Use whenever implementation is complete and the build gate has passed; when the operator says "ship it", "wrap up", "finish this", "deliver", "ready to merge?", or asks whether the work is done. This is the only path from build to done — never declare a work item finished, merged, or delivered without running this procedure.
+description: "Review, deliver, and learn from a completed work item: fresh-context code review (plus security review when the diff touches protected paths), every finding fixed or waived, docs updated, memory harvested, retro written, review and ship gates passed. Use it when the build gate has passed and the operator says 'ship it', 'wrap up', 'deliver', or asks whether the work is done. The only path from build to done."
 ---
 
 # op-ship — review, deliver, learn
@@ -155,10 +155,9 @@ for the next person.
 node .operator/bin/op.mjs gate <id>
 ```
 
-It checks the `DOCS` line, the `MEMORY` line (harvest at most 3 items — a discipline, not
-counted by the gate), the filled Retro, and
-(standard/full) memory caps. On pass the item advances to `done`. Set the frontmatter
-`next:` to `done — no further action`.
+It checks the `DOCS` line, the `MEMORY` line, the filled Retro, and (standard/full) memory
+caps. On pass the item advances to `done`. Set the frontmatter `next:` to
+`done — no further action`.
 
 ### 10. Report to the operator
 
@@ -206,8 +205,8 @@ The procedure ends only when the ship gate has passed and the operator has the r
   `node .operator/bin/op.mjs escalate <id>`, backfill, and redo the review including the
   security pass.
 - **More than three memory-worthy items.** Keep the three most durable; the rest stays in the
-  Retro, retrievable later. Keep the harvest to the three most durable — this cap is your
-  discipline, not a gate count (the gate only checks that a `MEMORY` line is present).
+  Retro, retrievable later. The cap is your discipline, not a gate count — the gate only checks
+  that a `MEMORY` line is present.
 - **The gate fails.** Do exactly what the checker's failure output names — it prints the fix
   per check. Never edit or backdate journal lines to satisfy a grep; the journal is
   append-only and its history is the audit trail.

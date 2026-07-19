@@ -1,6 +1,6 @@
 ---
 name: op-build
-description: Execute the build stage of an Operator work item — the per-task implement → test → tick → journal loop, with scope discipline, escalation tripwires, and the mechanical build gate. Use whenever implementation should proceed on an existing work item; the operator says "build it", "implement it", "go ahead", "write the code", "continue", a plan was just approved, or you are resuming an item whose stage is build. Always follow this procedure before writing any implementation code for a work item — never code straight from a spec, a conversation, or memory without it.
+description: "Execute the build stage of a work item: the per-task implement → test → tick → journal loop, with scope discipline, escalation tripwires, and the mechanical build gate. Use it whenever implementation should proceed — 'build it', 'go ahead', 'continue', a plan was just approved, or the item sits at stage build. Never write implementation code straight from a spec or conversation without it."
 ---
 
 # op-build — implement a work item
@@ -75,6 +75,11 @@ Journal per task, not per session — an agent resuming this item in a fresh con
 exactly where the loop stopped. If you stop for an external reason, append
 `- <ISO date> BLOCKED: <reason>`, and `- <ISO date> RESUMED: <what changed>` when you
 continue. The Journal is append-only: never edit or delete an earlier line.
+
+When a long session starts to fray — the harness compacted the conversation, you are re-reading
+files you already read, or re-litigating journaled decisions — finish the task at hand, journal
+it, and stop at the gate rather than push a tired window into review; after any compaction,
+re-read the workitem and the spec from disk before continuing.
 
 When a failure resists quick diagnosis, apply `operator-debugging`
 (`.agents/skills/operator-debugging/SKILL.md`): reproduce, isolate, verify the root cause.

@@ -102,12 +102,20 @@ grouping issue-sized work items, approved by the operator before work begins. Th
 sequences; every work item it spawns still enters op-new and is gated in full. Like discovery, it
 moves no work-item state and passes no mechanical gate — the operator approves it, not `op.mjs`.
 
+**Is the path still unknowable?** A confirmed problem that resists planning — the first milestone
+will not carve because the decisions that would shape it are unresolved — goes to `op-explore`. It
+maps the open decisions in `.operator/projects/<id>/map.md`, resolves them one per session
+(research, throwaway prototypes whose code never ships, operator interviews), and collapses into
+`op-roadmap` once milestones are carvable. A decision is never a work item: like discovery,
+exploration moves no work-item state and passes no gate — the operator approves the map.
+
 **Then classify the intent:**
 
 | The request… | Procedure | Effect |
 |---|---|---|
 | is vague or exploratory — problem-shaped, not a precise change | `op-discover` | no state (→ op-new) |
 | is bigger than one work item — a project, many features, a v2 | `op-roadmap` | no state (→ op-new per item) |
+| is confirmed but unplannable — unknowns to resolve across sessions | `op-explore` | no state (→ op-roadmap) |
 | asks for new work, already precise — feature, change, refactor, chore | `op-new` | moves state |
 | reports a bug — broken, crash, wrong output, regression | `op-fix` | moves state |
 | asks to plan/spec/design an item at `stage: spec` | `op-plan` | moves state |
@@ -139,6 +147,9 @@ Routing never excuses skipping a gate — every path still enters the method abo
 - Large efforts get a **Project**: `.operator/projects/<id>/roadmap.md` groups ordered milestones,
   which group work items. The roadmap is a planning artifact — approved by the operator, moving no
   work-item state and passing no mechanical gate; the work items it spawns carry the full pipeline.
+- A confirmed-but-foggy effort first gets `map.md` in the same project directory — op-explore's
+  map of open decisions, worked one per session and collapsed into the roadmap once the path
+  clears. Same regime as the roadmap: operator-approved, never gated, decisions are not work items.
 - The **Journal is append-only**. Never edit or delete a previous line. Approvals, gate
   passages, escalations, waivers, and reviews all become journal lines — that is what makes
   process erosion visible in git history.
@@ -164,6 +175,15 @@ Capabilities differ across host tools. Degrade gracefully, never silently skip a
 | Web access | Verify external assumptions (APIs, versions, docs) | Record each unverified assumption in the spec's Risks section |
 | Shell / Node | Run the gate checker and tests | Apply gate checklists manually and journal the evidence |
 
+Context is a consumable: a window holds its best judgement early — that is why an item fits one
+fresh session and a spec is approved before building begins. Gate boundaries are the natural
+hand-off points: on-disk state is complete there, and a fresh session resumes losslessly via
+op-status. Late in a long session, finish the current gate and stop rather than open a new stage.
+No host reports its context reliably, so watch behavioural signals, not numbers: the harness
+compacted or summarised the conversation, you are re-reading files you already read, or
+re-deciding decisions already journaled. On any of these, trust the disk over your recollection —
+re-read `workitem.md` and the spec before continuing — and hand off at the next gate.
+
 ## Memory
 
 Memory is a strategic asset. It lives in `.operator/memory/`:
@@ -174,11 +194,15 @@ Memory is a strategic asset. It lives in `.operator/memory/`:
   matching the files you are about to touch.
 - `lessons.md` — numbered `L-NNN` entries: *When «trigger», do «action», because «reason»*.
 - `decisions/` — one ADR per file, immutable once accepted, superseded by newer ADRs.
+- `out-of-scope/` — one file per deliberately rejected concept, with the reason. op-discover and
+  op-new check it before engaging; a match is surfaced, and the operator decides — never a veto.
+  Rejections only: never "already implemented", never deferrals.
 - `archive/` — pruned entries; moved, never deleted, never auto-loaded.
 
 Write triggers are gate-bound: op-plan files ADRs, op-fix records lessons, op-ship harvests at
-most three durable items. The one exception: when the operator corrects you, record the
-correction immediately via op-memory — corrections that wait for a gate get lost.
+most three durable items; op-new and op-discover record operator rejections to `out-of-scope/`
+as they happen. The one exception: when the operator corrects you, record the correction
+immediately via op-memory — corrections that wait for a gate get lost.
 
 Never memorize temporary information, intermediate states, or conversations. Never duplicate
 knowledge already recorded. Every entry cites the work item it came from.

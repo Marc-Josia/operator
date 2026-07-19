@@ -1,6 +1,6 @@
 ---
 name: op-fix
-description: The bug-fix procedure — reproduce with a failing test BEFORE any fix attempt, root-cause with evidence, fix the cause (never the symptom) through a gated work item, keep the regression test in the suite forever, and record the lesson. Use it whenever the operator reports a bug, defect, regression, crash, error, wrong output, or says something "is broken" or "doesn't work" — even when the fix looks like an obvious one-liner, and even when a test failure surfaces mid-task. Not for new features or planned changes (use op-new) and not for resuming planned implementation (use op-build).
+description: "The bug-fix procedure: reproduce with a failing test BEFORE any fix attempt, root-cause with evidence, fix the cause (never the symptom) through a gated work item, keep the regression test forever, and record the lesson. Use it whenever the operator reports a bug, defect, regression, crash, or wrong output — even an 'obvious one-liner', and even when a test failure surfaces mid-task. New or planned work goes to op-new; resuming planned implementation goes to op-build."
 ---
 
 # op-fix — reproduce, root-cause, fix, remember
@@ -40,9 +40,8 @@ discovery twice.
      first makes skipping it visible at the build gate (`tasks-complete`).
    - Scope includes the test location, not just the suspect source files.
    - Most fixes honestly score **quick**. But triage rules still apply in full: a bug in a
-     protected path (`.operator/config.json`) is **never quick** — the intake gate's
-     intake gate will reject it — the triage scorecard routes any protected-path "yes" straight
-     to the full lane, so triage it full from the start. A fix
+     protected path (`.operator/config.json`) is **never quick** — the scorecard routes any
+     protected-path "yes" straight to the full lane, so triage it full from the start. A fix
      that needs a schema migration or crosses module boundaries follows the normal lane rule.
    - Run `node .operator/bin/op.mjs gate <id>` to pass intake. On standard/full lanes, continue
      through `op-plan` (spec + operator approval) before any fix work; the repro test in step 3
@@ -64,7 +63,10 @@ discovery twice.
 
    **If the bug is genuinely untestable, the bar is high.** Most "untestable" bugs are testable
    one level down: extract the logic from the framework, fake the clock, stub the network,
-   capture the race with a deterministic interleaving. Exhaust those options first. Only when
+   capture the race with a deterministic interleaving. When the failing test is not immediate,
+   walk the ordered loop-construction list in `operator-debugging` step 1 — failing test, HTTP
+   script, CLI diff, headless browser, trace replay, throwaway harness, and down — before
+   concluding anything is untestable. Exhaust those options first. Only when
    automation is truly impossible (e.g. a vendor-device-only rendering defect), ask the
    operator for an explicit waiver and journal it with the reason and numbered manual repro
    steps:
@@ -122,7 +124,11 @@ discovery twice.
    steps instead and journal the outcome
    (`- <date> REPRO manual steps re-run after fix: bug no longer reproduces`).
 
-8. **Record the lesson.** For every **non-obvious** root cause, append an `L-NNN` entry to
+8. **Record the lesson.** First ask the post-mortem question: **what would have prevented this
+   bug?** The answer routes the learning — a lesson (`L-NNN`) when the next agent needs the
+   knowledge, a `conventions.md` rule when a standing rule would have blocked it, a follow-up
+   work item when the prevention is architectural (a missing seam from the root-cause finding
+   goes here). For every **non-obvious** root cause, append an `L-NNN` entry to
    `.operator/memory/lessons.md` in the file's exact format:
 
    ```

@@ -1,6 +1,6 @@
 ---
 name: operator-test-strategy
-description: Expertise pack — what to test, at which level of the pyramid, and when to stop. Covers per-lane test depth (quick/standard/full), mapping acceptance criteria to tests, what NOT to test, the flaky-test policy, and how to choose the single best regression test for a bug fix. Consumed by op-build (planning each task's proof) and op-fix (picking the reproduction test). Consult it whenever you are about to write tests, decide how much coverage a change needs, judge whether a test is worth writing at all, or handle a flaky test — read it before writing the first test, not after. Advise only — it returns a test plan to the procedure that invoked it and never moves work-item state.
+description: "Expertise pack for what to test, at which seam and pyramid level, and when to stop: per-lane test depth, mapping acceptance criteria to tests, the mocking policy (system boundaries only), what NOT to test, the flaky-test policy, and choosing the single regression test for a bug fix. Consult it before writing the first test, when deciding where a test should attach or whether to mock, and when a test flakes — op-build plans each task's proof with it; op-fix picks its reproduction test with it. Advisory only: it returns a test plan and never moves work-item state."
 ---
 
 # operator-test-strategy
@@ -53,13 +53,49 @@ Why the shape matters: the whole suite runs at every build gate (`tests-pass` re
 `testCommand` in `.operator/config.json` to exit 0), so suite speed is iteration speed, and a
 failure's precision is the next debugger's starting point.
 
+## Seams — where tests attach
+
+A **seam** is the stable boundary where a behavior can be observed and substituted without
+reaching inside — a public function, a handler interface, a module contract. **The interface
+is the test surface**: a test and a caller cross the same seam, which is exactly what lets the
+suite survive refactoring. Choosing the seam is choosing the pyramid level. Two rules cover
+most cases:
+
+- **New behavior:** the highest seam at which the behavior is still real — nothing of your own
+  mocked away — without dragging in unrelated system setup.
+- **Regression (bug fix):** the lowest seam that exercises the real defect (the regression
+  section below).
+
+If reaching a behavior requires testing *past* the interface — asserting on private state or
+internals — the module's shape is the finding: report it under `for the operator:` instead of
+writing the coupled test.
+
+## Mocking policy
+
+Mock **only at system boundaries**: the network and third-party APIs, the clock, randomness,
+the filesystem — and sometimes the database, though a real or in-memory one usually beats a
+mock. **Never mock your own modules**: such a test verifies call wiring, not behavior, and
+breaks on refactors that change nothing observable. If a behavior cannot be tested without
+mocking your own code, the missing seam is a design finding — report it under
+`for the operator:`. At the boundaries you do mock, prefer narrow SDK-style interfaces (one
+function per operation, dependencies injected) over generic fetchers: each stub returns one shape.
+
+One assertion trap at any seam: the **tautological test**, whose expected value is recomputed
+the way the code computes it — it passes by construction and can never disagree with the code.
+Expected values come from a source independent of the implementation: a known-good literal, a
+worked example, the spec.
+
+- Bad: `expected = items.reduce((s, i) => s + i.price, 0); expect(total(items)).toBe(expected)`
+- Good: `expect(total([{price: 10}, {price: 5}])).toBe(15)`
+
 ## Mapping acceptance criteria to tests
 
 Apply this per AC, in order:
 
 1. Extract the observable behavior — what a reviewer could check "met / not met" from outside.
 2. Restate it as *given / when / then*.
-3. Choose the lowest pyramid level at which that behavior is real (not mocked away).
+3. Choose the seam — the lowest one at which that behavior is real (not mocked away); the
+   seam sets the pyramid level.
 4. Name the test after the behavior and reference the AC number, so a reviewer can walk from
    spec to suite without a map.
 
@@ -89,8 +125,7 @@ Every test is permanent maintenance surface; a low-signal test taxes every futur
 buries the failures that matter. Do not write tests for:
 
 - **Implementation details** — private helpers, internal call order, intermediate state. Test
-  through the public surface so the suite survives refactoring; a test that breaks when
-  behavior did not is a false-alarm generator.
+  at the seam; a test that breaks when behavior did not is a false-alarm generator.
 - **Framework and library internals** — do not verify that the router routes or the ORM saves.
   Test your code's use of them, at the seam.
 - **Live third-party API behavior** — test your adapter against a stub of the documented
@@ -123,7 +158,7 @@ in order:
 
 1. **It fails on pre-fix code for the bug's own reason.** Read the failure output and match it
    to the reported defect — a test failing on a setup error reproduces nothing.
-2. **Lowest level that exercises the real defect.** If the bug lives in a parse function, a
+2. **Lowest seam that exercises the real defect.** If the bug lives in a parse function, a
    unit test on that function beats an end-to-end test through the UI: it pins the cause, runs
    in milliseconds forever, and cannot rot with unrelated UI changes.
 3. **Deterministic.** Pin the clock, seed randomness, stub the network, fix ordering. A

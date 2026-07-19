@@ -1,6 +1,6 @@
 ---
 name: op-discover
-description: "Problem-discovery interview that runs BEFORE op-new when a request is vague, exploratory, or problem-shaped rather than a precise change. Grill the operator one question at a time — recommending an answer to each, and researching facts from the codebase and memory instead of asking them — until you both share one clear, confirmed statement of the real problem, then hand that understanding to op-new for triage — or to op-roadmap when the effort is a whole project spanning several milestones. Use it whenever the ask is fuzzy or open-ended — 'I think our onboarding is bad', 'we should probably do something about performance', 'can you look into the billing flow', 'help me think this through', 'grill me on this idea' — or the operator is thinking out loud and the underlying need is unclear, or one request could mean several different things, or is really several problems bundled together. Skip it and go straight to op-new when the request is already a precise, discrete change you could restate in one sentence and triage. Skip it for bugs, defects, or regressions — those use op-fix, which reproduces first. Do not design the solution here — that is op-plan; discovery only defines the problem."
+description: "Problem-discovery interview that runs BEFORE op-new when the ask is vague, exploratory, or problem-shaped — 'onboarding feels bad', 'help me think this through', or one request hiding several problems. Grill the operator one question at a time, recommending an answer to each and researching facts instead of asking them, until you share one confirmed problem statement; hand it to op-new for triage, or to op-roadmap when it spans several milestones. When the operator asks to be asked everything at once or answers in batches, run the interview in frontier rounds instead. Skip it when the request is already precise enough to triage (op-new) and for bugs (op-fix, which reproduces first). Discovery defines the problem, never the solution (op-plan)."
 ---
 
 # op-discover — frame the problem before intake
@@ -50,9 +50,14 @@ already clear to me?* If yes, op-new. If no, discover.
 ### 1. Ground yourself before asking anything
 
 Facts are researched, not interviewed. Read `.operator/memory/project.md` and skim the relevant
-code, config, and tools so you arrive informed. Every question you can answer yourself is a
-question the operator should never have to answer — asking what you could have looked up erodes
-their trust and their time.
+code, config, and tools so you arrive informed — every question you could have answered yourself
+is one the operator should never see.
+
+**Prior-rejection check.** As part of grounding, scan `.operator/memory/out-of-scope/` (if it has
+entries). Matching is by concept similarity, not keyword — "night theme" matches `dark-mode.md`.
+If the ask overlaps a rejected concept, surface it before interviewing: name the file, quote the
+recorded reason, and ask whether the operator wants to reopen it. The record is memory, not a
+veto — **the operator decides**; if they reopen, continue discovery and update or delete the file.
 
 From that grounding, form a **hypothesis of the real problem**: what outcome the operator is
 actually after, and why now. You will test it, not assume it.
@@ -67,8 +72,8 @@ guess surfaces disagreement faster than an open "so what do you want?" ever will
 
 Walk the problem down as a decision tree, resolving dependencies in order. This is the core loop:
 
-- **One question at a time.** Ask, wait for the answer, let it shape the next question. A wall of
-  simultaneous questions gets shallow answers and hides which answer drove what.
+- **One question at a time — the default rhythm.** Ask, wait for the answer, let it shape the next
+  question. A wall of simultaneous questions gets shallow answers and hides which answer drove what.
 - **Recommend an answer to every question.** Never ask blankly — propose your best guess and your
   reasoning so the operator can confirm with a word or correct with a sentence. You are a senior
   engineer thinking alongside them, not a form to fill in.
@@ -78,6 +83,17 @@ Walk the problem down as a decision tree, resolving dependencies in order. This 
 - **Chase the why.** Behind a requested feature is a need; behind the need, a goal. Ask "so that…?"
   until you reach the real objective — often the best solution serves the goal without the feature
   originally named.
+
+**Frontier mode — the batched variant.** When the operator asks to go fast or to be asked
+everything at once, or answers asynchronously with long gaps, switch rhythm: ask the whole
+**frontier** — every question whose prerequisites are already settled — as one round of numbered
+questions, each still carrying your recommended answer, so the operator can reply in one line
+("1a, 2 yes, 3 your call"). Each round of answers reshapes the tree: recompute the frontier and
+ask the next round; a question depending on an answer still open this round waits for a later
+one. Research facts without blocking the round — only the questions downstream of a fact wait
+for it. A frontier that has not shrunk over two rounds is the stop signal of step 4 applied per
+round. Everything else in this procedure is rhythm-independent — recommended answers, facts
+researched not asked, the stopping rule, and the confirmed brief of steps 5–6.
 
 Cover, as they apply: the underlying goal and who it is for; what success looks like in observable
 terms; hard constraints and non-negotiables; what is explicitly out of scope; and the rough shape
@@ -93,7 +109,8 @@ items rather than forcing one.
 
 ### 5. Write the shared problem brief
 
-Summarise what you converged on, in the operator's terms:
+Summarise what you converged on, in the operator's terms, not the codebase's — behaviour and
+outcomes, no paths or symbols (the brief outlives today's code):
 
 ```
 Problem:      the real underlying problem/outcome, plainly stated
@@ -108,6 +125,11 @@ Likely shape: a rough sense of size/risk for triage (not a lane decision)
 If discovery uncovered several distinct problems, list one brief per problem and recommend the
 order to tackle them.
 
+When the interview *deliberately discarded* a direction — the operator considered an idea and
+said no, not just "not in this item" — record that rejection via op-memory into
+`.operator/memory/out-of-scope/` (concept, reason, the original ask) so it is never re-litigated
+from zero. Deferrals stay in the brief's `Out of scope` line; only considered "no"s are recorded.
+
 ### 6. Confirm alignment, then hand off by size
 
 Present the brief and get an explicit "yes, that's the problem" — this confirmation *is* the shared
@@ -121,6 +143,9 @@ big the confirmed problem really is:
   `.agents/skills/op-roadmap/SKILL.md`, which decomposes the confirmed problem into an ordered
   roadmap of milestones and work items, gets the operator's approval, then feeds items to op-new one
   at a time. Discovery framed the problem; op-roadmap sequences the work.
+- **Confirmed but the path unknowable — planning would stall on decisions no one can answer yet:**
+  go to `.agents/skills/op-explore/SKILL.md`, which maps those open decisions and resolves them one
+  session at a time before any roadmap is carved.
 
 Invoke the next procedure as a skill if your host supports skills; otherwise read its SKILL.md and
 follow it.
