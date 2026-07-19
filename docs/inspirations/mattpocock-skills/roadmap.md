@@ -37,9 +37,9 @@ contraire.
 
 | # | Item | Brief | ADR ? | Statut |
 |---|---|---|---|---|
-| 04 | Tranches verticales + dépendances dans `op-roadmap` | `items/04-roadmap-tranches-verticales.md` | oui | todo |
-| 06 | Règle de durabilité des briefs longue durée | `items/06-durabilite-des-briefs.md` (dépend de 04) | non | todo |
-| 05 | « Design it twice » dans le full lane d'`op-plan` | `items/05-design-it-twice.md` | non | todo |
+| 04 | Tranches verticales + dépendances dans `op-roadmap` | `items/04-roadmap-tranches-verticales.md` | oui (ADR-0018) | done (2026-07-19) |
+| 06 | Règle de durabilité des briefs longue durée | `items/06-durabilite-des-briefs.md` (dépend de 04) | non | done (2026-07-19) |
+| 05 | « Design it twice » dans le full lane d'`op-plan` | `items/05-design-it-twice.md` | non | done (2026-07-19) |
 
 ## Questions ouvertes (pas encore des items)
 
