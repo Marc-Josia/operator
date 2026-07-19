@@ -39,7 +39,9 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
      (`spec-lite.md` / `spec.md`) exists in the item directory, and its `status:` line.
    - for each `roadmap.md`: frontmatter `status:` and the Milestones section — which milestone is
      active and, per milestone, how many of its work items have reached `done` (join by the items'
-     `project`/`milestone` fields). The roadmap's own Progress section is the operator's summary.
+     `project`/`milestone` fields). Within the active milestone, derive the **frontier** — the
+     unshipped items whose `blocked-by` edges have all shipped — so the report can name what is
+     workable now. The roadmap's own Progress section is the operator's summary.
 
 3. **Classify each item.**
    - **done** — `stage: done`.
@@ -78,7 +80,8 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
 
    ### Projects
    - **001-airbnb-clone** (active) — M1 MVP: 3/4 items shipped; M2–M4 not started.
-     Active item: 014-search (build). Roadmap: .operator/projects/001-airbnb-clone/roadmap.md
+     Active item: 014-search (build). Frontier: "guest can book a listing".
+     Roadmap: .operator/projects/001-airbnb-clone/roadmap.md
 
    ### Active
    - **003-rate-limiting** (standard, build) — updated 2026-07-12
