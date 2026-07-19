@@ -1,9 +1,9 @@
 {
-  "version": "0.1.0",
-  "generatedAt": "2026-07-19T13:25:11.395Z",
+  "version": "0.2.0",
+  "generatedAt": "2026-07-19T16:24:26.175Z",
   "files": {
     "src/payload/agents-block.md": "9165862c48b5326162aadfe5f9b927147493e6bfaf0d8deaadc35944aea0bd48",
-    "src/payload/operator/VERSION": "e9dd8507f4bf0c6f42458e41aea833ad0bd3f6127272335eee9bf4d58541ed67",
+    "src/payload/operator/VERSION": "1f930dd1f133c1f97a94fe3acb8db34372cf4c01ffdb2b3ff4ca72f9494121e9",
     "src/payload/operator/bin/op.mjs": "99612c532202599ea457fe0709b6ca91bfd3f19d1dac807ec2ccc421b37ebcb2",
     "src/payload/operator/config.json": "0c91ba10584408125ede2191fbd622600d780780dd56ab57f17b0725f9eb735b",
     "src/payload/operator/constitution.md": "53bf05fa44ccef43e753d2256b596a52a2dd980c6c5f6ef12c68a12182fce7e1",
