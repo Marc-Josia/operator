@@ -20,6 +20,11 @@ A **Project** (`.operator/projects/<id>/roadmap.md`) groups **milestones**; a mi
 operator, not a gated work item: `op.mjs` never gates it, and it never bypasses a gate — every work
 item it spawns is triaged and gated exactly as always.
 
+Reaching a milestone is a beat of its own. Before its items are spec'd, op-roadmap **details** the
+milestone against current reality (step 5) — the "plan near" pass deferred until you actually build
+it, so you spec real items, never a sketch. When a milestone will not firm up because unresolved
+decisions would reshape it, that beat escalates to op-explore.
+
 ## When to use — and when to skip
 
 - **Use op-roadmap** when the effort is genuinely bigger than one work item: it spans multiple
@@ -121,9 +126,33 @@ Set frontmatter `status:` to `active` once approved (`shaping` before). Do not c
 against an unapproved roadmap — the operator owns the shape of the project, just as they own each
 plan.
 
-### 5. Kick off execution — one work item at a time
+### 5. Kick off a milestone — detail it before you spec its items
 
-Work the **frontier** of the active milestone: the items whose blocked-by edges have all shipped —
+Starting a milestone (M1, or the next one when the previous ships) is its own beat, not a jump to
+the spec. "Plan near, sketch far" (step 2) means the milestone you are about to build was carved
+against a codebase that has since moved and item lines that were deliberately coarse. So when a
+milestone becomes active, **detail it first** — do not route an item to op-new until you have:
+
+- **Re-grounded in reality** — re-read the milestone's goal and done-when, and survey what the
+  earlier milestones actually shipped. The bricks this milestone builds on are now real code, not a
+  plan; check them before you name its items.
+- **Sharpened the work items** — restate each item of this milestone by the behaviour it delivers
+  and its blocked-by edges, splitting or merging as reality now shows. This is the detailed pass
+  step 2 deferred; these lines become the ones op-new will actually triage.
+- **Got the operator's agreement on the breakdown** — present the detailed item list (per item:
+  what it delivers, its edges) and iterate until the granularity is right. Journal it:
+  `- <date> MILESTONE started: M<n> — detailed: <item ids/names>`. This is the milestone's shape
+  approval, the analogue of the roadmap approval at a smaller grain; the operator owns the shape.
+
+Right-size the kickoff. A milestone that carves cleanly needs only this light pass — minutes, no
+new artifact. A milestone that **will not carve** — its items keep refusing to firm up because
+decisions nobody has answered would reshape them — is fog, not detailing: route to
+`.agents/skills/op-explore/SKILL.md`, which maps and resolves those decisions one session at a time
+and collapses back here. Detail the milestone, then spec; never spec a sketch.
+
+### 6. Spawn work items — one at a time
+
+Work the **frontier** of the detailed milestone: the items whose blocked-by edges have all shipped —
 an item with no edges is in the frontier from the start. Take one frontier item (when several are
 open, the operator picks, or take the first listed) and route it to `.agents/skills/op-new/SKILL.md`.
 It triages that item into a lane and creates `.operator/work/<item-id>/workitem.md` as always — with
@@ -134,14 +163,15 @@ item proceeds through op-plan/op-build/op-ship exactly as any work item does.
 Do not fan out the whole backlog into work items at once. Create items as you reach them; an item
 created months early is a scope guess that will be stale by the time you build it.
 
-### 6. Maintain the roadmap as reality moves
+### 7. Maintain the roadmap as reality moves
 
 The roadmap is a living document, not a cage. As work lands, keep it honest:
 
 - When a work item ships (op-ship reaches `done`), tick it in the milestone and append
   `- <date> ITEM shipped: <item-id>` to the roadmap Journal; refresh the Progress section.
 - When every item in the active milestone has shipped and its "done when" holds, append
-  `- <date> MILESTONE shipped: M<n>` and start the next milestone (`MILESTONE started: M<n+1>`).
+  `- <date> MILESTONE shipped: M<n>` and start the next milestone by returning to step 5 — detail
+  it before spawning its items, journaling the `MILESTONE started: M<n+1>` line there.
 - When reality diverges from the plan — a milestone splits, an item turns out unnecessary, the
   order changes — **re-plan openly**: revise the milestones, present the change to the operator,
   and append `- <date> REPLANNED: <what changed and why>`. Never silently rewrite history; the
@@ -165,14 +195,19 @@ gate machinery still guarantees each brick.
 ## Exit
 
 There is no single gate. Shaping ends when the operator approves the roadmap (`status: active`) and
-the first work item has been routed to op-new. The procedure then recurs at maintenance: advance
-milestones, spawn the next items, re-plan when needed. The project reaches `status: done` when its
-last milestone has shipped — record it and write a short project retro in Progress.
+the first milestone has been detailed at kickoff and its first item routed to op-new. The procedure
+then recurs: detail each milestone at kickoff, spawn its items, advance, re-plan when needed. The
+project reaches `status: done` when its last milestone has shipped — record it and write a short
+project retro in Progress.
 
 ## Failure modes
 
 - **Over-planning the far future.** Detailing milestone six now produces fiction. Plan the next one
   or two deeply; keep the rest coarse and revise as you learn.
+- **Speccing a sketched milestone.** Routing a milestone's items straight to op-new the moment it
+  goes active specs lines carved coarsely against code that has since moved. Detail the milestone
+  first (step 5); if its items will not firm up, the blocker is fog, not detailing — route to
+  op-explore and return when it collapses.
 - **Horizontal milestones.** "All the models", then "all the endpoints", then "all the UI" delivers
   nothing demonstrable until the end and hides integration risk. Slice vertically.
 - **Fanning out the whole backlog into work items up front.** Early items are stale scope guesses.

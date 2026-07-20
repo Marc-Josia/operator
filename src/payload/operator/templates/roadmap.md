@@ -24,7 +24,9 @@ next: {{next-action}}
 
 <!-- Ordered, each a demonstrable vertical slice — something you could show working, not a
      horizontal layer ("all the models"). Plan near milestones in detail, far ones coarsely;
-     you will re-plan as you learn. Each work item becomes one op-new intake when its turn comes. -->
+     you will re-plan as you learn. When you start a milestone, detail it first (op-roadmap step 5):
+     sharpen its items against current reality and get the operator's agreement before any op-new —
+     never spec a sketch. Each work item becomes one op-new intake when its turn comes. -->
 
 ### M1 — {{first-milestone-name}}
 

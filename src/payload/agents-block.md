@@ -41,7 +41,7 @@ the procedure (`spec`→`op-plan`, `build`→`op-build`, `review`→`op-ship`).
 
 Right-size by scale: too fuzzy to restate? `op-discover`. Confirmed but the path unknowable?
 `op-explore` maps and resolves the decisions first. A whole project? `op-roadmap` slices it into
-milestones. All converge on `op-new` per item; a precise single change goes straight there.
+milestones — and when you start one ("attack M1"), it details that milestone before any item is spec'd, never straight to `op-plan`. All converge on `op-new` per item; a precise single change goes straight there.
 
 Some requests want judgement, not a state change — "review this", "is it secure?", "how do I
 test/debug this?". Consult the matching `operator-*` pack (`operator-code-review`,

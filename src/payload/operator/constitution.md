@@ -101,6 +101,10 @@ something like Airbnb", a whole subsystem, a v2 — is a *project*, not an issue
 grouping issue-sized work items, approved by the operator before work begins. The roadmap plans and
 sequences; every work item it spawns still enters op-new and is gated in full. Like discovery, it
 moves no work-item state and passes no mechanical gate — the operator approves it, not `op.mjs`.
+Starting a milestone is a beat of its own: before its items are spec'd, op-roadmap **details** that
+milestone against current reality — the "plan near" pass deferred until you build it — and gets the
+operator's agreement on the breakdown, escalating to `op-explore` when unresolved decisions would
+reshape it. Detail the milestone, then spec; never route a sketched item straight to op-plan.
 
 **Is the path still unknowable?** A confirmed problem that resists planning — the first milestone
 will not carve because the decisions that would shape it are unresolved — goes to `op-explore`. It
