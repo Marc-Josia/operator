@@ -7,7 +7,7 @@
 //   4. apply adapters (detected, or --tools)
 //   5. interview (skipped by --yes and on non-TTY stdin; --test-cmd presets)
 //   6. write .operator/.installed.json (the hash inventory updates diff against)
-//   7. print what happened and a 3-step quickstart
+//   7. print what happened and the quickstart (first step: run op-init in the agent)
 
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -171,8 +171,10 @@ export async function init(opts = {}) {
   log('');
   log('Quickstart:');
   log('  1. Open your agent tool in this project.');
-  log('  2. Say what you want built — the AGENTS.md routing engages op-new.');
-  log('  3. Check progress any time: node .operator/bin/op.mjs status');
+  log('  2. Say "set up Operator" — it runs op-init: surveys the codebase, confirms your test');
+  log('     command, and asks where to track work (markdown, GitHub Issues, or Linear).');
+  log('  3. Then say what you want built — the AGENTS.md routing engages op-new.');
+  log('  4. Check progress any time: node .operator/bin/op.mjs status');
   return report;
 }
 

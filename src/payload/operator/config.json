@@ -1,6 +1,8 @@
 {
   "schemaVersion": 1,
   "testCommand": null,
+  "tracker": "markdown",
+  "trackerConfig": {},
   "protectedPaths": [
     "**/auth/**",
     "**/security/**",

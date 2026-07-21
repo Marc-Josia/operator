@@ -28,6 +28,7 @@ the procedure (`spec`→`op-plan`, `build`→`op-build`, `review`→`op-ship`).
 
 | The operator wants… | Run |
 |---|---|
+| Operator set up — first run, "onboard", "configure tracking" (markdown/GitHub/Linear) | `op-init` |
 | a vague or exploratory ask — problem-shaped, unclear, "help me think this through" | `op-discover`, then `op-new` |
 | a big multi-feature effort — "build an app like X", a whole system, a v2 | `op-roadmap`, then `op-new` per item |
 | a confirmed problem too foggy to plan — unknowns to resolve before milestones | `op-explore`, then `op-roadmap` |
@@ -54,7 +55,6 @@ If your tool supports skills or slash commands, invoke them. Otherwise read
 
 ## System documents
 
-- `.operator/constitution.md` — values, laws, orchestration policy. Read it when starting or
-  resuming a work item.
+- `.operator/constitution.md` — values, laws, orchestration policy. Read it when starting or resuming a work item.
 - `.operator/work/<id>/workitem.md` — the single source of truth for each work item.
 - `.operator/memory/` — durable project knowledge. Never duplicate what is already there.

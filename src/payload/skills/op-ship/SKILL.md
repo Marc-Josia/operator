@@ -159,7 +159,18 @@ It checks the `DOCS` line, the `MEMORY` line, the filled Retro, and (standard/fu
 caps. On pass the item advances to `done`. Set the frontmatter `next:` to
 `done — no further action`.
 
-### 10. Report to the operator
+### 10. Close the tracker mirror (external trackers only)
+
+Read `tracker` in `.operator/config.json` and the item's `tracker_ref:`. If `tracker` is `markdown`
+or `tracker_ref:` is blank, skip this step. Otherwise close the linked issue through the tracker's
+MCP tools: post the ship report (below) as a closing comment and set the issue to its done state
+(GitHub: close as completed; Linear: move to a completed status). Journal
+`- <YYYY-MM-DD> TRACKER closed <handle>`. If the tool is absent or the call fails, journal
+`- <YYYY-MM-DD> TRACKER close (deferred: <reason>)` and continue — the item is already `done`
+locally, and the mirror can be reconciled later. Closing the issue reflects the passed gate; it
+never causes it (constitution `## Tracking`).
+
+### 11. Report to the operator
 
 Report in the constitution's order — accomplished, proof, decisions, remains — written for a
 human discovering the work, not for a log file:

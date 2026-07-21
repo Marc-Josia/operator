@@ -9,6 +9,7 @@ updated: {{date}}
 next: {{next-action}}
 project:
 milestone:
+tracker_ref:
 ---
 
 # {{title}}
@@ -57,7 +58,7 @@ milestone:
 <!-- Append-only. One line per event, newest last. Never edit or delete a previous line.
      Each line is date-prefixed: `- <ISO date> <EVENT> <details>`.
      Event vocabulary: CREATED, TASK, GATE <name> PASSED, APPROVAL, REVIEW, REPRO,
-     ESCALATED, WAIVER, DOCS, MEMORY, BLOCKED, RESUMED, ATTEMPT, POSTMORTEM.
+     ESCALATED, WAIVER, DOCS, MEMORY, TRACKER, BLOCKED, RESUMED, ATTEMPT, POSTMORTEM.
      ATTEMPT <task> failed: <reason> — one per failed fix/build retry; POSTMORTEM <file>: <line>
      once a method postmortem is written (the build gate forces one after repeated ATTEMPTs).
      (The checker writes the GATE PASSED line itself on a passing gate; a gate failure prints
