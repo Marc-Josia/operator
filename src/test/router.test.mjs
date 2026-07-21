@@ -48,14 +48,14 @@ function routingSection() {
   return match[0];
 }
 
-/** The `**Skills**` paragraph of src/README.md (its structured skill list):
- *  from the line starting `**Skills**` to the next bold-led paragraph. */
+/** The `## Skills reference` section of src/README.md (its structured skill list,
+ *  where every shipped skill is enumerated): from the heading to the next `## `. */
 function readmeSkillsSection() {
   const readme = read(REPO_ROOT, 'src', 'README.md');
-  const match = readme.match(/^\*\*Skills\*\*[\s\S]*?(?=^\*\*[A-Z]|^## )/m);
+  const match = readme.match(/^## Skills reference\n[\s\S]*?(?=^## )/m);
   assert.ok(
     match,
-    'src/README.md has no `**Skills**` paragraph — if the skill list moved or was removed, update router.test.mjs'
+    'src/README.md has no `## Skills reference` section — if the skill list moved or was removed, update router.test.mjs'
   );
   return match[0];
 }
