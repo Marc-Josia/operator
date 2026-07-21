@@ -4,11 +4,10 @@ title: {{title}}
 lane: {{lane}}
 stage: intake
 base: {{base-sha}}
+spec:
 created: {{date}}
 updated: {{date}}
 next: {{next-action}}
-project:
-milestone:
 ---
 
 # {{title}}
@@ -16,7 +15,7 @@ milestone:
 ## Problem
 
 <!-- What is being asked, in the requester's terms, and why it matters.
-     3–10 lines on the quick lane; the spec document carries the detail on other lanes. -->
+     3–10 lines on the quick lane; the spec document carries the detail on standard. -->
 
 ## Triage
 
@@ -31,8 +30,13 @@ milestone:
 | Crosses module boundaries? | yes/no |
 | User-visible behavior change? | yes/no |
 
-<!-- Lane rule: all "no" → quick. One or two "yes" (and protected paths "no") → standard.
-     Otherwise → full. Protected paths always exclude the quick lane. -->
+<!-- Lane rule: all "no" → quick. Any "yes" → standard.
+     Protected paths always exclude the quick lane. -->
+
+<!-- `spec:` frontmatter stays empty at intake. On the standard lane, op-plan fills it with
+     the spec document's path from the project root: the spec tool's artifact when one is
+     installed (spec-kit `specs/NNN-slug/spec.md`, OpenSpec `openspec/changes/<name>/proposal.md`)
+     or `.operator/work/<id>/spec.md` from the fallback template otherwise. -->
 
 ## Scope
 

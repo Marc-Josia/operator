@@ -9,7 +9,7 @@
 // Subcommands:
 //   status                        list work items + the active item's next action
 //   gate <id>                     verify the current stage's checks; on pass, advance
-//   escalate <id> [--to lane]     one-way lane raise (quick -> standard -> full)
+//   escalate <id>                 one-way lane raise (quick -> standard)
 //
 // Exit codes: 0 success, 1 a gate failed, 2 malformed input / precondition error.
 // Gates are checked, not asserted: on pass this tool appends the journal line and
@@ -26,7 +26,7 @@ const OPERATOR_DIR = path.resolve(HERE, '..'); // .operator/
 const PROJECT_ROOT = path.resolve(OPERATOR_DIR, '..'); // the user project root
 const WORK_DIR = path.join(OPERATOR_DIR, 'work');
 
-const LANE_RANK = { quick: 0, standard: 1, full: 2 };
+const LANE_RANK = { quick: 0, standard: 1 };
 
 // Tokens that never count as "filled" content in a template section. `{{...}}` is
 // removed separately by regex; the rest are matched as whole trimmed tokens.
@@ -177,14 +177,10 @@ function triageAnswers(content) {
   return rows;
 }
 
-/** Lane implied by the triage answers (the template's lane rule). */
+/** Lane implied by the triage answers (the template's lane rule): any yes -> standard. */
 function expectedLane(rows) {
   const yes = rows.filter((r) => r.answer === 'yes').length;
-  const protectedRow = rows.find((r) => /protected/i.test(r.question));
-  const protectedYes = protectedRow ? protectedRow.answer === 'yes' : false;
-  if (yes === 0) return 'quick';
-  if (yes <= 2 && !protectedYes) return 'standard';
-  return 'full';
+  return yes === 0 ? 'quick' : 'standard';
 }
 
 /** Numbered acceptance criteria of a spec doc (placeholder-only entries excluded). */
@@ -331,9 +327,23 @@ function fileLineCount(rel) {
   }
 }
 
+/** Directory prefixes excluded from the measured diff: `.operator/` always, plus
+ *  the directory holding the item's external spec artifact (spec-kit and OpenSpec
+ *  author sibling documents there; that authoring is spec-stage work, not build diff). */
+function diffExcludes(data) {
+  const excludes = ['.operator'];
+  const spec = String(data.spec || '').trim().replace(/^\.\//, '');
+  if (spec && !spec.startsWith('.operator/')) {
+    const dir = spec.includes('/') ? spec.slice(0, spec.lastIndexOf('/')) : null;
+    if (dir) excludes.push(dir);
+  }
+  return excludes;
+}
+
 /** The change surface since `base`: distinct files + total changed lines,
- *  excluding `.operator/**`. Unresolvable base falls back to uncommitted-only. */
-function measureDiff(base) {
+ *  excluding the `excludes` directory prefixes (default `.operator/**`).
+ *  Unresolvable base falls back to uncommitted-only. */
+function measureDiff(base, excludes = ['.operator']) {
   const map = {};
   let warning = null;
   const merge = (src) => {
@@ -356,7 +366,7 @@ function measureDiff(base) {
   const files = [];
   let changedLines = 0;
   for (const [p, v] of Object.entries(map)) {
-    if (p === '.operator' || p.startsWith('.operator/')) continue;
+    if (excludes.some((ex) => p === ex || p.startsWith(ex + '/'))) continue;
     files.push(p);
     changedLines += v.adds + v.dels;
   }
@@ -427,31 +437,56 @@ function chkProtectedLane(ctx) {
   return { pass: true, evidence: 'no protected paths in scope or diff' };
 }
 
-function chkSpecSections(ctx) {
-  if (!ctx.specDoc) return { pass: false, fix: 'this lane has no spec document configured' };
-  const p = path.join(ctx.itemDir, ctx.specDoc);
-  if (!fs.existsSync(p)) return { pass: false, fix: `create ${ctx.specDoc} in the work item from the template and fill every section` };
-  const spec = fs.readFileSync(p, 'utf8');
+/** Spec tools detected in the project by their filesystem markers. */
+function detectSpecTools() {
+  const tools = [];
+  if (fs.existsSync(path.join(PROJECT_ROOT, '.specify'))) tools.push('spec-kit (.specify/)');
+  if (fs.existsSync(path.join(PROJECT_ROOT, 'openspec'))) tools.push('OpenSpec (openspec/)');
+  return tools;
+}
+
+/** The spec gate is provider-aware: frontmatter `spec:` names the artifact.
+ *  An Operator-template spec (inside the work item directory) is held to the
+ *  template contract — sections filled, no TBD, numbered acceptance criteria.
+ *  An external artifact (spec-kit, OpenSpec, hand-written) must exist and be
+ *  non-empty; its structure is the external tool's contract, not ours. */
+function chkSpecArtifact(ctx) {
+  const rel = String(ctx.data.spec || '').trim().replace(/^\.\//, '');
+  if (!rel) {
+    const tools = detectSpecTools();
+    const hint = tools.length
+      ? `author it with ${tools.join(' or ')} and point \`spec:\` at the artifact`
+      : `author .operator/work/${ctx.id}/spec.md from .operator/templates/spec.md`;
+    return { pass: false, fix: `frontmatter \`spec:\` is empty — ${hint} (path from the project root)` };
+  }
+  const abs = path.resolve(PROJECT_ROOT, rel);
+  if (!abs.startsWith(PROJECT_ROOT + path.sep)) {
+    return { pass: false, fix: `spec: '${rel}' resolves outside the project — use a path relative to the project root` };
+  }
+  if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) {
+    return { pass: false, fix: `spec: points at '${rel}', which does not exist — author the spec document (op-plan) or fix the path` };
+  }
+  const spec = fs.readFileSync(abs, 'utf8');
+  const internal = abs.startsWith(ctx.itemDir + path.sep);
+  if (!internal) {
+    if (meaningfulText(stripComments(spec)) === '') {
+      return { pass: false, fix: `spec artifact '${rel}' is empty — fill it via its own tool before requesting approval` };
+    }
+    return { pass: true, evidence: `external spec artifact ${rel} present (${lineCount(spec)} lines)` };
+  }
   const secs = sections(spec);
-  if (!secs.length) return { pass: false, fix: `${ctx.specDoc} has no sections; write it from the template` };
+  if (!secs.length) return { pass: false, fix: `${rel} has no sections; write it from .operator/templates/spec.md` };
   const empty = secs.filter((s) => meaningfulText(s.body) === '').map((s) => s.title);
   const tbd = secs.filter((s) => /\bTBD\b/i.test(stripComments(s.body))).map((s) => s.title);
   if (empty.length || tbd.length) {
     const parts = [];
     if (empty.length) parts.push(`fill ${empty.join(', ')}`);
     if (tbd.length) parts.push(`remove TBD from ${tbd.join(', ')}`);
-    return { pass: false, fix: `in ${ctx.specDoc}: ${parts.join('; ')}` };
+    return { pass: false, fix: `in ${rel}: ${parts.join('; ')}` };
   }
-  return { pass: true, evidence: `${ctx.specDoc}: all ${secs.length} sections filled` };
-}
-
-function chkAcceptance(ctx) {
-  if (!ctx.specDoc) return { pass: false, fix: 'this lane has no spec document configured' };
-  const p = path.join(ctx.itemDir, ctx.specDoc);
-  if (!fs.existsSync(p)) return { pass: false, fix: `create ${ctx.specDoc} with a numbered Acceptance criteria list` };
-  const ac = acceptanceCriteria(fs.readFileSync(p, 'utf8'));
-  if (!ac.length) return { pass: false, fix: `add at least one numbered, testable entry under Acceptance criteria in ${ctx.specDoc}` };
-  return { pass: true, evidence: `${ac.length} acceptance criteria` };
+  const ac = acceptanceCriteria(spec);
+  if (!ac.length) return { pass: false, fix: `add at least one numbered, testable entry under Acceptance criteria in ${rel}` };
+  return { pass: true, evidence: `${rel}: all ${secs.length} sections filled, ${ac.length} acceptance criteria` };
 }
 
 function chkApproval(ctx) {
@@ -610,8 +645,7 @@ const CHECKS = {
   'triage-scorecard': chkTriage,
   'base-recorded': chkBase,
   'protected-paths-lane': chkProtectedLane,
-  'spec-doc-sections': chkSpecSections,
-  'acceptance-criteria-present': chkAcceptance,
+  'spec-artifact': chkSpecArtifact,
   'operator-approval': chkApproval,
   'tasks-complete': chkAllChecked('Tasks', 'task'),
   'postmortem-if-thrashing': chkThrashing,
@@ -696,7 +730,6 @@ function runGate(id) {
   if (!gate) die(`work item ${id} is at stage '${stage}', which has no gate`);
   const checkIds = gate.checks[lane];
   if (!checkIds) die(`stage '${stage}' has no checks for the ${lane} lane`);
-  const specDoc = gates.lanes[lane] ? gates.lanes[lane].specDoc : null;
 
   let diffCache = null;
   const ctx = {
@@ -707,11 +740,10 @@ function runGate(id) {
     lane,
     stage,
     itemDir,
-    specDoc,
     id,
     getDiff() {
       if (!diffCache) {
-        diffCache = measureDiff(data.base);
+        diffCache = measureDiff(data.base, diffExcludes(data));
         if (diffCache.warning) warn(diffCache.warning);
       }
       return diffCache;
@@ -768,10 +800,9 @@ function runEscalate(rest) {
   const { content, data, itemDir } = loadWorkitem(id);
   const old = data.lane;
   if (!(old in LANE_RANK)) die(`work item ${id} has an invalid lane '${old}'`);
-  let target = to;
-  if (!target) target = old === 'quick' ? 'standard' : old === 'standard' ? 'full' : null;
-  if (!target) die(`work item ${id} is already at the full lane; cannot escalate further`);
-  if (!(target in LANE_RANK)) die(`unknown lane '${target}' (choose standard or full)`);
+  const target = to || 'standard';
+  if (!(target in LANE_RANK)) die(`unknown lane '${target}' (the only escalation target is standard)`);
+  if (old === 'standard') die(`work item ${id} is already at the standard lane; cannot escalate further — re-plan via op-plan instead`);
   if (LANE_RANK[target] <= LANE_RANK[old]) die(`escalation is one-way; cannot move ${old} → ${target}`);
 
   const reasonText = reason || '(no reason provided)';
@@ -780,14 +811,13 @@ function runEscalate(rest) {
   updated = rewriteFrontmatter(updated, { lane: target, updated: date });
   fs.writeFileSync(path.join(itemDir, 'workitem.md'), updated);
 
-  const gates = loadJson(path.join(OPERATOR_DIR, 'gates.json'));
-  const specDoc = gates.lanes[target] ? gates.lanes[target].specDoc : null;
+  const tools = detectSpecTools();
   log(`Escalated ${id}: ${old} → ${target}.`);
-  if (specDoc) {
-    log(`Backfill before the next gate: write .operator/work/${id}/${specDoc} (run op-plan) so the spec gate can pass.`);
-  } else {
-    log('No spec document is required for the target lane.');
-  }
+  log(
+    `Backfill before the next gate (run op-plan): author the spec — ` +
+      (tools.length ? `via ${tools.join(' or ')}` : `from .operator/templates/spec.md into .operator/work/${id}/spec.md`) +
+      ` — and set the workitem frontmatter \`spec:\` to its path so the spec gate can pass.`
+  );
   process.exit(0);
 }
 
@@ -814,6 +844,8 @@ function runStatus() {
       });
     }
   }
+  const tools = detectSpecTools();
+  if (tools.length) log(`Spec tools detected: ${tools.join(', ')}`);
   if (!items.length) {
     log('No work items yet. Ask your agent for a change — the AGENTS.md routing engages op-new.');
     return;
@@ -845,7 +877,7 @@ function usage() {
   log('Usage:');
   log('  node .operator/bin/op.mjs status');
   log('  node .operator/bin/op.mjs gate <id>');
-  log('  node .operator/bin/op.mjs escalate <id> [--to standard|full] [reason...]');
+  log('  node .operator/bin/op.mjs escalate <id> [reason...]');
 }
 
 // ---------------------------------------------------------------------------
@@ -869,5 +901,5 @@ switch (sub) {
     usage();
     break;
   default:
-    die(`unknown subcommand '${sub}'. Use: status | gate <id> | escalate <id> [--to lane]`);
+    die(`unknown subcommand '${sub}'. Use: status | gate <id> | escalate <id>`);
 }

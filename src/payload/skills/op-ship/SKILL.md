@@ -24,8 +24,8 @@ that neither can happen silently.
 
 ### 1. Load the item and measure what shipped
 
-1. Read `.operator/work/<id>/workitem.md` and the lane's spec document (`spec-lite.md` on
-   standard, `spec.md` on full; the quick lane has none — the Problem statement and the
+1. Read `.operator/work/<id>/workitem.md` and, on the standard lane, the spec document named
+   by its `spec:` frontmatter (the quick lane has none — the Problem statement and the
    Definition of done are the contract).
 2. Regenerate the real diff from the frontmatter `base` sha: `git diff <base>` plus staged
    and untracked files. Review what actually changed, never what you remember changing.
@@ -37,20 +37,25 @@ that neither can happen silently.
 A review from your own working memory is worthless: you will read what you meant to write,
 not what you wrote. The reviewer must reconstruct the work from disk.
 
+Review with an installed code-review expertise skill when the project has one (third-party
+collections ship them); with none, review against this baseline: every acceptance criterion
+met or named as unmet, correctness of the changed logic, tests actually exercising the new
+behavior, no unrelated hunks, conventions respected. Findings come back as
+`[severity] file:line — issue — why it matters — suggested fix`.
+
 - **If your host supports sub-agents:** spawn one reviewer sub-agent. Brief it with paths,
-  not conclusions: the workitem path, the spec doc path, the `base` sha, and the instruction
-  to follow `.agents/skills/operator-code-review/SKILL.md`. It reads the spec first, then the
-  diff against the acceptance criteria, and returns findings in that pack's output format
-  (`[severity] file:line — issue — why it matters — suggested fix`). It advises only — it
-  never edits files or work-item state.
+  not conclusions: the workitem path, the spec doc path, the `base` sha, and the review
+  skill to follow (or the baseline above). It reads the spec first, then the diff against
+  the acceptance criteria. It advises only — it never edits files or work-item state.
 - **If it does not:** degrade per the constitution's table — re-read the spec document and
-  the full diff from disk, fresh, then walk the code-review pack's checklist yourself as if
+  the full diff from disk, fresh, then walk the review checklist yourself as if
   the author were someone else.
 - **Quick lane:** a fresh-eyes self-review is acceptable (still use a sub-agent if you have
-  one). Review the diff against the Problem statement and the Definition of done, using the
-  same pack.
-- **If step 1 matched a protected path:** run a second, separate pass following
-  `.agents/skills/operator-security-review/SKILL.md`, and journal it on its own line even
+  one). Review the diff against the Problem statement and the Definition of done.
+- **If step 1 matched a protected path:** run a second, separate security pass — with an
+  installed security-review skill when present, otherwise check at minimum: input validation
+  at trust boundaries, authn/authz on changed routes, secrets kept out of code and logs,
+  injection risks in anything that builds queries or commands. Journal it on its own line even
   when it finds nothing — the gate looks for the line, and "we checked, found nothing" is
   evidence too.
 
@@ -96,7 +101,7 @@ node .operator/bin/op.mjs gate <id>
 ```
 
 It checks review evidence (`REVIEW self` on quick; `REVIEW` plus `REVIEW security` when
-protected paths were touched on standard/full) and that every Definition of done box is
+protected paths were touched on standard) and that every Definition of done box is
 checked. On pass it appends the journal line and advances the item to `ship`. On fail, do
 exactly what each failing check names, then re-run.
 
@@ -145,7 +150,7 @@ Compare each memory file's line count against `memoryCaps` in `.operator/config.
 file exceeds its cap: consolidate duplicates, promote lessons seen three times into a
 convention, and move stale entries to `.operator/memory/archive/` — moved with their original
 IDs, never deleted. The full consolidation procedure lives in
-`.agents/skills/op-memory/SKILL.md`. The ship gate enforces caps on standard and full lanes;
+`.agents/skills/op-memory/SKILL.md`. The ship gate enforces caps on the standard lane;
 on the quick lane, still gc when a file is visibly over — leaving it flags a doctor warning
 for the next person.
 
@@ -155,7 +160,7 @@ for the next person.
 node .operator/bin/op.mjs gate <id>
 ```
 
-It checks the `DOCS` line, the `MEMORY` line, the filled Retro, and (standard/full) memory
+It checks the `DOCS` line, the `MEMORY` line, the filled Retro, and (standard) memory
 caps. On pass the item advances to `done`. Set the frontmatter `next:` to
 `done — no further action`.
 
@@ -185,7 +190,7 @@ op-ship crosses two gates, both via `node .operator/bin/op.mjs gate <id>`:
   `review → ship`.
 - **ship gate** (after step 9, the exit of this procedure): `DOCS updated:`/`DOCS no-impact:`
   journaled with a reason, `MEMORY harvested:` (≤3 items)/`MEMORY none:` journaled, Retro
-  filled, memory files within caps (standard/full). Advances `ship → done`.
+  filled, memory files within caps (standard). Advances `ship → done`.
 
 The procedure ends only when the ship gate has passed and the operator has the report.
 

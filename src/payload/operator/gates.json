@@ -1,65 +1,58 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "stages": ["intake", "spec", "build", "review", "ship", "done"],
   "lanes": {
-    "quick": { "stages": ["intake", "build", "review", "ship", "done"], "specDoc": null },
-    "standard": { "stages": ["intake", "spec", "build", "review", "ship", "done"], "specDoc": "spec-lite.md" },
-    "full": { "stages": ["intake", "spec", "build", "review", "ship", "done"], "specDoc": "spec.md" }
+    "quick": { "stages": ["intake", "build", "review", "ship", "done"] },
+    "standard": { "stages": ["intake", "spec", "build", "review", "ship", "done"] }
   },
   "gates": {
     "intake": {
-      "advancesTo": { "quick": "build", "standard": "spec", "full": "spec" },
+      "advancesTo": { "quick": "build", "standard": "spec" },
       "checks": {
         "quick": ["workitem-sections", "triage-scorecard", "base-recorded", "protected-paths-lane"],
-        "standard": ["workitem-sections", "triage-scorecard", "base-recorded"],
-        "full": ["workitem-sections", "triage-scorecard", "base-recorded"]
+        "standard": ["workitem-sections", "triage-scorecard", "base-recorded"]
       }
     },
     "spec": {
-      "advancesTo": { "standard": "build", "full": "build" },
+      "advancesTo": { "standard": "build" },
       "checks": {
-        "standard": ["spec-doc-sections", "acceptance-criteria-present", "operator-approval"],
-        "full": ["spec-doc-sections", "acceptance-criteria-present", "operator-approval"]
+        "standard": ["spec-artifact", "operator-approval"]
       }
     },
     "build": {
-      "advancesTo": { "quick": "review", "standard": "review", "full": "review" },
+      "advancesTo": { "quick": "review", "standard": "review" },
       "checks": {
         "quick": ["tasks-complete", "postmortem-if-thrashing", "tests-pass", "diff-within-lane-caps", "diff-within-scope", "protected-paths-lane"],
-        "standard": ["tasks-complete", "postmortem-if-thrashing", "tests-pass", "diff-within-scope"],
-        "full": ["tasks-complete", "postmortem-if-thrashing", "tests-pass", "diff-within-scope"]
+        "standard": ["tasks-complete", "postmortem-if-thrashing", "tests-pass", "diff-within-scope"]
       }
     },
     "review": {
-      "advancesTo": { "quick": "ship", "standard": "ship", "full": "ship" },
+      "advancesTo": { "quick": "ship", "standard": "ship" },
       "checks": {
         "quick": ["self-review-evidence", "dod-complete"],
-        "standard": ["review-evidence", "security-review-if-protected", "dod-complete"],
-        "full": ["review-evidence", "security-review-if-protected", "dod-complete"]
+        "standard": ["review-evidence", "security-review-if-protected", "dod-complete"]
       }
     },
     "ship": {
-      "advancesTo": { "quick": "done", "standard": "done", "full": "done" },
+      "advancesTo": { "quick": "done", "standard": "done" },
       "checks": {
         "quick": ["docs-updated-or-waived", "memory-harvest", "retro-filled"],
-        "standard": ["docs-updated-or-waived", "memory-harvest", "memory-caps", "retro-filled"],
-        "full": ["docs-updated-or-waived", "memory-harvest", "memory-caps", "retro-filled"]
+        "standard": ["docs-updated-or-waived", "memory-harvest", "memory-caps", "retro-filled"]
       }
     }
   },
   "checkDescriptions": {
     "workitem-sections": "workitem.md has non-empty Problem, Triage, Scope, Tasks sections; frontmatter parses; no TBD in Problem/Scope",
-    "triage-scorecard": "Triage table has a yes/no answer on every row and the chosen lane is consistent with the lane rule",
+    "triage-scorecard": "Triage table has a yes/no answer on every row and the chosen lane is consistent with the lane rule (all no = quick, any yes = standard)",
     "base-recorded": "frontmatter `base:` is a resolvable git commit",
     "protected-paths-lane": "no path in Scope or in the measured diff matches config protectedPaths (quick lane only)",
-    "spec-doc-sections": "the lane's spec document exists with all template sections non-empty and no TBD",
-    "acceptance-criteria-present": "spec has a numbered Acceptance criteria list with at least one entry",
+    "spec-artifact": "frontmatter `spec:` points at an existing spec document; an Operator-template spec (inside the work item directory) must have every section filled, no TBD, and at least one numbered Acceptance criteria entry; an external spec tool's artifact (spec-kit, OpenSpec, hand-written) must exist and be non-empty — its structure is the external tool's contract",
     "operator-approval": "journal contains an `APPROVAL plan granted by operator:` line quoting the operator",
     "tasks-complete": "every checkbox in the Tasks section is checked",
     "postmortem-if-thrashing": "fewer than config postmortemThreshold `ATTEMPT` journal lines since the last `POSTMORTEM` (repeated failure forces a method postmortem)",
     "tests-pass": "config testCommand exits 0 (testCommand false = explicitly waived, journaled)",
     "diff-within-lane-caps": "measured diff since `base` is within config lane caps (files, changed lines)",
-    "diff-within-scope": "every file in the measured diff matches the Scope section's declared paths",
+    "diff-within-scope": "every file in the measured diff matches the Scope section's declared paths (the spec artifact's own directory is excluded from the measurement)",
     "self-review-evidence": "journal contains a `REVIEW self` line with findings summary",
     "review-evidence": "journal contains a `REVIEW` line recording reviewer context, findings count, and resolution",
     "security-review-if-protected": "if the diff touches protectedPaths, journal contains a `REVIEW security` line",

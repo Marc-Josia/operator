@@ -40,17 +40,17 @@ cannot stay inside a mandate you have not read.
 - Read the plan for the lane:
   - **quick** — no spec document. The workitem's Problem, Scope, and Definition of done ARE
     the plan.
-  - **standard** — `.operator/work/<id>/spec-lite.md`; its frontmatter must say
-    `status: approved`.
-  - **full** — `.operator/work/<id>/spec.md`, plus any ADRs it references in
-    `.operator/memory/decisions/`. Decisions recorded there are settled; do not re-open them
-    mid-build.
+  - **standard** — the spec document named by the workitem's `spec:` frontmatter (a spec-kit
+    or OpenSpec artifact, or `.operator/work/<id>/spec.md` from the fallback template), plus
+    any ADRs in `.operator/memory/decisions/` the plan references. The journal must carry the
+    `APPROVAL plan granted by operator:` line — that approval is your mandate. Decisions
+    recorded in ADRs are settled; do not re-open them mid-build.
 - Read `.operator/memory/project.md`, then every rule in `.operator/memory/conventions.md`
   whose `paths:` matches the files in Scope (rules without `paths:` always apply).
   Conventions beat your habits.
-- Consult `operator-test-strategy` (`.agents/skills/operator-test-strategy/SKILL.md`) to
-  decide what proof each task needs on this lane. Do this before coding: a task whose proof
-  you cannot name is a task you do not understand yet.
+- Decide what proof each task needs before coding — consult an installed test-strategy or TDD
+  skill when the project has one. A task whose proof you cannot name is a task you do not
+  understand yet.
 
 ### 2. Run the task loop
 
@@ -60,10 +60,9 @@ Take the first unchecked box in the workitem's Tasks section and repeat until no
 2. **Check the escalation tripwires** (Step 3) before writing anything.
 3. **Implement** the smallest change that satisfies the task. Follow the existing patterns of
    the codebase unless a convention says otherwise.
-4. **Prove it.** Run the proof the task names — new behavior gets a new test, per
-   `operator-test-strategy`. Keep the project's test command (`testCommand` in
-   `.operator/config.json`) green as you go: the build gate runs it, and a red suite fails
-   the gate.
+4. **Prove it.** Run the proof the task names — new behavior gets a new test. Keep the
+   project's test command (`testCommand` in `.operator/config.json`) green as you go: the
+   build gate runs it, and a red suite fails the gate.
 5. **Tick the checkbox** in Tasks and append one journal line recording the proof:
 
    `- <ISO date> TASK done: <task summary> — proof: <command or check>, <result>`
@@ -81,9 +80,9 @@ files you already read, or re-litigating journaled decisions — finish the task
 it, and stop at the gate rather than push a tired window into review; after any compaction,
 re-read the workitem and the spec from disk before continuing.
 
-When a failure resists quick diagnosis, apply `operator-debugging`
-(`.agents/skills/operator-debugging/SKILL.md`): reproduce, isolate, verify the root cause.
-Do not shotgun changes until the suite happens to pass. Each time an attempt on the same task
+When a failure resists quick diagnosis, debug systematically — with an installed debugging
+skill when the project has one, otherwise: reproduce, isolate, verify the root cause with
+evidence. Do not shotgun changes until the suite happens to pass. Each time an attempt on the same task
 fails and you retry, journal `- <ISO date> ATTEMPT <task> failed: <reason>`. At
 `postmortemThreshold` ATTEMPTs (default 3, in `.operator/config.json`) since the last postmortem,
 the build gate's `postmortem-if-thrashing` check blocks: stop, copy
@@ -100,7 +99,7 @@ Stop the loop the moment any of these appears:
   / 80 changed lines). Count what the gate will count: distinct files touched and lines
   added plus deleted since the frontmatter `base` commit;
 - the change would touch a **protected path** on the quick lane (config `protectedPaths`) —
-  protected paths never travel the quick lane. On standard/full, a protected path inside
+  protected paths never travel the quick lane. On standard, a protected path inside
   Scope is allowed; it triggers a security review at the review stage, not a build stop;
 - you are about to make a **design decision the spec did not anticipate** — a new dependency,
   a new interface, a data-shape change. Design decisions belong to op-plan, where they get an
@@ -108,14 +107,14 @@ Stop the loop the moment any of these appears:
 
 Then:
 
-1. Run `node .operator/bin/op.mjs escalate <id> --to <standard|full>`, giving the reason. The
-   checker appends the `ESCALATED` journal line and prints which artifacts must be backfilled.
-2. Backfill via `op-plan`: write the new lane's spec document, update Scope and Tasks, and
-   present the change to the operator for a fresh journaled approval. Escalation is one-way;
+1. Run `node .operator/bin/op.mjs escalate <id>`, giving the reason. The checker appends the
+   `ESCALATED` journal line and prints which artifacts must be backfilled.
+2. Backfill via `op-plan`: author the spec document, update Scope and Tasks, and present the
+   change to the operator for a fresh journaled approval. Escalation is one-way;
    de-escalation needs the operator's quoted instruction in the journal.
-3. Already on the **full** lane (nothing to escalate to), or the trigger is scope rather than
-   lane? Re-plan instead: return to `op-plan`, revise the spec and Scope with the operator,
-   and journal the new `APPROVAL` line before resuming.
+3. Already on the **standard** lane (nothing to escalate to), or the trigger is scope rather
+   than lane? Re-plan instead: return to `op-plan`, revise the spec and Scope with the
+   operator, and journal the new `APPROVAL` line before resuming.
 4. Resume the loop only once the backfilled plan is approved.
 
 Why stop instead of pushing through: the build gate measures the real diff against Scope and
@@ -125,7 +124,7 @@ with less context.
 **Example.** Quick-lane item `007-fix-timeout`, Scope declares `src/http/client.mjs`. Task 2
 turns out to need a change in `src/http/retry.mjs` plus a new config key — a second file and
 an unplanned interface. Stop; run
-`node .operator/bin/op.mjs escalate 007-fix-timeout --to standard`; write `spec-lite.md`; get
+`node .operator/bin/op.mjs escalate 007-fix-timeout`; author the spec via op-plan; get
 the operator's approval journaled; resume the loop.
 
 ### 4. Stay inside the mandate

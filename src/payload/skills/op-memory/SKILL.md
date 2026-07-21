@@ -37,7 +37,7 @@ This table is the whole policy:
 | Ship-time harvest | op-ship, at the ship stage | at most 3 durable items (`L-NNN`, `C-NNN`, or a `project.md` fact) |
 | Repeated failure on one item (the build gate forced a pause) | op-fix / op-build, when thrashing | a `postmortem-NNN.md` under the work item — a method postmortem, harvested to `L-NNN`/`C-NNN` at ship |
 | **The operator corrects you or states a rule** | **op-memory record — immediately** | `C-NNN` or `L-NNN`, cited |
-| The operator rejects a request or discards a direction | op-new (at triage) / op-discover (in the interview) | a concept file in `memory/out-of-scope/` |
+| The operator rejects a request or discards a direction | op-new (at triage) | a concept file in `memory/out-of-scope/` |
 
 The operator-correction row is the one exception to gate-binding: a correction is the most
 expensive knowledge there is — the operator had to notice you doing it wrong — and one that
@@ -99,7 +99,7 @@ to what you were doing.
      "already implemented"** — a request covered by existing behavior is a built feature, not
      a rejection; recording it would poison the prior-rejection check. And never record
      deferrals ("not now") — only considered rejections. No ID, no line cap; these files are
-     read by op-discover and op-new, and the operator can reopen a concept at any time by
+     read by op-new at intake, and the operator can reopen a concept at any time by
      deleting its file.
 
 4. **Number and cite.** Next `NNN` = highest existing number for that prefix across the live
@@ -174,7 +174,7 @@ to what you were doing.
    consolidate step 5: moved to `archive/` verbatim, IDs preserved, never deleted.
 
 4. **Report** what moved and where each file now stands against its cap. The ship gate's
-   `memory-caps` check (standard/full lanes) and the installer's `doctor` verify the same
+   `memory-caps` check (standard lane) and the installer's `doctor` verify the same
    thing mechanically — gc is how you make them pass, not a substitute for them.
 
 ## Exit gate

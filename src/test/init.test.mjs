@@ -30,7 +30,7 @@ function makeFixture(t, { version = '0.1.0' } = {}) {
     fs.writeFileSync(op, '#!/usr/bin/env node\n// test stub for the gate checker\n');
   }
   ensureSkill(payload, 'op-new');
-  ensureSkill(payload, 'operator-code-review');
+  ensureSkill(payload, 'op-build');
   fs.writeFileSync(path.join(payload, 'operator', 'VERSION'), version + '\n');
   const proj = path.join(base, 'proj');
   fs.mkdirSync(path.join(proj, '.git'), { recursive: true }); // enough for the git presence check

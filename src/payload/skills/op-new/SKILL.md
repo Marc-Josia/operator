@@ -1,6 +1,6 @@
 ---
 name: op-new
-description: "Intake for all new work: restate the request, triage it into a lane (quick/standard/full) with the honest scorecard, create the work item, pass the intake gate, and route to op-plan or op-build. Use it whenever the operator asks for a feature, change, refactor, or chore that no existing work item covers — even a 'tiny' one-line request; all development work enters here. Bugs and regressions go to op-fix instead, which reproduces first and then comes back through this triage."
+description: "Intake for all new work: restate the request, triage it into a lane (quick/standard) with the honest scorecard, create the work item, pass the intake gate, and route to op-plan or op-build. Use it whenever the operator asks for a feature, change, refactor, or chore that no existing work item covers — even a 'tiny' one-line request; all development work enters here. Bugs and regressions go to op-fix instead, which reproduces first and then comes back through this triage."
 ---
 
 # op-new — intake
@@ -17,9 +17,10 @@ downstream — spec, diff measurement, review, ship — keys off what is created
 - The operator asked for new work, and no open item in `.operator/work/` already covers it
   (check with `node .operator/bin/op.mjs status`).
 - The request is precise enough to restate in one sentence and triage. If it is still vague or
-  exploratory — you cannot yet state the Problem or answer the scorecard — back up to
-  `.agents/skills/op-discover/SKILL.md` first; it interviews the operator into a confirmed problem
-  brief and hands it back here.
+  exploratory — you cannot yet state the Problem or answer the scorecard — clarify first: use an
+  installed discovery/interview skill when the project has one, otherwise interview the operator
+  yourself (one question at a time, recommended answer first) until the problem statement is
+  confirmed, then come back here.
 - The request is not a bug with known-good past behavior — those follow
   `.agents/skills/op-fix/SKILL.md`, which reproduces first and then triages through intake.
 - You have read `.operator/constitution.md` (required when starting a work item).
@@ -51,8 +52,8 @@ ask it. "Should I write tests?" never changes anything — the answer is always 
 
 This is *light* clarification on an already-precise request, not problem discovery. If you cannot
 even restate the request because it is genuinely vague or exploratory, you skipped a step: stop,
-run `.agents/skills/op-discover/SKILL.md` to interview the operator into a shared problem, and come
-back with its confirmed brief.
+clarify per the entry criteria (installed discovery skill, or your own structured interview), and
+come back with the confirmed problem statement.
 
 ### 3. Triage into a lane
 
@@ -64,6 +65,7 @@ request to the file's `Prior requests` list and close the intake — no work ite
 update or delete the file and triage normally. If instead the operator rejects *this* request
 after triage discussion, record it there via op-memory (concept, reason, the quoted ask) — but
 never record "already implemented": point to where the behavior lives instead.
+
 
 Fill the Triage scorecard — every row gets a yes or no, no blanks, no "maybe":
 
@@ -82,8 +84,8 @@ Lane rule (mechanical — apply it, do not negotiate with it):
 
 - All "no" → **quick**. No spec document; hard caps of 3 files / 80 changed lines
   (`.operator/config.json`), enforced against the real diff at the build gate.
-- One or two "yes", and "Touches protected paths?" is "no" → **standard** (`spec-lite.md`).
-- Otherwise → **full** (`spec.md` with architecture and ADRs).
+- Any "yes" → **standard**: a spec document is authored (op-plan, via the project's spec tool
+  or the fallback template) and approved before any code.
 - Protected paths (`.operator/config.json` `protectedPaths`) never travel the quick lane.
 
 **Answer honestly — the scorecard is a prediction, the gates measure reality.** The build gate
@@ -102,7 +104,7 @@ worst moment. Worked example — request: "Add an `--json` flag to the CLI `stat
 | Crosses module boundaries? | no | no |
 | User-visible behavior change? | yes — new output mode | no |
 
-Honest: two "yes" → standard lane; a short spec-lite is written and approved before code, once.
+Honest: two "yes" → standard lane; a short spec is written and approved before code, once.
 Dishonest: all "no" → quick lane; the real diff lands at 4 files and ~120 lines (command,
 formatter, tests, README), the build gate fails `diff-within-lane-caps` against the 3/80 caps,
 and you must escalate mid-build, backfill the spec anyway, and re-plan. The gate failure prints
@@ -125,19 +127,18 @@ rework and a visible escalation record.
    **every** `{{placeholder}}` — the gate checker treats leftover `{{…}}` as empty content, so
    none may remain: `{{id}}`, `{{title}}`, `{{lane}}`, `{{base-sha}}` (from step 2), `{{date}}`
    (today, `YYYY-MM-DD`), `{{next-action}}` (`op-build: implement the tasks` on quick,
-   `op-plan: write the spec` otherwise), `{{first-task}}`. Leave the `project:` and `milestone:`
-   frontmatter fields blank for standalone work; if you arrived here from op-roadmap, set `project:`
-   to the roadmap id and `milestone:` to the milestone (e.g. `M1`) so op-status can roll the item up.
+   `op-plan: write the spec` otherwise), `{{first-task}}`. Leave the `spec:` frontmatter field
+   blank — op-plan fills it with the spec artifact's path on the standard lane.
 4. Fill the sections:
    - **Problem** — what is asked, in the requester's terms, and why it matters. 3–10 lines on
-     the quick lane (it doubles as the acceptance criterion); shorter elsewhere — the spec
+     the quick lane (it doubles as the acceptance criterion); shorter on standard — the spec
      document carries the detail.
    - **Triage** — the scorecard from step 3, plus one line naming the chosen lane.
    - **Scope** — the paths or globs the work is expected to touch, one per line. Declare
      honestly: files in the real diff that match nothing here fail `diff-within-scope` at the
      build gate. When the work grows beyond it, escalate — never silently widen.
    - **Tasks** — quick lane: write the full task list now (small, ordered, each verifiable).
-     Standard/full: one seed task is enough (e.g. `- [ ] Plan: spec written and approved`);
+     Standard: one seed task is enough (e.g. `- [ ] Plan: spec written and approved`);
      op-plan owns the task list and will rewrite it.
 5. The instantiated Journal must contain exactly one line — append-only from here on:
    `- <YYYY-MM-DD> CREATED lane=<lane>`
@@ -155,8 +156,9 @@ Report briefly to the operator — item id, lane, gate output as proof, what hap
 
 - **quick** → follow `.agents/skills/op-build/SKILL.md`. There is no spec stage; the Problem
   statement is the contract.
-- **standard / full** → follow `.agents/skills/op-plan/SKILL.md` to write the lane's spec and
-  get the operator's approval. Never start implementing before the spec gate passes.
+- **standard** → follow `.agents/skills/op-plan/SKILL.md` to author the spec (via the project's
+  spec tool when one is installed) and get the operator's approval. Never start implementing
+  before the spec gate passes.
 
 Invoke the next procedure as a skill if your host supports skills; otherwise read its SKILL.md
 and follow it literally.
@@ -172,7 +174,7 @@ and follow it literally.
 - `protected-paths-lane` (quick lane only) — nothing in Scope or the diff matches
   `protectedPaths`.
 
-On pass the checker sets `stage:` to `build` (quick) or `spec` (standard/full). If your
+On pass the checker sets `stage:` to `build` (quick) or `spec` (standard). If your
 environment has no Node runtime, apply this checklist manually from `.operator/gates.json` and
 append: `- <YYYY-MM-DD> GATE intake PASSED (manual) — evidence: <one line per check>`.
 
@@ -183,8 +185,8 @@ append: `- <YYYY-MM-DD> GATE intake PASSED (manual) — evidence: <one line per 
 - **Gate fails `workitem-sections`** — leftover `{{placeholders}}`, `TBD`, or template default
   text count as empty. Fill the sections and re-run; never edit `stage:` to move on.
 - **Gate fails `protected-paths-lane`** — the work cannot travel the quick lane. Run
-  `node .operator/bin/op.mjs escalate <id> --to standard` (or `full`); it appends the
-  `ESCALATED` journal line and lists what to backfill. Then re-run the gate.
+  `node .operator/bin/op.mjs escalate <id>`; it appends the `ESCALATED` journal line and
+  names what to backfill. Then re-run the gate.
 - **The operator insists on a lower lane than the rule gives** — de-escalation requires their
   quoted instruction: append `- <YYYY-MM-DD> WAIVER lane: operator said "<their words>"` before
   changing `lane:`. Never de-escalate on your own judgment; the caps still apply at build.

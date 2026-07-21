@@ -146,32 +146,19 @@ function writeItem(root, id, opts = {}) {
   return dir;
 }
 
-function writeSpec(dir, name, opts = {}) {
-  const { standard = name === 'spec-lite.md', filled = true, ac = ['The API returns 200 for valid input.'], tbd = false } = opts;
+/** Write a fallback-template-shaped spec into `dir` (default name spec.md). */
+function writeSpec(dir, name = 'spec.md', opts = {}) {
+  const { filled = true, ac = ['The API returns 200 for valid input.'], tbd = false } = opts;
   const acText = ac.map((c, i) => `${i + 1}. ${c}`).join('\n');
   const secBody = (real) => (filled ? (tbd ? 'TBD' : real) : '<!-- placeholder -->\n\n...');
-  let body;
-  if (standard) {
-    body =
-      `---\nitem: 001\nstatus: approved\n---\n\n# Spec — Test\n\n` +
-      `## Problem & goal\n\n${secBody('Users hit a crash; done means no crash on empty input.')}\n\n` +
-      `## Acceptance criteria\n\n${acText}\n\n` +
-      `## Approach\n\n${secBody('Guard the empty-input branch and add a regression test.')}\n\n` +
-      `## Non-functional constraints\n\n${secBody('None — a small internal guard, no perf/i18n/security surface.')}\n\n` +
-      `## Out of scope\n\n${secBody('Any redesign of the input widget.')}\n\n` +
-      `## Risks & assumptions\n\n${secBody('Assumes the validator is the only caller.')}\n`;
-  } else {
-    body =
-      `---\nitem: 001\nstatus: approved\n---\n\n# Spec — Test\n\n` +
-      `## Problem & goal\n\n${secBody('Users hit a crash; done means no crash on empty input.')}\n\n` +
-      `## Acceptance criteria\n\n${acText}\n\n` +
-      `## Architecture & decisions\n\n${secBody('A single guard clause in the validator module.')}\n\n` +
-      `## Rejected alternatives\n\n${secBody('A framework upgrade — too large for this need.')}\n\n` +
-      `## Non-functional constraints\n\n${secBody('First paint < 1.5s on staging; no hard-coded user-facing strings.')}\n\n` +
-      `## Impact\n\n${secBody('Security: none. Performance: none. Docs: none.')}\n\n` +
-      `## Out of scope\n\n${secBody('Widget redesign.')}\n\n` +
-      `## Risks & assumptions\n\n${secBody('Assumes the validator is the only caller.')}\n`;
-  }
+  const body =
+    `---\nitem: 001\nstatus: approved\n---\n\n# Spec — Test\n\n` +
+    `## Problem & goal\n\n${secBody('Users hit a crash; done means no crash on empty input.')}\n\n` +
+    `## Acceptance criteria\n\n${acText}\n\n` +
+    `## Approach\n\n${secBody('Guard the empty-input branch and add a regression test.')}\n\n` +
+    `## Non-functional constraints\n\n${secBody('None — a small internal guard, no perf/i18n/security surface.')}\n\n` +
+    `## Out of scope\n\n${secBody('Any redesign of the input widget.')}\n\n` +
+    `## Risks & assumptions\n\n${secBody('Assumes the validator is the only caller.')}\n`;
   fs.writeFileSync(path.join(dir, name), body);
 }
 
@@ -256,7 +243,7 @@ test('triage-scorecard fails on an unanswered row', (t) => {
 
 test('triage-scorecard fails when the lane is below the rule floor', (t) => {
   const { root, base } = setup(t);
-  // three yes -> rule floor is full, but the item claims quick
+  // three yes -> rule floor is standard, but the item claims quick
   const triage = withYes('New dependency?', 'Hard to reverse?', 'Crosses module boundaries?');
   writeItem(root, '001-fix', { lane: 'quick', stage: 'intake', base, triage });
   const r = op(root, ['gate', '001-fix']);
@@ -294,65 +281,88 @@ test('intake gate (standard) passes and advances to spec', (t) => {
 });
 
 // =============================================================================
-// spec gate — standard/full (spec-doc-sections, acceptance, approval)
+// spec gate — standard (spec-artifact, approval)
 // =============================================================================
 
 function specItem(root, id, opts = {}) {
-  const { lane = 'standard', approved = true, spec = 'spec-lite.md' } = opts;
-  const journal = ['- 2026-07-15 CREATED lane=' + lane];
+  const { approved = true, spec } = opts;
+  const journal = ['- 2026-07-15 CREATED lane=standard'];
   if (approved) journal.push('- 2026-07-15 APPROVAL plan granted by operator: "ship it, looks right"');
-  const dir = writeItem(root, id, { lane, stage: 'spec', base: '', journal });
+  const extraFrontmatter = spec === undefined ? {} : { spec };
+  const dir = writeItem(root, id, { lane: 'standard', stage: 'spec', base: '', journal, extraFrontmatter });
   return dir;
 }
 
-test('spec gate (standard) passes and advances to build', (t) => {
+test('spec gate (standard) passes with a filled fallback-template spec', (t) => {
   const { root } = setup(t);
-  const dir = specItem(root, '002-feat', { lane: 'standard' });
-  writeSpec(dir, 'spec-lite.md', { standard: true });
+  const dir = specItem(root, '002-feat', { spec: '.operator/work/002-feat/spec.md' });
+  writeSpec(dir, 'spec.md');
   const r = op(root, ['gate', '002-feat']);
   assert.equal(r.status, 0, r.out);
   assert.match(readItem(dir), /^stage: build$/m);
 });
 
-test('spec gate (full) passes with the full spec template', (t) => {
+test('spec gate passes with a non-empty external spec artifact (spec tool regime)', (t) => {
   const { root } = setup(t);
-  const dir = specItem(root, '003-big', { lane: 'full' });
-  writeSpec(dir, 'spec.md', { standard: false });
-  const r = op(root, ['gate', '003-big']);
+  const dir = specItem(root, '003-ext', { spec: 'specs/003-ext/spec.md' });
+  writeFile(root, 'specs/003-ext/spec.md', '# Feature\n\nThe app SHALL return 200 for valid input.\n');
+  const r = op(root, ['gate', '003-ext']);
   assert.equal(r.status, 0, r.out);
   assert.match(readItem(dir), /^stage: build$/m);
+  assert.match(r.stdout, /external spec artifact/);
 });
 
-test('spec-doc-sections fails when the spec document is missing', (t) => {
+test('spec-artifact fails when the spec frontmatter is empty', (t) => {
   const { root } = setup(t);
-  specItem(root, '002-feat', { lane: 'standard' });
+  specItem(root, '002-feat');
   const r = op(root, ['gate', '002-feat']);
   assert.equal(r.status, 1);
-  assert.match(r.out, /spec-doc-sections/);
+  assert.match(r.out, /spec-artifact/);
+  assert.match(r.out, /`spec:` is empty/);
 });
 
-test('spec-doc-sections fails on an unfilled section', (t) => {
+test('spec-artifact fails when the referenced document does not exist', (t) => {
   const { root } = setup(t);
-  const dir = specItem(root, '002-feat', { lane: 'standard' });
-  writeSpec(dir, 'spec-lite.md', { standard: true, filled: false });
+  specItem(root, '002-feat', { spec: 'specs/002-feat/spec.md' });
   const r = op(root, ['gate', '002-feat']);
   assert.equal(r.status, 1);
-  assert.match(r.out, /spec-doc-sections/);
+  assert.match(r.out, /spec-artifact/);
+  assert.match(r.out, /does not exist/);
 });
 
-test('acceptance-criteria-present fails when no criteria are listed', (t) => {
+test('spec-artifact fails on an empty external artifact', (t) => {
   const { root } = setup(t);
-  const dir = specItem(root, '002-feat', { lane: 'standard' });
-  writeSpec(dir, 'spec-lite.md', { standard: true, ac: [] });
+  specItem(root, '003-ext', { spec: 'specs/003-ext/spec.md' });
+  writeFile(root, 'specs/003-ext/spec.md', '<!-- nothing yet -->\n');
+  const r = op(root, ['gate', '003-ext']);
+  assert.equal(r.status, 1);
+  assert.match(r.out, /spec-artifact/);
+  assert.match(r.out, /empty/);
+});
+
+test('spec-artifact holds a fallback-template spec to the template contract (unfilled section)', (t) => {
+  const { root } = setup(t);
+  const dir = specItem(root, '002-feat', { spec: '.operator/work/002-feat/spec.md' });
+  writeSpec(dir, 'spec.md', { filled: false });
   const r = op(root, ['gate', '002-feat']);
   assert.equal(r.status, 1);
-  assert.match(r.out, /acceptance-criteria-present/);
+  assert.match(r.out, /spec-artifact/);
+});
+
+test('spec-artifact requires acceptance criteria in a fallback-template spec', (t) => {
+  const { root } = setup(t);
+  const dir = specItem(root, '002-feat', { spec: '.operator/work/002-feat/spec.md' });
+  writeSpec(dir, 'spec.md', { ac: [] });
+  const r = op(root, ['gate', '002-feat']);
+  assert.equal(r.status, 1);
+  assert.match(r.out, /spec-artifact/);
+  assert.match(r.out, /Acceptance criteria/);
 });
 
 test('operator-approval fails without a quoted approval line', (t) => {
   const { root } = setup(t);
-  const dir = specItem(root, '002-feat', { lane: 'standard', approved: false });
-  writeSpec(dir, 'spec-lite.md', { standard: true });
+  const dir = specItem(root, '002-feat', { approved: false, spec: '.operator/work/002-feat/spec.md' });
+  writeSpec(dir, 'spec.md');
   const r = op(root, ['gate', '002-feat']);
   assert.equal(r.status, 1);
   assert.match(r.out, /operator-approval/);
@@ -768,31 +778,57 @@ test('escalate quick -> standard journals the raise and names the spec to backfi
   const wi = readItem(dir);
   assert.match(wi, /^lane: standard$/m);
   assert.match(wi, /ESCALATED quick → standard — reason: grew past the caps/);
-  assert.match(r.stdout, /spec-lite\.md/);
+  assert.match(r.stdout, /templates\/spec\.md/);
+  assert.match(r.stdout, /`spec:`/);
 });
 
-test('escalate with no --to raises exactly one level', (t) => {
+test('escalate with no --to defaults to standard', (t) => {
   const { root, base } = setup(t);
-  const dir = writeItem(root, '002-feat', { lane: 'standard', stage: 'build', base });
-  const r = op(root, ['escalate', '002-feat']);
+  const dir = writeItem(root, '001-fix', { lane: 'quick', stage: 'build', base });
+  const r = op(root, ['escalate', '001-fix']);
   assert.equal(r.status, 0, r.out);
-  assert.match(readItem(dir), /^lane: full$/m);
+  assert.match(readItem(dir), /^lane: standard$/m);
 });
 
 test('escalate refuses to lower the lane (one-way)', (t) => {
   const { root, base } = setup(t);
-  writeItem(root, '003-big', { lane: 'full', stage: 'build', base });
-  const r = op(root, ['escalate', '003-big', '--to', 'standard']);
+  writeItem(root, '001-fix', { lane: 'quick', stage: 'build', base });
+  const r = op(root, ['escalate', '001-fix', '--to', 'quick']);
   assert.equal(r.status, 2);
   assert.match(r.out, /one-way/);
 });
 
-test('escalate refuses to go beyond full', (t) => {
+test('escalate refuses to go beyond standard', (t) => {
   const { root, base } = setup(t);
-  writeItem(root, '003-big', { lane: 'full', stage: 'build', base });
-  const r = op(root, ['escalate', '003-big']);
+  writeItem(root, '002-feat', { lane: 'standard', stage: 'build', base });
+  const r = op(root, ['escalate', '002-feat']);
   assert.equal(r.status, 2);
-  assert.match(r.out, /full lane/);
+  assert.match(r.out, /standard lane/);
+});
+
+// =============================================================================
+// external spec artifact directory is excluded from the measured diff
+// =============================================================================
+
+test('build gate excludes the external spec artifact directory from the diff', (t) => {
+  const { root } = setup(t);
+  writeFile(root, 'src/app.js', 'x\n');
+  const base = commitAll(root, 'seed');
+  writeFile(root, 'src/app.js', 'x\ny\n');
+  // spec-stage documents authored by the spec tool, NOT in Scope
+  writeFile(root, 'specs/002-feat/spec.md', '# spec\n\nThe app SHALL work.\n');
+  writeFile(root, 'specs/002-feat/plan.md', '# plan\n');
+  setConfig(root, { testCommand: 'exit 0' });
+  const dir = writeItem(root, '002-feat', {
+    lane: 'standard',
+    stage: 'build',
+    base,
+    scope: 'src/app.js',
+    extraFrontmatter: { spec: 'specs/002-feat/spec.md' },
+  });
+  const r = op(root, ['gate', '002-feat']);
+  assert.equal(r.status, 0, r.out);
+  assert.match(readItem(dir), /^stage: review$/m);
 });
 
 // =============================================================================

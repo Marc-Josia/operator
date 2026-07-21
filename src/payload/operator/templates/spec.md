@@ -3,15 +3,17 @@ item: {{id}}
 status: draft
 ---
 
-<!-- status: draft | approved — op-plan sets approved only after the operator's approval
+<!-- Fallback spec template — used only when the project has no spec tool installed
+     (no spec-kit `.specify/`, no OpenSpec `openspec/`). When one is installed, op-plan
+     authors the spec through that tool instead and this template is not used.
+     status: draft | approved — op-plan sets approved only after the operator's approval
      is journaled in workitem.md. -->
 
 # Spec — {{title}}
 
 ## Problem & goal
 
-<!-- The need behind the request. Who is affected, what "done" changes for them,
-     and how we will know it worked. -->
+<!-- The need behind the request, in plain language. What "done" changes for the user. -->
 
 ## Acceptance criteria
 
@@ -20,35 +22,17 @@ status: draft
 
 1. …
 
-## Architecture & decisions
+## Approach
 
-<!-- The shape of the solution: components touched or created, data flow, contracts
-     between parts. Every significant decision gets a one-paragraph rationale here;
-     decisions with rejected alternatives worth remembering become ADRs in
-     `.operator/memory/decisions/` and are linked from this section. -->
-
-## Rejected alternatives
-
-<!-- Each serious alternative considered, and the concrete reason it lost.
-     "We didn't think of another way" is an answer — write it if true. -->
+<!-- The intended solution in a few paragraphs: what changes, what stays untouched,
+     and why this approach over the obvious alternative. A decision with a real rejected
+     alternative becomes an ADR in `.operator/memory/decisions/` (template: adr.md). -->
 
 ## Non-functional constraints
 
-<!-- Standing targets the result must satisfy regardless of this change, each written
-     as a measurable, testable met/not-met criterion — performance budget, accessibility,
-     internationalization (no hard-coded user-facing strings), security (no secrets in
-     logs/output). These are constraints, not a description; where useful, map them to a
-     test in operator-test-strategy. Write `None — <reason>` when there are genuinely none.
-     Distinct from Impact below, which assesses the effect of *this* change. -->
-
-## Impact
-
-| Dimension | Impact | Notes |
-|---|---|---|
-| Security | none / low / high | |
-| Performance | none / low / high | |
-| Operations (deploy, config, migrations) | none / low / high | |
-| Documentation | none / needs update | |
+<!-- Standing targets the result must satisfy regardless of this change, each a measurable
+     met/not-met criterion — performance, accessibility, i18n (no hard-coded user-facing
+     strings), no secrets in logs. Write `None — <reason>` when there are genuinely none. -->
 
 ## Out of scope
 
@@ -56,8 +40,8 @@ status: draft
 
 ## Risks & assumptions
 
-<!-- Anything unverified. Every assumption listed here must be verified or accepted
-     by the operator before ship. -->
+<!-- Anything unverified (external APIs, versions, behavior). Every assumption listed
+     here must be verified or accepted by the operator before ship. -->
 
 <!-- Note: the declared change surface lives in workitem.md → Scope. Keep it current;
      the build gate measures the real diff against it. -->

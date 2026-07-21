@@ -1,6 +1,6 @@
 ---
 name: op-status
-description: "Read-only orientation across all work items and project roadmaps: reads every workitem.md's frontmatter and latest journal lines from disk, reports status with the exact next action per item, and flags anything blocked or inconsistent. Use it whenever the operator asks 'where are we', 'what's next', or 'is X done yet'; at the start of a session resuming earlier work; and before picking which item to work. It changes nothing, so it is always safe to run."
+description: "Read-only orientation across all work items: reads every workitem.md's frontmatter and latest journal lines from disk, reports status with the exact next action per item, and flags anything blocked or inconsistent. Use it whenever the operator asks 'where are we', 'what's next', or 'is X done yet'; at the start of a session resuming earlier work; and before picking which item to work. It changes nothing, so it is always safe to run."
 ---
 
 # op-status — orient without touching anything
@@ -25,23 +25,17 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
 
 ## Steps
 
-1. **Enumerate the work.** List `.operator/work/*/workitem.md` and, if present,
-   `.operator/projects/*/roadmap.md`. If both are missing or empty, that is the status: report "no
-   work items yet" and point the operator at `op-new` (or `op-roadmap` for a large effort) to open
-   the first one. Stop here.
+1. **Enumerate the work.** List `.operator/work/*/workitem.md`. If missing or empty, that is
+   the status: report "no work items yet" and point the operator at `op-new` to open the first
+   one. Stop here.
 
 2. **Read each item from disk — not from what you remember doing.** For every `workitem.md`:
-   - frontmatter: `id`, `title`, `lane`, `stage`, `updated`, `next`, and `project`/`milestone`
-     if the item belongs to a project;
+   - frontmatter: `id`, `title`, `lane`, `stage`, `spec`, `updated`, `next`;
    - the last 3–5 journal lines — the most recent events are what actually happened last;
    - progress counts: checked vs total boxes in Tasks and in Definition of done;
-   - for standard/full items at `spec` or later: whether the lane's spec document
-     (`spec-lite.md` / `spec.md`) exists in the item directory, and its `status:` line.
-   - for each `roadmap.md`: frontmatter `status:` and the Milestones section — which milestone is
-     active and, per milestone, how many of its work items have reached `done` (join by the items'
-     `project`/`milestone` fields). Within the active milestone, derive the **frontier** — the
-     unshipped items whose `blocked-by` edges have all shipped — so the report can name what is
-     workable now. The roadmap's own Progress section is the operator's summary.
+   - for standard items at `spec` or later: whether the document named by `spec:` exists
+     (it may be a spec-kit or OpenSpec artifact outside `.operator/`), and whether the journal
+     carries the `APPROVAL plan granted by operator:` line.
 
 3. **Classify each item.**
    - **done** — `stage: done`.
@@ -62,7 +56,7 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
    | stage | next action |
    |---|---|
    | intake | complete Problem/Triage/Scope/Tasks, then `node .operator/bin/op.mjs gate <id>` — per `.agents/skills/op-new/SKILL.md` |
-   | spec | write the spec doc or obtain operator approval (whichever the item lacks), then the spec gate — per `.agents/skills/op-plan/SKILL.md` |
+   | spec | author the spec artifact, record it in `spec:`, or obtain operator approval (whichever the item lacks), then the spec gate — per `.agents/skills/op-plan/SKILL.md` |
    | build | work the unchecked tasks, then the build gate — per `.agents/skills/op-build/SKILL.md` (`op-fix` if the journal shows a bug item, e.g. a `REPRO` line) |
    | review | fresh-context review, findings resolved, then the review gate — per `.agents/skills/op-ship/SKILL.md` |
    | ship | docs, memory harvest, retro, then the ship gate — per `.agents/skills/op-ship/SKILL.md` |
@@ -78,11 +72,6 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
    ```
    ## Status — 2026-07-14
 
-   ### Projects
-   - **001-airbnb-clone** (active) — M1 MVP: 3/4 items shipped; M2–M4 not started.
-     Active item: 014-search (build). Frontier: "guest can book a listing".
-     Roadmap: .operator/projects/001-airbnb-clone/roadmap.md
-
    ### Active
    - **003-rate-limiting** (standard, build) — updated 2026-07-12
      4/6 tasks checked; last event: GATE spec PASSED.
@@ -90,8 +79,8 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
      `node .operator/bin/op.mjs gate 003-rate-limiting`.
 
    ### Blocked
-   - **005-sso-login** (full, spec) — BLOCKED 2026-07-10 awaiting operator approval of the spec.
-     Unblocks when the operator approves: journal the APPROVAL line and run the spec gate
+   - **005-sso-login** (standard, spec) — BLOCKED 2026-07-10 awaiting operator approval of the
+     spec. Unblocks when the operator approves: journal the APPROVAL line and run the spec gate
      (op-plan).
 
    ### Done
@@ -100,8 +89,7 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
    Mechanical view: node .operator/bin/op.mjs status
    ```
 
-   Omit the Projects section when no `.operator/projects/` exist; when they do, lead with it — it is
-   the operator's altitude — then the per-item detail below. If several items are active, restate
+   If several items are active, restate
    the rule: one active agent per item — parallel agents take different items.
 
 7. **Recommend the mechanical view.** `node .operator/bin/op.mjs status` prints the same facts

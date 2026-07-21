@@ -9,8 +9,8 @@ Rules:
 - **One file per concept, not per request.** Several requests for the same thing share one
   file: kebab-case name recognizable at a glance (`dark-mode.md`, `plugin-system.md`).
 - **Matching is by concept similarity, not keyword** — "night theme" matches `dark-mode.md`.
-  op-discover (grounding) and op-new (before the triage scorecard) check here; on a match they
-  surface the file and its reason to the operator. **The operator decides** — a recorded
+  op-new checks here before the triage scorecard; on a match it
+  surfaces the file and its reason to the operator. **The operator decides** — a recorded
   rejection is memory, never a veto. To reopen a concept, delete or rewrite its file.
 - **Never record "already implemented".** A request closed because the behavior already exists
   is a built feature, not a rejected one — recording it would poison the check into refusing

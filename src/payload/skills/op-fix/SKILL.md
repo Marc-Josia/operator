@@ -40,18 +40,18 @@ discovery twice.
      first makes skipping it visible at the build gate (`tasks-complete`).
    - Scope includes the test location, not just the suspect source files.
    - Most fixes honestly score **quick**. But triage rules still apply in full: a bug in a
-     protected path (`.operator/config.json`) is **never quick** — the scorecard routes any
-     protected-path "yes" straight to the full lane, so triage it full from the start. A fix
-     that needs a schema migration or crosses module boundaries follows the normal lane rule.
-   - Run `node .operator/bin/op.mjs gate <id>` to pass intake. On standard/full lanes, continue
+     protected path (`.operator/config.json`) is **never quick** — any scorecard "yes" routes
+     to the standard lane, so triage it standard from the start. A fix that needs a schema
+     migration or crosses module boundaries follows the same rule.
+   - Run `node .operator/bin/op.mjs gate <id>` to pass intake. On the standard lane, continue
      through `op-plan` (spec + operator approval) before any fix work; the repro test in step 3
      is still written first — it is diagnosis, not implementation.
 
 3. **Reproduce before you fix — write the failing test now.** Before forming any opinion about
    the fix, write an automated test that fails because of the bug. The failing test is the only
-   objective definition of "fixed", and it becomes the permanent regression test. Consult
-   `.agents/skills/operator-test-strategy/SKILL.md` to pick the right test level — prefer the
-   lowest level that exercises the real defect.
+   objective definition of "fixed", and it becomes the permanent regression test. Pick the right
+   test level (an installed test-strategy or TDD skill helps here) — prefer the lowest level
+   that exercises the real defect.
 
    Run it and confirm it fails **for the bug's reason** — read the failure output; a test that
    fails on a typo in your setup reproduces nothing. Then journal it, before any fix attempt:
@@ -64,8 +64,8 @@ discovery twice.
    **If the bug is genuinely untestable, the bar is high.** Most "untestable" bugs are testable
    one level down: extract the logic from the framework, fake the clock, stub the network,
    capture the race with a deterministic interleaving. When the failing test is not immediate,
-   walk the ordered loop-construction list in `operator-debugging` step 1 — failing test, HTTP
-   script, CLI diff, headless browser, trace replay, throwaway harness, and down — before
+   walk down the ladder of repro harnesses — failing test, HTTP script, CLI diff, headless
+   browser, trace replay, throwaway harness — before
    concluding anything is untestable. Exhaust those options first. Only when
    automation is truly impossible (e.g. a vendor-device-only rendering defect), ask the
    operator for an explicit waiver and journal it with the reason and numbered manual repro
@@ -81,7 +81,8 @@ discovery twice.
    to `Manual repro steps re-run after fix and journaled (test waived — see WAIVER line)`, so
    the review gate's `dod-complete` check stays honest.
 
-4. **Root-cause it.** Read `.agents/skills/operator-debugging/SKILL.md` and follow it: isolate
+4. **Root-cause it.** Debug systematically — follow an installed debugging skill when the
+   project has one; the loop is the same either way: isolate
    (bisect, minimal case), hypothesize, verify each hypothesis with evidence. You have found
    the root cause when you can explain the failure mechanism end-to-end and it predicts the
    failing test's exact output — not merely a place where adding a guard makes the error
@@ -111,8 +112,8 @@ discovery twice.
    or ask the operator before trying again.
 
 6. **Assess the blast radius.** Before locking the fix in, check what else the change touches:
-   read the call sites and other users of the code you changed (via `operator-code-review`'s
-   "read the callers the diff does not show", or `operator-debugging`), and confirm no other path
+   read the call sites and other users of the code you changed — the callers the diff does not
+   show — and confirm no other path
    relied on the buggy behavior. If a sibling path shares the same latent cause, add a test for it
    or note it as a follow-up — do not silently widen Scope into a refactor. Keep this light and
    within the lane's caps.
@@ -182,7 +183,7 @@ never edit the stage by hand.
 - **Deleting or weakening the regression test** after it passes ("cleanup", "duplicate
   coverage"). The test is the fix's contract; removing it is undoing the fix.
 - **Protected-path fix rushed through the quick lane.** The intake and build gates both reject
-  it; triage it full from the start instead of losing the work at the gate.
+  it; triage it standard from the start instead of losing the work at the gate.
 - **Bundled refactors.** They widen the diff past caps and past Scope, and they hide the fix
   from the reviewer. New work item.
 - **"Untestable" as a shortcut.** A waiver without the operator's quoted words and manual repro

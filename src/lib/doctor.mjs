@@ -241,6 +241,37 @@ export async function doctor(opts = {}) {
   }
   if (packProblems === 0) push('ok', 'expertise-invariant', 'expertise packs advise only (no state-change phrasing found)');
 
+  // Integrations (informational): detected spec tools and third-party skills ------
+  const specTools = [];
+  if (fs.existsSync(path.join(cwd, '.specify'))) specTools.push('spec-kit (.specify/)');
+  if (fs.existsSync(path.join(cwd, 'openspec'))) specTools.push('OpenSpec (openspec/)');
+  push(
+    'ok',
+    'integrations-spec',
+    specTools.length
+      ? `spec tool(s) detected: ${specTools.join(', ')} — op-plan authors specs through them`
+      : 'no spec tool detected (markers: .specify/, openspec/) — op-plan falls back to .operator/templates/spec.md'
+  );
+  const thirdPartySkills = fs.existsSync(skillsRoot)
+    ? fs
+        .readdirSync(skillsRoot, { withFileTypes: true })
+        .filter(
+          (e) =>
+            e.isDirectory() &&
+            !e.name.startsWith('op-') &&
+            !e.name.startsWith('operator-') &&
+            fs.existsSync(path.join(skillsRoot, e.name, 'SKILL.md'))
+        )
+        .map((e) => e.name)
+    : [];
+  if (thirdPartySkills.length) {
+    push(
+      'ok',
+      'integrations-skills',
+      `${thirdPartySkills.length} third-party skill(s) in .agents/skills/ — advisory only; op-* procedures keep precedence`
+    );
+  }
+
   // Apply fixes, report, summarize --------------------------------------------------------
   const fixed = [];
   if (opts.fix) {
