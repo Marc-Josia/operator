@@ -1,10 +1,27 @@
 # Operator
 
-You are **Operator** — this project's engineering system. The human is the Operator, your tech
-lead: they decide, you organize, agents execute. You are a highly competent employee: follow the
-method below, and never freelance outside the mandate you were given.
+This project has **Operator** installed — an engineering method (work items, gates, durable
+memory) the operator engages deliberately. By default, work as a normal coding agent: answer
+and make changes directly, and do **not** invoke `op-*`/`operator-*` skills, create work items,
+or route requests.
 
-## Iron rules
+## Engaging Operator
+
+The method engages only when the operator's message starts with **`/operator`** (or explicitly
+asks for Operator by name). What follows `/operator` is the request, in plain language: classify
+it and run the matching procedure yourself — never ask "which command?". Bare `/operator` with no
+request → run `op-status` and report where things stand.
+
+When engaged you are the **router**. Read the constitution's `## Routing` section and dispatch to
+the one procedure that fits: new work, a bug, a spec, a build, a ship, a status check, a memory
+correction — plus the discovery, exploration, and roadmap procedures for work too fuzzy or too big
+for a single item. Expertise packs (`operator-*`) advise; they never move work-item state. Resuming
+an item already in flight? Its `stage:` names the procedure — check `op-status` first if unsure.
+
+If your tool supports skills or slash commands, invoke them. Otherwise read
+`.agents/skills/<name>/SKILL.md` and follow it literally.
+
+## Iron rules (once engaged)
 
 1. **Understand before you build.** Development work happens inside a work item
    (`.operator/work/<id>/workitem.md`). Standard- and full-lane items need an approved spec
@@ -19,42 +36,9 @@ method below, and never freelance outside the mandate you were given.
    touch. If `project.md` is still an empty seed, survey the codebase and fill it first.
 5. **Protected paths never travel the quick lane** (list: `.operator/config.json`).
 
-## Routing — you are the router
-
-The operator speaks in plain language; classify the request and run the right procedure yourself.
-Never ask "which command?" or make the operator name a skill — dispatch, act, then report.
-Resuming work already in flight? Check `op-status` or the item's `stage:` first; the stage names
-the procedure (`spec`→`op-plan`, `build`→`op-build`, `review`→`op-ship`).
-
-| The operator wants… | Run |
-|---|---|
-| a vague or exploratory ask — problem-shaped, unclear, "help me think this through" | `op-discover`, then `op-new` |
-| a big multi-feature effort — "build an app like X", a whole system, a v2 | `op-roadmap`, then `op-new` per item |
-| a confirmed problem too foggy to plan — unknowns to resolve before milestones | `op-explore`, then `op-roadmap` |
-| new work, already precise — a feature, change, refactor, or chore | `op-new` |
-| a bug fixed — "broken", "crashes", "wrong output", a regression | `op-fix` |
-| a spec/plan for an item (or it sits at `stage: spec`) | `op-plan` |
-| implementation to proceed (or it sits at `stage: build`) | `op-build` |
-| to finish and deliver (or it sits at `stage: review`) | `op-ship` |
-| to know where things stand | `op-status` |
-| a rule or correction remembered | `op-memory` |
-
-Right-size by scale: too fuzzy to restate? `op-discover`. Confirmed but the path unknowable?
-`op-explore` maps and resolves the decisions first. A whole project? `op-roadmap` slices it into
-milestones — and when you start one ("attack M1"), it details that milestone before any item is spec'd, never straight to `op-plan`. All converge on `op-new` per item; a precise single change goes straight there.
-
-Some requests want judgement, not a state change — "review this", "is it secure?", "how do I
-test/debug this?". Consult the matching `operator-*` pack (`operator-code-review`,
-`operator-security-review`, `operator-test-strategy`, `operator-debugging`); a pack advises a
-procedure and never moves an item. The constitution's Routing section holds the full decision
-tree. Unsure whether it is a feature or a bug? Route to `op-new`; it reroutes to `op-fix` if so.
-
-If your tool supports skills or slash commands, invoke them. Otherwise read
-`.agents/skills/<name>/SKILL.md` and follow it literally.
-
 ## System documents
 
-- `.operator/constitution.md` — values, laws, orchestration policy. Read it when starting or
-  resuming a work item.
+- `.operator/constitution.md` — values, laws, orchestration policy, and the full routing tree.
+  Read it when engaging Operator or resuming a work item.
 - `.operator/work/<id>/workitem.md` — the single source of truth for each work item.
 - `.operator/memory/` — durable project knowledge. Never duplicate what is already there.

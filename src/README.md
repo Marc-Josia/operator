@@ -11,9 +11,10 @@ it into every prompt.
 Operator is agent-agnostic. It works with any tool that reads `AGENTS.md` and skill files —
 Claude Code, Codex, OpenCode, Cursor, Gemini CLI. You remain the tech lead (Operator calls you
 **the operator**): you decide what gets built and approve plans. The agent follows written
-procedures. A small script checks that the evidence behind each claim is real. You never pick a
-skill — you describe what you want in plain language, and the always-loaded block classifies the
-request and runs the matching procedure.
+procedures. A small script checks that the evidence behind each claim is real. You control when
+the method runs: prefix a request with `/operator` and describe what you want in plain language,
+and Operator classifies it and runs the matching procedure — you never pick a skill. Without
+`/operator`, your agent behaves as it normally would.
 
 Concretely, `init` installs three things: a managed block (under 60 lines) injected into your
 project's `AGENTS.md` between `<!-- operator:begin -->` / `<!-- operator:end -->` markers — it
@@ -77,11 +78,12 @@ rm -rf "$(npm config get cache)/_npx"
 A realistic walk-through: adding per-IP rate limiting to a small Express API. Terminal output
 below is abbreviated.
 
-**1. Ask for the feature.** Open your agent tool in the project and say:
+**1. Ask for the feature.** Open your agent tool in the project and engage Operator explicitly:
 
-> Add per-IP rate limiting to the public API endpoints.
+> /operator Add per-IP rate limiting to the public API endpoints.
 
-The managed `AGENTS.md` block routes this to the `op-new` procedure. The agent restates the
+The `/operator` prefix engages the method, and the managed `AGENTS.md` block routes this to the
+`op-new` procedure. (Without the prefix, the agent would just answer normally.) The agent restates the
 request, asks only the questions whose answers change the plan ("Which endpoints? What limit and
 window?"), fills the triage scorecard, and creates `.operator/work/001-rate-limiting/workitem.md`:
 
@@ -344,9 +346,9 @@ Be clear-eyed about this. No agent host can *force* a model to invoke a skill or
 `AGENTS.md` — instructions are context the model almost always follows, not code it must
 execute. Operator's design accepts that and works with it:
 
-- **Compliance is the path of least resistance.** The routing table is always in context, every
-  procedure ends in a single command, and templates mean the agent never has to invent
-  structure. Following the process is genuinely less work than improvising.
+- **Compliance is the path of least resistance.** Once `/operator` engages the method the routing
+  table is in context, every procedure ends in a single command, and templates mean the agent
+  never has to invent structure. Following the process is genuinely less work than improvising.
 - **Drift is visible, not impossible.** The gate checker refuses to advance a stage without
   evidence, and it — not the agent — writes the `GATE … PASSED` line. An agent that skips the
   process leaves fingerprints: no work item, no journal lines, no approval quote. `doctor`

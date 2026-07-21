@@ -77,10 +77,13 @@ ajoutés par ADR-0014/0015, `op-explore` par ADR-0019).
 - **4 packs d'expertise `operator-*`** (conseil uniquement, ne touchent jamais l'état) :
   `operator-code-review`, `operator-security-review`, `operator-test-strategy`,
   `operator-debugging`.
-- **Routage automatique** : le bloc toujours chargé est le routeur — l'operateur parle en langage
-  naturel, l'agent classe et dispatche. Échelle de taille : flou → `op-discover`, confirmé mais
-  brumeux → `op-explore`, projet → `op-roadmap`, changement précis → `op-new` ; un bug →
-  `op-fix`. La `constitution.md` fait autorité ; le bloc en est le résumé.
+- **Routage opt-in** (ADR-0021) : par défaut l'agent reste un agent de code normal et ne route
+  rien. Le routage ne s'enclenche que lorsque l'operateur commence son message par `/operator` ;
+  le bloc toujours chargé porte cette bascule (défaut off, `/operator` on) et pointe vers la
+  constitution. Une fois enclenché, l'agent est le routeur : il classe et dispatche. Échelle de
+  taille : flou → `op-discover`, confirmé mais brumeux → `op-explore`, projet → `op-roadmap`,
+  changement précis → `op-new` ; un bug → `op-fix`. La `constitution.md` fait autorité (elle
+  porte l'arbre complet) ; le bloc en est le résumé.
 
 **État & mémoire.** `workitem.md` est la source de vérité d'un item (frontmatter plat dont
 `project`/`milestone`, Journal append-only). Un gros effort a un `.operator/projects/<id>/roadmap.md`
@@ -131,8 +134,9 @@ plus `decisions/` (ADRs) et `archive/`.
   mérite un test.
 - **Le bloc `src/payload/agents-block.md` reste ≤ 60 lignes** (il est chargé à chaque tour) — le
   détail va dans `constitution.md`, dont le bloc est le résumé.
-- **Décision d'architecture significative** → un ADR dans `docs/adr/` (`NNNN-slug.md`). 16 ADRs
-  existent (0001–0016) ; ne pas réécrire un ADR accepté, en ajouter un nouveau qui le supersède.
+- **Décision d'architecture significative** → un ADR dans `docs/adr/` (`NNNN-slug.md`). 21 ADRs
+  existent (0001–0021) ; ne pas réécrire un ADR accepté, en ajouter un nouveau qui le supersède
+  (ex. 0021 supersède 0013 : routage opt-in via `/operator`).
 - **Zéro dépendance runtime, jamais de réseau** dans le toolkit (installeur comme `op.mjs`) : Node
   builtins uniquement.
 - **Agent-agnostique** : toute évolution doit fonctionner sur Claude Code, Codex, OpenCode, Cursor
