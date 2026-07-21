@@ -1,4 +1,4 @@
-# ADR-0021: Pluggable work trackers (mirror model) and an agent-side `op-init`
+# ADR-0022: Pluggable work trackers (mirror model) and an agent-side `op-init`
 
 - Status: accepted
 - Date: 2026-07-21
