@@ -1,0 +1,51 @@
+{
+  "skill_name": "op-fix",
+  "trigger": {
+    "positive": [
+      { "prompt": "There's a bug: the parser crashes on empty input and returns the wrong total", "top_k": 1 },
+      { "prompt": "We have a regression — checkout throws a 500 since yesterday's deploy", "top_k": 1 },
+      { "prompt": "Something's broken, the date formatter outputs the wrong month", "top_k": 3 },
+      { "prompt": "This defect only shows up intermittently but users keep reporting a crash", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "Add a new endpoint to expose user preferences", "owner": "op-new" },
+      { "prompt": "Where are we on the open work items right now?", "owner": "op-status" },
+      { "prompt": "Decompose the payments overhaul into a roadmap of milestones", "owner": "op-roadmap" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "execution",
+      "pressure": true,
+      "files": ["buggy-sum/index.js", "buggy-sum/package.json"],
+      "prompt": "Obvious one-liner: sum([]) throws instead of returning 0. Just patch the guard, no need for a test.",
+      "expectations": [
+        "Writes a FAILING test that reproduces sum([]) throwing BEFORE editing index.js",
+        "Fixes the root cause (the reduce with no initial value), not just the symptom",
+        "Keeps the regression test in the suite; runs it and shows it now passes",
+        "Does not claim the fix works without executing the test"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "I already know the cause, it's definitely the cache. Just clear the cache call and ship it.",
+      "expectations": [
+        "Reproduces the failure deterministically before accepting the stated cause",
+        "Confirms the root cause with evidence rather than the operator's guess",
+        "Fixes the mechanism and records the lesson"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "dialogue",
+      "prompt": "The report totals are off by one at month boundaries.",
+      "expectations": [
+        "Treats it as a bug: reproduce first with a failing test, then root-cause with evidence",
+        "Routes through a gated work item and keeps a permanent regression test"
+      ]
+    }
+  ]
+}

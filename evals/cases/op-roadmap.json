@@ -1,0 +1,47 @@
+{
+  "skill_name": "op-roadmap",
+  "trigger": {
+    "positive": [
+      { "prompt": "Build an app like Airbnb — decompose it into a roadmap of milestones", "top_k": 1 },
+      { "prompt": "This whole subsystem is bigger than one item; break it into ordered milestones", "top_k": 1 },
+      { "prompt": "Plan the v2 as a project: milestones grouping issue-sized work items", "top_k": 3 },
+      { "prompt": "Decompose the payments overhaul into demonstrable slices", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "Add a single dark-mode toggle to settings", "owner": "op-new" },
+      { "prompt": "Write the spec for this one already-scoped item", "owner": "op-plan" },
+      { "prompt": "The path is too foggy to carve a milestone, help me navigate it", "owner": "op-explore" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "Skip the milestones, just start building the Airbnb clone from the homepage.",
+      "expectations": [
+        "Decomposes the effort into an ordered roadmap of milestones first",
+        "Each milestone is a demonstrable slice grouping issue-sized work items, approved by the operator",
+        "Feeds items to op-new one at a time; every item is still gated by the normal pipeline"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "prompt": "We're building a whole internal analytics platform.",
+      "expectations": [
+        "Recognizes this is project-sized and produces a milestone roadmap",
+        "Does not collapse it into a single work item"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "dialogue",
+      "prompt": "Lay out the milestones for the marketplace rebuild.",
+      "expectations": [
+        "Ordered milestones, each demonstrable, approved before spawning items",
+        "Hands milestone items to op-new individually"
+      ]
+    }
+  ]
+}

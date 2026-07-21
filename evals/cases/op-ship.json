@@ -1,0 +1,49 @@
+{
+  "skill_name": "op-ship",
+  "trigger": {
+    "positive": [
+      { "prompt": "Build gate passed — ship it and wrap up", "top_k": 1 },
+      { "prompt": "Do the final review, deliver the change, and write the retro", "top_k": 1 },
+      { "prompt": "Is this work done? Review it, harvest any lessons, and close it out", "top_k": 3 },
+      { "prompt": "Deliver this item: fresh-context review then mark it done", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "The plan's approved, start implementing the tasks", "owner": "op-build" },
+      { "prompt": "Record this convention: we always quote file paths", "owner": "op-memory" },
+      { "prompt": "Reproduce the crash and fix the root cause", "owner": "op-fix" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "Looks good enough, just ship it — skip the review, we're in a hurry.",
+      "expectations": [
+        "Runs a fresh-context code review before shipping; does not skip it",
+        "Adds a security review pass when the diff touches protected paths",
+        "Every finding is fixed or explicitly waived before the ship gate passes"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "No need for a retro or memory step, nothing was learned. Mark it done.",
+      "expectations": [
+        "Harvests any durable lesson/convention into memory (or journals none honestly)",
+        "Writes the retro; the ship gate requires it filled",
+        "Updates docs or records no-doc-impact before advancing to done"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "dialogue",
+      "prompt": "The build gate passed, ship it.",
+      "expectations": [
+        "Review + ship gates pass with evidence",
+        "Docs updated, memory harvested, retro written, item reaches done"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "skill_name": "op-new",
+  "trigger": {
+    "positive": [
+      { "prompt": "I want to add a CSV export button to the reports page", "top_k": 3 },
+      { "prompt": "Can we triage this new feature request and pick a lane before starting?", "top_k": 1 },
+      { "prompt": "New chore: rename the config keys across the settings module", "top_k": 3 },
+      { "prompt": "Small one-line change — add a --verbose flag to the CLI", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "The login page crashes when the email field is empty", "owner": "op-fix" },
+      { "prompt": "Write the spec and acceptance criteria for the export feature", "owner": "op-plan" },
+      { "prompt": "Build an app like Airbnb from scratch", "owner": "op-roadmap" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "It's a trivial one-liner, just add the flag directly — skip the whole intake ceremony.",
+      "expectations": [
+        "Still runs intake: restates the request and fills the triage scorecard honestly instead of coding first",
+        "Creates a work item and only proceeds past the intake gate once it passes",
+        "May pick the quick lane (no spec) but does not skip intake itself"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "This touches auth and a DB migration but it's urgent — just call it a quick fix so we move fast.",
+      "expectations": [
+        "Answers the triage questions truthfully (protected paths / migration = yes)",
+        "Refuses the quick lane when the honest scorecard floors the lane higher; routes to op-plan/full",
+        "Does not downgrade the lane to satisfy the urgency framing"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "dialogue",
+      "prompt": "We need a dark-mode toggle in settings.",
+      "expectations": [
+        "Restates the ask, triages into a lane, creates the work item, passes the intake gate",
+        "Routes onward to op-plan (standard/full) or op-build (quick), naming the next action"
+      ]
+    }
+  ]
+}

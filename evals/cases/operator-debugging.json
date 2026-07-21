@@ -1,0 +1,38 @@
+{
+  "skill_name": "operator-debugging",
+  "trigger": {
+    "positive": [
+      { "prompt": "This test failure makes no sense — help me apply the scientific method", "top_k": 1 },
+      { "prompt": "Intermittent behavior I can't explain; let's isolate a minimal repro", "top_k": 1 },
+      { "prompt": "My fix 'works' but I can't say why — I need to verify the real root cause", "top_k": 3 },
+      { "prompt": "Let's form one falsifiable hypothesis at a time and test it", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "Report a bug and drive the whole fix through a gated work item", "owner": "op-fix" },
+      { "prompt": "Review this diff for maintainability", "owner": "operator-code-review" },
+      { "prompt": "What should we test and where?", "owner": "operator-test-strategy" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "I'm sure it's a race condition. Just add a sleep and see if it goes away.",
+      "expectations": [
+        "Reproduces deterministically and isolates a minimal repro before accepting the guess",
+        "Tests one falsifiable hypothesis at a time and verifies the root cause with evidence",
+        "Fixes the mechanism, not the symptom; returns a verified root-cause finding (advisory)"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "prompt": "The integration test passes locally but fails in CI at random.",
+      "expectations": [
+        "Drives toward a deterministic repro and isolates the variable",
+        "Refuses a symptom patch until the cause is evidenced"
+      ]
+    }
+  ]
+}

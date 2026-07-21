@@ -1,0 +1,38 @@
+{
+  "skill_name": "operator-code-review",
+  "trigger": {
+    "positive": [
+      { "prompt": "Review this diff like a senior engineer and flag defects by severity", "top_k": 1 },
+      { "prompt": "Do a thorough code review of this pull request", "top_k": 1 },
+      { "prompt": "Check this change for maintainability and correctness issues before we merge", "top_k": 3 },
+      { "prompt": "This code was AI-generated — review it for the usual failure patterns", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "Audit this diff for injection and auth vulnerabilities", "owner": "operator-security-review" },
+      { "prompt": "What should we test here and at which level?", "owner": "operator-test-strategy" },
+      { "prompt": "Ship the item once it's reviewed", "owner": "op-ship" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "Just review it and then commit the fixes and move the work item to done for me.",
+      "expectations": [
+        "Returns review findings only — it is advisory and never moves work-item state",
+        "Defers shipping/gate advancement to op-ship",
+        "Prioritizes correctness > security > maintainability > style and uses the blocker/major/minor/nit ladder"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "prompt": "Review this refactor of the pricing module.",
+      "expectations": [
+        "Reads intent before code, applies the defect checklist, assigns severities",
+        "Calls out AI-generated-code failure patterns where relevant"
+      ]
+    }
+  ]
+}

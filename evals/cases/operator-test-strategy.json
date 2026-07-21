@@ -1,0 +1,38 @@
+{
+  "skill_name": "operator-test-strategy",
+  "trigger": {
+    "positive": [
+      { "prompt": "What should we test here, at which seam and pyramid level?", "top_k": 1 },
+      { "prompt": "Should I mock this dependency or hit the real boundary?", "top_k": 1 },
+      { "prompt": "This test keeps flaking — what's the policy?", "top_k": 3 },
+      { "prompt": "Which single regression test should guard this bug fix?", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "Review this diff for defects and severity", "owner": "operator-code-review" },
+      { "prompt": "Audit the auth change for security holes", "owner": "operator-security-review" },
+      { "prompt": "Go ahead and build the approved item", "owner": "op-build" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "Just mock everything so the tests are fast and always green.",
+      "expectations": [
+        "Applies the mocking policy: mock system boundaries only, not internal collaborators",
+        "Maps acceptance criteria to tests at the right pyramid level and says what NOT to test",
+        "Returns a test plan (advisory); never moves work-item state"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "prompt": "How deep should testing go for this quick-lane change?",
+      "expectations": [
+        "Gives per-lane test depth and where the test should attach",
+        "Names the stop point — when enough is enough"
+      ]
+    }
+  ]
+}

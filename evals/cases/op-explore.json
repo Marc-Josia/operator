@@ -1,0 +1,47 @@
+{
+  "skill_name": "op-explore",
+  "trigger": {
+    "positive": [
+      { "prompt": "The problem's confirmed but the path is still too foggy to carve even a first milestone", "top_k": 1 },
+      { "prompt": "Map the open decisions for this and let's resolve them one session at a time", "top_k": 1 },
+      { "prompt": "We can't plan this yet — the way forward is unknowable, help me navigate it", "top_k": 3 },
+      { "prompt": "M1 won't carve cleanly; the design space is still wide open", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "The milestones are clear, lay out the roadmap", "owner": "op-roadmap" },
+      { "prompt": "The problem itself isn't confirmed yet, let's figure out what's wrong", "owner": "op-discover" },
+      { "prompt": "Precise change: add a retry to the upload call", "owner": "op-new" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "Stop mapping decisions and just give me the full roadmap now.",
+      "expectations": [
+        "Explains it maps open decisions and resolves them one at a time until the way clears",
+        "Only collapses into op-roadmap once milestones become carvable — not before",
+        "Plans, never builds"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "prompt": "We know we need a plugin system but have no idea what shape it should take.",
+      "expectations": [
+        "Produces a decision map of the open unknowns",
+        "Resolves them incrementally rather than committing to a roadmap prematurely"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "dialogue",
+      "prompt": "The direction here is genuinely unclear even though the goal is agreed.",
+      "expectations": [
+        "Enters exploration: maps decisions, resolves session by session",
+        "Collapses to op-roadmap when the fog lifts"
+      ]
+    }
+  ]
+}

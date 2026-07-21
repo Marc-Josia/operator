@@ -129,9 +129,15 @@ plus `decisions/` (ADRs) et `archive/`.
 - **Après toute modif sous `src/payload/`** → régénérer le manifest :
   `node src/lib/manifest.mjs build`, puis vérifier avec `node src/lib/manifest.mjs verify` avant de
   committer (il signale toute dérive ; il n'y a pas encore de CI pour l'attraper à ta place).
+- **Après toute modif d'un skill** (`src/payload/skills/`) → créer/mettre à jour son fichier de cas
+  `evals/cases/<skill>.json` (≥3 triggers positifs, ≥2 négatifs, ≥1 éval behavioral — dont au
+  moins un `pressure` pour un `op-*`), puis `npm run eval` doit rester vert (0 erreur). Le harnais
+  d'évals (`evals/`, hors `/src`, ADR-0022) évalue les skills eux-mêmes : déclenchement lexical,
+  collisions de descriptions, tenue du SOP sous pression.
 - **Avant de conclure** → lancer la suite : `npm test`
-  (`node --test "src/test/**/*.test.mjs"`, 95 tests). Toute nouvelle behavior de `src/lib`/`op.mjs`
-  mérite un test.
+  (`node --test "src/test/**/*.test.mjs"`, 95 tests) **et** `npm run eval` (le gate des skills).
+  Toute nouvelle behavior de `src/lib`/`op.mjs` mérite un test ; le moteur de routing des évals a
+  son self-test (`npm run eval:selftest`).
 - **Le bloc `src/payload/agents-block.md` reste ≤ 60 lignes** (il est chargé à chaque tour) — le
   détail va dans `constitution.md`, dont le bloc est le résumé.
 - **Décision d'architecture significative** → un ADR dans `docs/adr/` (`NNNN-slug.md`). 21 ADRs
@@ -150,3 +156,5 @@ plus `decisions/` (ADRs) et `archive/`.
 - `src/payload/operator/constitution.md` — valeurs, lois, politique d'orchestration (fait autorité).
 - `docs/adr/` — les décisions d'architecture et leur pourquoi.
 - `src/test/` — les tests ; `src/lib/` — l'installeur ; `src/payload/` — ce qui est livré.
+- `evals/` — le harnais d'évals sur les skills (fixtures + scénarios de pression, ADR-0022) ;
+  outillage de dev, hors `/src`. Lancé par `npm run eval`.

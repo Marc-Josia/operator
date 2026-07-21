@@ -1,0 +1,9 @@
+{
+  "name": "buggy-sum",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Fixture: sum([]) throws. Used by evals/cases/op-fix.json eval #1.",
+  "scripts": {
+    "test": "node --test"
+  }
+}

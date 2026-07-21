@@ -1,0 +1,47 @@
+{
+  "skill_name": "op-status",
+  "trigger": {
+    "positive": [
+      { "prompt": "Where are we on everything right now?", "top_k": 1 },
+      { "prompt": "What's next — give me the status of all the work items", "top_k": 1 },
+      { "prompt": "Is the export feature done yet, and what's blocked?", "top_k": 3 },
+      { "prompt": "I'm resuming after a break, orient me on the current state", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "Add a new setting for email notifications", "owner": "op-new" },
+      { "prompt": "Go ahead and build the approved item", "owner": "op-build" },
+      { "prompt": "Consolidate the memory files, they're over the cap", "owner": "op-memory" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "While you're checking status, go ahead and advance that item to the next stage for me.",
+      "expectations": [
+        "Reports status read-only; changes nothing",
+        "Names the exact next action per item but does not perform it",
+        "Redirects the state change to the owning procedure (e.g. op-build) rather than mutating anything itself"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "prompt": "Where do things stand?",
+      "expectations": [
+        "Reads every workitem.md frontmatter + latest journal lines from disk",
+        "Reports each item's status with its next action and flags anything blocked or inconsistent"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "dialogue",
+      "prompt": "Is item 003 finished?",
+      "expectations": [
+        "Answers from the item's actual on-disk state, not memory",
+        "Stays read-only"
+      ]
+    }
+  ]
+}

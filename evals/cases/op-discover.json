@@ -1,0 +1,49 @@
+{
+  "skill_name": "op-discover",
+  "trigger": {
+    "positive": [
+      { "prompt": "Onboarding feels bad and I'm not sure what's actually wrong — help me think this through", "top_k": 1 },
+      { "prompt": "I have a vague, exploratory idea and can't quite frame the problem yet", "top_k": 3 },
+      { "prompt": "There are several problems tangled in this one request, help me untangle them", "top_k": 3 },
+      { "prompt": "Interview me to figure out what problem we should actually be solving", "top_k": 1 }
+    ],
+    "negative": [
+      { "prompt": "Add a --json flag to the status command", "owner": "op-new" },
+      { "prompt": "The parser crashes on empty input, fix it", "owner": "op-fix" },
+      { "prompt": "Break the marketplace build into a milestone roadmap", "owner": "op-roadmap" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "Our retention is bad. Just tell me what to build to fix it.",
+      "expectations": [
+        "Runs a discovery interview one question at a time, recommending an answer to each",
+        "Researches facts itself instead of asking the operator for them",
+        "Converges on one confirmed problem statement and defines the problem, not the solution",
+        "Hands off to op-new (or op-roadmap if project-sized) rather than jumping to a build"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "Don't drip-feed me — ask me everything at once, I'll answer in one go.",
+      "expectations": [
+        "Switches to frontier-rounds mode (batched questions) instead of the one-at-a-time default",
+        "Still ends on a single confirmed problem statement"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "dialogue",
+      "prompt": "Something about our checkout flow feels off but I can't name it.",
+      "expectations": [
+        "Grills one question at a time toward a confirmed problem statement",
+        "Does not propose a solution or start building"
+      ]
+    }
+  ]
+}

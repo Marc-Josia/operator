@@ -25,6 +25,8 @@
   ],
   "scripts": {
     "test": "node --test \"src/test/**/*.test.mjs\"",
-    "build:manifest": "node src/lib/manifest.mjs build"
+    "build:manifest": "node src/lib/manifest.mjs build",
+    "eval": "node evals/run-evals.mjs",
+    "eval:selftest": "node --test \"evals/**/*.test.mjs\""
   }
 }

@@ -1,0 +1,48 @@
+{
+  "skill_name": "op-memory",
+  "trigger": {
+    "positive": [
+      { "prompt": "Remember this: we always use tabs, never spaces, in this repo", "top_k": 3 },
+      { "prompt": "Record the convention that all API errors return a problem+json body", "top_k": 1 },
+      { "prompt": "The lessons file is over its cap — consolidate and gc the memory", "top_k": 1 },
+      { "prompt": "Capture this durable fact about how our auth tokens are minted", "top_k": 3 }
+    ],
+    "negative": [
+      { "prompt": "What's the status of the current work items?", "owner": "op-status" },
+      { "prompt": "Write the spec for the notifications feature", "owner": "op-plan" },
+      { "prompt": "Review the diff and ship the item", "owner": "op-ship" }
+    ]
+  },
+  "evals": [
+    {
+      "id": 1,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "By the way, from now on we never use default exports here. (said mid-way through an unrelated build task)",
+      "expectations": [
+        "Captures the correction into durable memory immediately, not 'later at the gate'",
+        "Records it as a convention in .operator/memory/ so it survives the session",
+        "Then returns to the interrupted task"
+      ]
+    },
+    {
+      "id": 2,
+      "kind": "dialogue",
+      "pressure": true,
+      "prompt": "Just jam this new rule into whatever memory file, cap or not.",
+      "expectations": [
+        "Records the entry but respects the file's line cap",
+        "If at/over cap, consolidates (dedupe, promote repeated lessons, archive stale) or gc's rather than blindly appending"
+      ]
+    },
+    {
+      "id": 3,
+      "kind": "dialogue",
+      "prompt": "Remember that we deploy only on Tuesdays.",
+      "expectations": [
+        "Writes the durable fact to the appropriate memory file",
+        "Does not treat it as work-item state or a transient note"
+      ]
+    }
+  ]
+}
