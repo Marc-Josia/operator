@@ -66,10 +66,12 @@ diff), `standard` (`spec-lite.md`), `full` (`spec.md` + ADRs). **Les gates sont 
 affirmées** : `node .operator/bin/op.mjs gate <id>` mesure le diff git réel, coche les preuves,
 puis avance l'étape lui-même. `op.mjs` a **3 sous-commandes** : `status`, `gate`, `escalate`.
 
-**Les skills — 14, sur deux contrats** (le mécanisme : ADR-0005 ; `op-discover` et `op-roadmap`
-ajoutés par ADR-0014/0015, `op-explore` par ADR-0019).
-- **10 procédures `op-*`** (seules autorisées à déplacer l'état d'un work item) :
-  `op-discover` (cadrer un besoin flou), `op-explore` (naviguer un projet brumeux : carte de
+**Les skills — 15, sur deux contrats** (le mécanisme : ADR-0005 ; `op-discover` et `op-roadmap`
+ajoutés par ADR-0014/0015, `op-explore` par ADR-0019, `op-init` par ADR-0022).
+- **11 procédures `op-*`** (seules autorisées à déplacer l'état d'un work item) :
+  `op-init` (onboarding : survey + profil de communication dans `AGENTS.md` + choix du tracker
+  markdown/GitHub/Linear), `op-discover`
+  (cadrer un besoin flou), `op-explore` (naviguer un projet brumeux : carte de
   décisions, collapse vers la roadmap), `op-roadmap` (découper un projet en roadmap de
   milestones), `op-new` (intake + triage), `op-plan` (spec), `op-build` (implémentation),
   `op-fix` (bug, repro d'abord), `op-ship` (revue + livraison + mémoire), `op-status`
@@ -86,7 +88,9 @@ ajoutés par ADR-0014/0015, `op-explore` par ADR-0019).
   porte l'arbre complet) ; le bloc en est le résumé.
 
 **État & mémoire.** `workitem.md` est la source de vérité d'un item (frontmatter plat dont
-`project`/`milestone`, Journal append-only). Un gros effort a un `.operator/projects/<id>/roadmap.md`
+`project`/`milestone`/`tracker_ref`, Journal append-only) — y compris quand le travail est
+*tracké* dans GitHub/Linear : le tracker externe n'est qu'un miroir (ADR-0022 ; `tracker` dans
+`config.json`), jamais la source de vérité, car `op.mjs` est zéro-réseau. Un gros effort a un `.operator/projects/<id>/roadmap.md`
 (milestones → work items), précédé d'un `map.md` (carte de décisions `op-explore`) quand la voie
 est encore brumeuse — approuvés par l'operateur mais **non gatés** mécaniquement. Mémoire
 plafonnée dans `.operator/memory/` : `project.md` (120), `conventions.md` (200), `lessons.md` (150),
@@ -107,7 +111,7 @@ plus `decisions/` (ADRs) et `archive/`.
      seule phrase-déclencheur ; les synonymes qui re-déclenchent la même branche sont de la
      duplication. Front-loader le leading word ; ne pas re-dire l'identité déjà dans le corps.
      Cible : 60–90 mots — la description est du context load permanent chez les hôtes à
-     model-invocation, multiplié par 14 skills.
+     model-invocation, multiplié par 15 skills.
   2. **Chaque étape finit sur un critère de complétion checkable.** Les étapes gatées l'ont via
      `op.mjs` ; une étape non gatée le dit en toutes lettres (« it ends when… »).
   3. **Test du no-op, phrase par phrase.** Une phrase qui ne change pas le comportement par
@@ -134,8 +138,8 @@ plus `decisions/` (ADRs) et `archive/`.
   mérite un test.
 - **Le bloc `src/payload/agents-block.md` reste ≤ 60 lignes** (il est chargé à chaque tour) — le
   détail va dans `constitution.md`, dont le bloc est le résumé.
-- **Décision d'architecture significative** → un ADR dans `docs/adr/` (`NNNN-slug.md`). 21 ADRs
-  existent (0001–0021) ; ne pas réécrire un ADR accepté, en ajouter un nouveau qui le supersède
+- **Décision d'architecture significative** → un ADR dans `docs/adr/` (`NNNN-slug.md`). 22 ADRs
+  existent (0001–0022) ; ne pas réécrire un ADR accepté, en ajouter un nouveau qui le supersède
   (ex. 0021 supersède 0013 : routage opt-in via `/operator`).
 - **Zéro dépendance runtime, jamais de réseau** dans le toolkit (installeur comme `op.mjs`) : Node
   builtins uniquement.

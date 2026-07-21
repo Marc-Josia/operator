@@ -2,8 +2,8 @@
 
 <!-- Durable facts every session needs. This is the only memory file loaded by default at
      task start — keep it dense and current. Cap: 120 lines (`.operator/config.json`).
-     This file is a seed: the first op-* run in this project must survey the codebase and
-     fill it in (see AGENTS.md iron rule 4). -->
+     This file is a seed: op-init surveys the codebase and fills it in on first run (any op-*
+     run must do so if it is still a seed — see AGENTS.md iron rule 4). -->
 
 ## Stack
 

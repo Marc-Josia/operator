@@ -50,7 +50,7 @@ preset the command with `--test-cmd "npm test"`), and writes:
 ```
 AGENTS.md              managed block injected between markers; your content is untouched
 CLAUDE.md              ensured to contain `@AGENTS.md` (only when Claude Code is detected)
-.agents/skills/        14 skills: 10 op-* procedures + 4 operator-* expertise packs
+.agents/skills/        15 skills: 11 op-* procedures + 4 operator-* expertise packs
 .claude/skills/        copy of the skills, for Claude Code (only when detected)
 .gemini/settings.json  context file setting (only when .gemini/ already exists)
 .operator/
@@ -65,6 +65,14 @@ CLAUDE.md              ensured to contain `@AGENTS.md` (only when Claude Code is
 ```
 
 Commit all of it. The work-item journals in git history are your audit trail.
+
+**First run — set the project up.** Open your agent and say *"set up Operator"*. That runs the
+`op-init` procedure: it surveys your codebase into memory, confirms your test command, tunes how the
+agent talks to you (language, verbosity, and whether you are a novice or an expert engineer — it
+does not address the two the same way), and asks where you want to track work — local markdown work
+items (the default, fully offline), GitHub Issues, or Linear. Choose an external tracker and
+Operator mirrors each work item to an issue your team already watches, while the local work item
+stays the source of truth. Re-run it any time to switch trackers or adjust the tone.
 
 Note on npx caching: npx caches GitHub-sourced packages and does not refresh them automatically.
 If you installed before and want the newest version, clear the cache first:
@@ -225,10 +233,11 @@ picks the lane mechanically:
 
 **Skills** come in two kinds, and the distinction is a rule, not a naming scheme:
 
-- Procedures (`op-discover`, `op-explore`, `op-roadmap`, `op-new`, `op-plan`, `op-build`,
-  `op-fix`, `op-ship`, `op-status`, `op-memory`) — the only things allowed to move work-item
-  state (`op-discover`, `op-explore`, and `op-roadmap` move none themselves; discovery and the
-  roadmap feed `op-new`, exploration feeds `op-roadmap`).
+- Procedures (`op-init`, `op-discover`, `op-explore`, `op-roadmap`, `op-new`, `op-plan`,
+  `op-build`, `op-fix`, `op-ship`, `op-status`, `op-memory`) — the only things allowed to move
+  work-item state (`op-init`, `op-discover`, `op-explore`, and `op-roadmap` move none themselves;
+  op-init onboards and sets the tracker, discovery and the roadmap feed `op-new`, exploration feeds
+  `op-roadmap`).
 - Expertise packs (`operator-code-review`, `operator-security-review`,
   `operator-test-strategy`, `operator-debugging`) — advice consumed by the procedures; they
   never touch stage, lane, or journal.
@@ -291,6 +300,8 @@ including inside agent sandboxes.
 | Key | Meaning |
 |---|---|
 | `testCommand` | the command the build gate runs. `null` (the initial value if you skipped the interview) makes the gate fail with instructions to configure it. `false` means "this project has no tests, and the operator has waived them" — the gate then requires a journaled `WAIVER tests` line quoting you |
+| `tracker` | where work items are mirrored: `"markdown"` (default — fully local, no network), `"github"`, or `"linear"`. Set it with `op-init`. The local work item stays the source of truth in every mode; an external tracker is a mirror the agent keeps in sync via MCP |
+| `trackerConfig` | the target for an external tracker: `{ "owner": "…", "repo": "…" }` for GitHub, `{ "team": "…" }` for Linear. Empty `{}` for markdown |
 | `protectedPaths` | globs (`**`, `*`, `?` supported) that never travel the quick lane and always trigger a security review at the review gate. Defaults cover auth, payments, migrations, secrets, CI workflows — edit to fit your project |
 | `lanes.quick` | quick-lane caps: `maxFiles` (3) and `maxChangedLines` (80) |
 | `memoryCaps` | max lines per memory file before `op-memory` must consolidate and archive |
@@ -305,9 +316,13 @@ as conventions immediately; check `decisions/` into review like any other doc.
 
 ### AGENTS.md
 
-Everything outside the `<!-- operator:begin -->` / `<!-- operator:end -->` markers is yours and
-is never modified. Do not edit inside the block — `update` replaces it wholesale, and `doctor`
-flags drift. Project-specific instructions belong in your own zones or in memory files.
+Operator manages two regions of `AGENTS.md`. The **block** (`<!-- operator:begin -->` /
+`<!-- operator:end -->`) is the always-loaded router: `update` replaces it wholesale, so do not edit
+inside it (`doctor` flags drift). The optional **communication profile**
+(`<!-- operator:profile:begin -->` / `<!-- operator:profile:end -->`), written by `op-init`, holds
+your language, verbosity, and expertise level; `update` preserves it (it is your data, like
+`config.json`), and `remove` strips both regions. Everything outside those two regions is yours and
+is never modified — project-specific instructions belong in your own zones or in memory files.
 
 ### Templates and skills
 
@@ -334,7 +349,7 @@ npx --yes github:Marc-Josia/operator remove          # keeps work/, memory/, pro
 npx --yes github:Marc-Josia/operator remove --purge  # removes those too
 ```
 
-`remove` deletes the managed block (your `AGENTS.md` content stays), the 14 skill directories
+`remove` deletes the managed block (your `AGENTS.md` content stays), the 15 skill directories
 (including the `.claude/skills/` mirror), and `.operator/` — except your work items and memory,
 which are kept unless you `--purge`. `CLAUDE.md` is removed only if it is exactly the generated
 one-line import; in `.gemini/settings.json` only the key Operator added is reverted. It prints

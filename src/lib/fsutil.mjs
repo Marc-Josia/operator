@@ -191,6 +191,34 @@ export function removeMarkerBlock(content) {
   return (content.slice(0, found.start) + content.slice(found.end)).replace(/^\n+/, '');
 }
 
+// The operator communication profile — a SECOND, distinct managed region written
+// by op-init (language, verbosity, operator expertise). Its markers deliberately
+// differ from the block's so BEGIN_RE/END_RE never match them: update preserves
+// this region (user data, like config.json); only remove strips it.
+export const PROFILE_BEGIN = '<!-- operator:profile:begin -->';
+export const PROFILE_END = '<!-- operator:profile:end -->';
+const PROFILE_BEGIN_RE = /<!--\s*operator:profile:begin\s*-->/;
+const PROFILE_END_RE = /<!--\s*operator:profile:end\s*-->/;
+
+/** Locate the profile region. Returns `{ start, end, inner }` (offsets cover the
+ *  markers themselves; `inner` is the raw text between them) or null. */
+export function findProfileRegion(content) {
+  const begin = content.match(PROFILE_BEGIN_RE);
+  if (!begin) return null;
+  const afterBegin = begin.index + begin[0].length;
+  const rest = content.slice(afterBegin);
+  const end = rest.match(PROFILE_END_RE);
+  if (!end) return null;
+  return { start: begin.index, end: afterBegin + end.index + end[0].length, inner: rest.slice(0, end.index) };
+}
+
+/** Remove the profile region (markers included), keeping everything else. */
+export function removeProfileRegion(content) {
+  const found = findProfileRegion(content);
+  if (!found) return content;
+  return (content.slice(0, found.start) + content.slice(found.end)).replace(/\n{3,}/g, '\n\n').replace(/^\n+/, '');
+}
+
 // ---------------------------------------------------------------------------
 // Minimal glob
 // ---------------------------------------------------------------------------

@@ -31,8 +31,8 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
    the first one. Stop here.
 
 2. **Read each item from disk — not from what you remember doing.** For every `workitem.md`:
-   - frontmatter: `id`, `title`, `lane`, `stage`, `updated`, `next`, and `project`/`milestone`
-     if the item belongs to a project;
+   - frontmatter: `id`, `title`, `lane`, `stage`, `updated`, `next`, `project`/`milestone`
+     if the item belongs to a project, and `tracker_ref:` if it is mirrored to an external tracker;
    - the last 3–5 journal lines — the most recent events are what actually happened last;
    - progress counts: checked vs total boxes in Tasks and in Definition of done;
    - for standard/full items at `spec` or later: whether the lane's spec document
@@ -102,7 +102,9 @@ about. Reading costs nothing, so orientation can happen as often as anyone wants
 
    Omit the Projects section when no `.operator/projects/` exist; when they do, lead with it — it is
    the operator's altitude — then the per-item detail below. If several items are active, restate
-   the rule: one active agent per item — parallel agents take different items.
+   the rule: one active agent per item — parallel agents take different items. When an item carries a
+   `tracker_ref:`, show the handle (e.g. `github:#42`, `linear:ENG-17`) on its line so the operator
+   can jump to the mirrored issue — reading only, op-status never syncs the tracker.
 
 7. **Recommend the mechanical view.** `node .operator/bin/op.mjs status` prints the same facts
    as a deterministic table straight from the frontmatter, plus the active item's last journal

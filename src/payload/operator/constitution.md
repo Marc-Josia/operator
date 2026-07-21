@@ -86,7 +86,13 @@ what they want in plain language, and you route it. You are the dispatcher: clas
 run the matching procedure, report the outcome. Never ask "which command should I run?" — deciding
 that is your job, not theirs. A bare `/operator` with no request routes to `op-status`.
 
-**First, is this new or already in flight?** If an open work item covers the request, resume it —
+**First, is Operator set up in this project?** On the very first engagement — `memory/project.md`
+still a seed, or the operator says "set up", "onboard", "get started", "configure tracking" — run
+`op-init` before anything else: it surveys the codebase into memory, confirms the test command, and
+chooses where work is tracked (markdown / GitHub / Linear). It is run once and is safe to re-run to
+change the tracker. Setup done, route the actual request below.
+
+**Then, is this new or already in flight?** If an open work item covers the request, resume it —
 its `stage:` field names the procedure (`spec`→op-plan, `build`→op-build, `review`→op-ship). Run
 `op-status` whenever you are unsure what is open or where an item stands.
 
@@ -120,6 +126,7 @@ exploration moves no work-item state and passes no gate — the operator approve
 
 | The request… | Procedure | Effect |
 |---|---|---|
+| is first-run setup — install just done, "onboard", "configure tracking" | `op-init` | no state (writes config/memory) |
 | is vague or exploratory — problem-shaped, not a precise change | `op-discover` | no state (→ op-new) |
 | is bigger than one work item — a project, many features, a v2 | `op-roadmap` | no state (→ op-new per item) |
 | is confirmed but unplannable — unknowns to resolve across sessions | `op-explore` | no state (→ op-roadmap) |
@@ -163,6 +170,33 @@ Routing never excuses skipping a gate — every path still enters the method abo
 - Only `op-*` procedures move state (stage, lane, journal). Expertise packs (`operator-*`)
   advise and never write state. The gate checker owns stage transitions.
 - One active agent per work item. Parallel agents work on different items.
+
+## Tracking
+
+Where work is *tracked* is the operator's choice, set once at `op-init` and stored in
+`.operator/config.json` as `tracker`: `markdown` (the default), `github`, or `linear`. The choice
+never changes where state *lives*. In every mode the local `workitem.md` is the single source of
+truth — triage, Scope, the append-only Journal, and gate evidence are there, and `op.mjs` measures
+the real git diff to advance stages. A tracker is a **mirror**: the local truth published outward.
+
+This is forced by the engine, not a preference. `op.mjs` is zero-dependency and zero-network, so it
+cannot read or advance state that lives behind a GitHub or Linear API; making the tracker
+authoritative would break "gates are checked, not asserted" the moment the network is down. So the
+agent — which has network and MCP tools — does the mirroring, at four touchpoints:
+
+- **create/link** — after the intake gate passes, `op-new` (and `op-fix`) creates or links an issue
+  on the tracker and records its handle in frontmatter `tracker_ref:` (e.g. `github:#42`,
+  `linear:ENG-17`). `markdown` mode leaves it blank.
+- **advance** — each gate passage publishes a short status note to the linked issue (stage moved,
+  the evidence line).
+- **close** — `op-ship` closes or completes the linked issue at `done`, with the ship report.
+- **read** — `op-status` surfaces the `tracker_ref` link beside each item.
+
+Mirroring degrades like every other host capability (see the table below): when the tracker is
+external but its MCP tool is absent or a call fails, journal the intended sync
+(`- <date> TRACKER <what> (deferred: <reason>)`) and continue. The local gate is never blocked on
+an external system, and `markdown` mode makes no external calls at all. Only `op.mjs` owns stage
+transitions; the tracker only ever reflects them.
 
 ## Orchestration
 
@@ -231,6 +265,13 @@ gate checker's output is the proof. If doubt remains, the work is not finished, 
 Report in this order: what was accomplished → the proof → the decisions → what remains. Never
 narrate internal reasoning. Never produce long, useless analyses. Write for a human discovering
 the work, not for a log file.
+
+Adapt tone to the operator. When `AGENTS.md` carries an `operator:profile` region (written by
+op-init — language, verbosity, expertise level), honor it in **every** reply, plain chat included:
+converse in the stated language, match the stated verbosity, and pitch explanations at the stated
+expertise — teach concepts to a novice, assume depth with an expert. The report *order* above is
+fixed; what flexes is the language, how much you say, and how much you explain. With no profile set,
+default to concise and match the operator's own language and level as you observe them.
 
 ## Continuous improvement
 

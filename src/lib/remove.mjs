@@ -1,6 +1,7 @@
 // `operator remove` — uninstall Operator from a project, conservatively.
 //
-// Removed: the managed AGENTS.md block, the installed skill directories (and
+// Removed: the managed AGENTS.md block and the op-init communication-profile
+// region, the installed skill directories (and
 // their .claude/skills mirrors), and `.operator/` EXCEPT `work/`, `memory/`, and `projects/`
 // — those hold the project's history and knowledge and are kept unless
 // `--purge`. CLAUDE.md is deleted only when it is exactly our generated
@@ -8,7 +9,14 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { OperatorError, findMarkerBlock, readJson, removeMarkerBlock } from './fsutil.mjs';
+import {
+  OperatorError,
+  findMarkerBlock,
+  findProfileRegion,
+  readJson,
+  removeMarkerBlock,
+  removeProfileRegion,
+} from './fsutil.mjs';
 import { adapters, installedSkillNames } from './adapters/index.mjs';
 
 function rmdirIfEmpty(p) {
@@ -38,19 +46,22 @@ export async function remove(opts = {}) {
   }
   const skillNames = installedSkillNames(installed, cwd);
 
-  // AGENTS.md: strip the managed block, keep everything the user wrote -----------
+  // AGENTS.md: strip the managed block and the profile region, keep the rest ------
   const agentsPath = path.join(cwd, 'AGENTS.md');
   if (fs.existsSync(agentsPath)) {
     const content = fs.readFileSync(agentsPath, 'utf8');
-    if (findMarkerBlock(content)) {
-      const stripped = removeMarkerBlock(content);
+    const hadBlock = findMarkerBlock(content) !== null;
+    const hadProfile = findProfileRegion(content) !== null;
+    if (hadBlock || hadProfile) {
+      const stripped = removeProfileRegion(removeMarkerBlock(content));
+      const what = [hadBlock && 'managed block', hadProfile && 'communication profile'].filter(Boolean).join(' and ');
       if (stripped.trim()) {
         fs.writeFileSync(agentsPath, stripped);
-        report.removed.push('the managed block from AGENTS.md');
+        report.removed.push(`the ${what} from AGENTS.md`);
         report.kept.push('AGENTS.md — it contains your own content');
       } else {
         fs.rmSync(agentsPath);
-        report.removed.push('AGENTS.md (it contained only the managed block)');
+        report.removed.push(`AGENTS.md (it contained only the ${what})`);
       }
     }
   }

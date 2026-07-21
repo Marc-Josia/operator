@@ -26,20 +26,14 @@ downstream — spec, diff measurement, review, ship — keys off what is created
 
 ## Steps
 
-### 1. Survey project memory (first run in a project only)
+### 1. Ensure the project is set up (first run only)
 
-Read `.operator/memory/project.md`. If it still contains `_Not yet surveyed._`, fill it before
-anything else — triage, scope, and test expectations all depend on knowing the project:
-
-- **Stack** — languages, frameworks, package manager, runtimes (from manifests and lockfiles).
-- **Commands** — install, build, test, lint, run locally. Take them from manifests and CI
-  config, not guesswork. If `.operator/config.json` has `"testCommand": null` and the survey
-  found the test command, confirm it with the operator and write it into the config — the
-  build gate cannot pass without it.
-- **Layout** — the 5–10 directories that matter and what lives in each.
-- **Environment quirks** — required env vars, ports, platform gotchas, slow or flaky steps.
-
-Stay under the 120-line cap (`.operator/config.json`). If `project.md` is already filled, skip.
+Read `.operator/memory/project.md`. If it still reads `_Not yet surveyed._`, the project was never
+onboarded: stop and run `.agents/skills/op-init/SKILL.md` first. It surveys the codebase into
+memory, confirms the test command, and sets where work is tracked (markdown / GitHub / Linear) —
+triage, scope, and the build gate all depend on that survey, and the tracker choice decides whether
+this item is mirrored to an issue. Come back here once `project.md` is filled. If it is already
+filled, continue.
 
 ### 2. Restate and clarify
 
@@ -149,7 +143,25 @@ Run `node .operator/bin/op.mjs gate <id>`. On pass, the checker itself appends t
 stage by hand; a self-asserted gate is exactly what iron rule 2 forbids. On fail, it prints
 each failing check with its fix and changes nothing: fix the item, re-run.
 
-### 6. Route
+### 6. Mirror the item to the tracker (external trackers only)
+
+Read `tracker` in `.operator/config.json`. If it is `markdown`, skip this step — `tracker_ref:`
+stays blank and no external call is made. If it is `github` or `linear`, mirror the work item to an
+issue through that tracker's MCP tools (the constitution's `## Tracking` section is the authority —
+mirror, never author):
+
+- Create the issue: title = the work item title; body = a short summary (the Problem, the lane, and
+  a pointer to `.operator/work/<id>/`). Take the target from `trackerConfig` (`owner`/`repo` for
+  GitHub, `team` for Linear). If the operator named an existing issue for this work, link that one
+  instead of creating a duplicate.
+- Record the handle in frontmatter `tracker_ref:` — `github:#<number>` or `linear:<identifier>` —
+  and journal `- <YYYY-MM-DD> TRACKER linked <handle>`. `tracker_ref:` is a convenience field the
+  checker ignores (it tolerates unknown keys); editing it is not a stage transition.
+- If the tracker's MCP tool is absent or the call fails, do not block intake: journal
+  `- <YYYY-MM-DD> TRACKER create (deferred: <reason>)` and continue. The local work item is the
+  source of truth; the mirror can be reconciled on the next op-init or by hand.
+
+### 7. Route
 
 Report briefly to the operator — item id, lane, gate output as proof, what happens next — then:
 
