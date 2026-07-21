@@ -1,12 +1,12 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-07-20T11:39:00.036Z",
+  "generatedAt": "2026-07-21T06:19:16.560Z",
   "files": {
-    "src/payload/agents-block.md": "94e72d5862fde8df3a4f8e23b55540ccc983a6d4a7fdbf73abb12c7c6e795cdd",
+    "src/payload/agents-block.md": "96837d4027545101c54d74f77f7c76112874d6aba518723111f44b276f6d3e50",
     "src/payload/operator/VERSION": "1f930dd1f133c1f97a94fe3acb8db34372cf4c01ffdb2b3ff4ca72f9494121e9",
     "src/payload/operator/bin/op.mjs": "99612c532202599ea457fe0709b6ca91bfd3f19d1dac807ec2ccc421b37ebcb2",
     "src/payload/operator/config.json": "0c91ba10584408125ede2191fbd622600d780780dd56ab57f17b0725f9eb735b",
-    "src/payload/operator/constitution.md": "91cab68a2b69b308389a70475bbfba64bccc8e2089f375dcd49e204b58c6428d",
+    "src/payload/operator/constitution.md": "844595666813104c4104ec18fe95a74310487d7a92d387c75965e9d1989b1c9e",
     "src/payload/operator/gates.json": "7d6ea3e07c7b455046663253bd7a2d734f08fbf7c766da419663bebf4c9c34ac",
     "src/payload/operator/memory/archive/README.md": "e09c5a8f12ddf5ee52d7dc16b09fdea1859fdc1f8c414328c7a52fffc3377dfd",
     "src/payload/operator/memory/conventions.md": "688012ca82208056c2c85723acfe0e268a22e4f30f80a026e1d2a3bcc064cb2d",

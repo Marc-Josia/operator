@@ -1,6 +1,6 @@
 # ADR-0013: Natural-language routing lives in the always-loaded harness, not a router skill
 
-- Status: accepted
+- Status: superseded by ADR-0021
 - Date: 2026-07-15
 
 ## Context

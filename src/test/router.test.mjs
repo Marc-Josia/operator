@@ -1,8 +1,10 @@
-// "The router never lies" — the always-loaded agents-block.md and the
-// constitution's Routing section are the toolkit's dispatcher. These tests pin
-// them to the skills actually shipped in src/payload/skills/: every shipped
-// skill is routed, every routed name exists, the block stays within its line
-// budget, and each SKILL.md frontmatter name matches its directory.
+// "The router never lies" — the constitution's Routing section holds the full
+// dispatch tree; the always-loaded agents-block.md gates engagement (default
+// off, `/operator` on) and points to it. These tests pin the dispatcher to the
+// skills actually shipped in src/payload/skills/: every shipped skill is routed
+// in the constitution and listed in the README, every routed name in any router
+// surface exists, the block stays within its line budget, and each SKILL.md
+// frontmatter name matches its directory.
 // Scope guard: this is a router-consistency check, not a general skill linter.
 
 import assert from 'node:assert/strict';
@@ -58,13 +60,14 @@ function readmeSkillsSection() {
   return match[0];
 }
 
-test('router coverage: every shipped skill is named in agents-block.md and the Routing section', () => {
-  const block = read(PAYLOAD, 'agents-block.md');
+test('router coverage: every shipped skill is named in the Routing section and the README', () => {
+  // The block no longer enumerates skills (it points to the constitution since
+  // ADR-0021); coverage is asserted against the constitution's Routing tree and
+  // the README skills list, which remain the authoritative enumerations.
   const routing = routingSection();
   const readmeSkills = readmeSkillsSection();
   for (const name of skillDirs()) {
     const word = new RegExp(`\\b${name}\\b`);
-    assert.match(block, word, `skill ${name} is shipped but agents-block.md never routes it`);
     assert.match(routing, word, `skill ${name} is shipped but the constitution Routing section never routes it`);
     assert.match(readmeSkills, word, `skill ${name} is shipped but the src/README.md Skills list omits it`);
   }

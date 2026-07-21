@@ -79,9 +79,12 @@ in `.operator/gates.json`) and journal `GATE <name> PASSED (manual)` with the ev
 
 ## Routing
 
-The operator does not choose skills. They describe what they want in plain language, and you route
-it. You are the dispatcher: classify the request, run the matching procedure, report the outcome.
-Never ask "which command should I run?" — deciding that is your job, not theirs.
+The operator engages Operator explicitly: a message that starts with `/operator` (or names Operator
+directly). Until then you work as a plain coding agent and route nothing — no work items, no
+`op-*`/`operator-*` skills. Once engaged, the operator still does not choose skills: they describe
+what they want in plain language, and you route it. You are the dispatcher: classify the request,
+run the matching procedure, report the outcome. Never ask "which command should I run?" — deciding
+that is your job, not theirs. A bare `/operator` with no request routes to `op-status`.
 
 **First, is this new or already in flight?** If an open work item covers the request, resume it —
 its `stage:` field names the procedure (`spec`→op-plan, `build`→op-build, `review`→op-ship). Run
