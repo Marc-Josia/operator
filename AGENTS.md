@@ -69,7 +69,8 @@ puis avance l'étape lui-même. `op.mjs` a **3 sous-commandes** : `status`, `gat
 **Les skills — 15, sur deux contrats** (le mécanisme : ADR-0005 ; `op-discover` et `op-roadmap`
 ajoutés par ADR-0014/0015, `op-explore` par ADR-0019, `op-init` par ADR-0021).
 - **11 procédures `op-*`** (seules autorisées à déplacer l'état d'un work item) :
-  `op-init` (onboarding : survey + choix du tracker markdown/GitHub/Linear), `op-discover`
+  `op-init` (onboarding : survey + profil de communication dans `AGENTS.md` + choix du tracker
+  markdown/GitHub/Linear), `op-discover`
   (cadrer un besoin flou), `op-explore` (naviguer un projet brumeux : carte de
   décisions, collapse vers la roadmap), `op-roadmap` (découper un projet en roadmap de
   milestones), `op-new` (intake + triage), `op-plan` (spec), `op-build` (implémentation),

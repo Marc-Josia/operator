@@ -66,11 +66,12 @@ CLAUDE.md              ensured to contain `@AGENTS.md` (only when Claude Code is
 Commit all of it. The work-item journals in git history are your audit trail.
 
 **First run — set the project up.** Open your agent and say *"set up Operator"*. That runs the
-`op-init` procedure: it surveys your codebase into memory, confirms your test command, and asks
-where you want to track work — local markdown work items (the default, fully offline), GitHub
-Issues, or Linear. Choose an external tracker and Operator mirrors each work item to an issue your
-team already watches, while the local work item stays the source of truth. Re-run it any time to
-switch trackers.
+`op-init` procedure: it surveys your codebase into memory, confirms your test command, tunes how the
+agent talks to you (language, verbosity, and whether you are a novice or an expert engineer — it
+does not address the two the same way), and asks where you want to track work — local markdown work
+items (the default, fully offline), GitHub Issues, or Linear. Choose an external tracker and
+Operator mirrors each work item to an issue your team already watches, while the local work item
+stays the source of truth. Re-run it any time to switch trackers or adjust the tone.
 
 Note on npx caching: npx caches GitHub-sourced packages and does not refresh them automatically.
 If you installed before and want the newest version, clear the cache first:
@@ -313,9 +314,13 @@ as conventions immediately; check `decisions/` into review like any other doc.
 
 ### AGENTS.md
 
-Everything outside the `<!-- operator:begin -->` / `<!-- operator:end -->` markers is yours and
-is never modified. Do not edit inside the block — `update` replaces it wholesale, and `doctor`
-flags drift. Project-specific instructions belong in your own zones or in memory files.
+Operator manages two regions of `AGENTS.md`. The **block** (`<!-- operator:begin -->` /
+`<!-- operator:end -->`) is the always-loaded router: `update` replaces it wholesale, so do not edit
+inside it (`doctor` flags drift). The optional **communication profile**
+(`<!-- operator:profile:begin -->` / `<!-- operator:profile:end -->`), written by `op-init`, holds
+your language, verbosity, and expertise level; `update` preserves it (it is your data, like
+`config.json`), and `remove` strips both regions. Everything outside those two regions is yours and
+is never modified — project-specific instructions belong in your own zones or in memory files.
 
 ### Templates and skills
 

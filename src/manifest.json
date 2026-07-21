@@ -1,12 +1,12 @@
 {
   "version": "0.2.0",
-  "generatedAt": "2026-07-21T06:14:06.961Z",
+  "generatedAt": "2026-07-21T06:25:45.639Z",
   "files": {
     "src/payload/agents-block.md": "5ab81fb763dbb27bc838b02d3155c8465b183e5b060e24dad8a63cece96e7a17",
     "src/payload/operator/VERSION": "1f930dd1f133c1f97a94fe3acb8db34372cf4c01ffdb2b3ff4ca72f9494121e9",
     "src/payload/operator/bin/op.mjs": "99612c532202599ea457fe0709b6ca91bfd3f19d1dac807ec2ccc421b37ebcb2",
     "src/payload/operator/config.json": "03052365e16342bf79d9dd695c02484b4ccc109a3b3bc5a8294916ff4bf40470",
-    "src/payload/operator/constitution.md": "4f73e0f3a1aa2adc49be0210d61a2263a4a41e105295ca18003b9cca4e1d28bd",
+    "src/payload/operator/constitution.md": "892494317cd1f48b13340f1ab7227f3004c37063c3cadab1bf55523681359833",
     "src/payload/operator/gates.json": "7d6ea3e07c7b455046663253bd7a2d734f08fbf7c766da419663bebf4c9c34ac",
     "src/payload/operator/memory/archive/README.md": "e09c5a8f12ddf5ee52d7dc16b09fdea1859fdc1f8c414328c7a52fffc3377dfd",
     "src/payload/operator/memory/conventions.md": "688012ca82208056c2c85723acfe0e268a22e4f30f80a026e1d2a3bcc064cb2d",
@@ -25,7 +25,7 @@
     "src/payload/skills/op-discover/SKILL.md": "89653908c05a4b713a341a2f429407cd6b680ccb5adc56d66ffd8bb877d41d50",
     "src/payload/skills/op-explore/SKILL.md": "640aa8df4da123615c5c6d7ac013dcc311b17cb03ff132baa183989eb958801b",
     "src/payload/skills/op-fix/SKILL.md": "47e092abdb25e5d2e0f519da8493526ae38355ac48ef92cc6f1dee777a4c5059",
-    "src/payload/skills/op-init/SKILL.md": "3f1fc5649f72f1d72317e4fe5af4bb8d8594c6cbfd975efa4c1225dfaa7824ae",
+    "src/payload/skills/op-init/SKILL.md": "acb5d31aad627914ac76f1467765e7d5d9ffad61985f9887f5239b93fb0bcd87",
     "src/payload/skills/op-memory/SKILL.md": "12cffb479a074a36d791e7cc04e03422ac1887f312dcfeec3d619c4f9eeba64f",
     "src/payload/skills/op-new/SKILL.md": "5f93a3537a1283accc405572d905b94d0d34b08766d244281d69aa4381c884ee",
     "src/payload/skills/op-plan/SKILL.md": "ebf8f8578b1acfd5589c69740c740def9aa0dcb037a3a696d8fb2aaa5d5bb856",

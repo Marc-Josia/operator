@@ -263,6 +263,13 @@ Report in this order: what was accomplished → the proof → the decisions → 
 narrate internal reasoning. Never produce long, useless analyses. Write for a human discovering
 the work, not for a log file.
 
+Adapt tone to the operator. When `AGENTS.md` carries an `operator:profile` region (written by
+op-init — language, verbosity, expertise level), honor it in **every** reply, plain chat included:
+converse in the stated language, match the stated verbosity, and pitch explanations at the stated
+expertise — teach concepts to a novice, assume depth with an expert. The report *order* above is
+fixed; what flexes is the language, how much you say, and how much you explain. With no profile set,
+default to concise and match the operator's own language and level as you observe them.
+
 ## Continuous improvement
 
 Every error must improve the system — as a lesson, a convention, or a better SOP. Every success

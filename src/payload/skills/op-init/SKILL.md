@@ -1,19 +1,20 @@
 ---
 name: op-init
-description: "Set up Operator in a project on first run: survey the codebase into memory, confirm the test command and protected paths, and choose where work is tracked — local markdown work items, GitHub Issues, or Linear — verifying the connection for an external tracker and recording it in config. Use it right after install, when the operator says to onboard, get started, or configure tracking, or to switch trackers later. It writes config and memory, opens no work item, and passes no gate."
+description: "Set up Operator in a project on first run: survey the codebase into memory, confirm the test command, tune how the agent talks to the operator (language, verbosity, expertise level), and choose where work is tracked — local markdown work items, GitHub Issues, or Linear. Use it right after install, when the operator says to onboard, get started, configure tracking, or adjust the tone, or to switch trackers later. It writes config, the AGENTS.md profile, and memory, opens no work item, and passes no gate."
 ---
 
 # op-init — set the project up
 
 ## Purpose
 
-Make the project ready to run work through Operator, once. Three things get settled here and are
+Make the project ready to run work through Operator, once. Four things get settled here and are
 assumed everywhere downstream: the codebase is surveyed into `memory/project.md`, the test command
-and protected paths in `config.json` are confirmed against reality, and the operator chooses where
-work is **tracked** — local markdown, GitHub Issues, or Linear. Triage, scope, and every gate
-depend on the survey; the mirror touchpoints in `op-new`, `op-fix`, `op-ship`, and `op-status`
-depend on the tracker choice. op-init is the one place that choice is made, so nothing later has to
-guess it.
+and protected paths in `config.json` are confirmed against reality, the **communication profile**
+(language, verbosity, operator expertise) is written into `AGENTS.md` so the agent talks the way the
+operator wants, and the operator chooses where work is **tracked** — local markdown, GitHub Issues,
+or Linear. Triage, scope, and every gate depend on the survey; the mirror touchpoints in `op-new`,
+`op-fix`, `op-ship`, and `op-status` depend on the tracker choice; every reply's tone depends on the
+profile. op-init is the one place these are set, so nothing later has to guess them.
 
 ## Entry criteria
 
@@ -51,7 +52,42 @@ The build gate cannot pass without a test command. Read `.operator/config.json`:
   payments, migrations, secrets, CI). Adjust on request. Protected paths never travel the quick lane
   and always force a security review.
 
-### 3. Choose where work is tracked
+### 3. Set the communication profile
+
+The agent should not address a total novice and a staff engineer the same way, and not everyone
+works in English. Ask the operator three things, then write their answers into `AGENTS.md` so every
+reply — plain chat as much as work-item reports — honors them:
+
+- **Language** — the language to converse in (the reply prose; skill and procedure files stay
+  English). Default to the language the operator is already using with you.
+- **Verbosity** — how much detail in discussion: `terse` (answer first, minimal preamble),
+  `balanced`, or `thorough` (spell out reasoning and context).
+- **Operator expertise** — `novice` (explain concepts, avoid unexplained jargon, guide more
+  actively), `intermediate`, or `expert` (assume depth, use precise terms, justify trade-offs
+  instead of teaching basics).
+
+Write them into a dedicated managed region in `AGENTS.md`, immediately after the
+`<!-- operator:end -->` marker of the Operator block, using **these exact markers** so it can be
+updated in place and cleanly removed:
+
+```
+<!-- operator:profile:begin -->
+## Operator — communication profile
+
+Adapt every reply to the operator, in chat and in reports:
+- **Language:** <language> — converse in this language; skill and procedure files stay English.
+- **Verbosity:** <level> — <one-line gloss of what that means here>.
+- **Operator expertise:** <level> — <how to pitch explanations at this level>.
+<!-- operator:profile:end -->
+```
+
+This region is the operator's data, not the managed block: `update` preserves it (like
+`config.json`), and `remove` strips it. Re-running op-init finds the markers and rewrites the region
+in place — never leave a second one. If `AGENTS.md` has no Operator block yet (unusual — install
+writes one), put the region at the top of the file instead. The constitution's `## Communication`
+section is the authority on honoring it.
+
+### 4. Choose where work is tracked
 
 Ask the operator plainly: **markdown, GitHub Issues, or Linear?** Explain the trade in one line —
 markdown keeps everything local and offline; GitHub/Linear mirror each work item to an issue your
@@ -74,7 +110,7 @@ fails, say so, keep `"tracker": "markdown"`, and tell the operator what to conne
 for that tracker) before re-running op-init. An external tracker the agent cannot reach would leave
 every work item silently un-mirrored — default to the honest local mode instead.
 
-### 4. Report and hand off
+### 5. Report and hand off
 
 Tell the operator what is now set: the surveyed stack in one line, the test command, and the chosen
 tracker (with its target for GitHub/Linear). Then point them at the actual work — a plain-language
@@ -85,9 +121,9 @@ no work item; the first `op-new` will create one and, in an external tracker mod
 
 None. op-init moves no work-item state and passes no mechanical gate — like `op-discover` and
 `op-roadmap`, the operator approves its output, not `op.mjs`. It ends when `memory/project.md` is
-filled, `config.json` carries a confirmed `testCommand` (or an explicit `false`), and `tracker` is
-set to a mode whose connection you verified (or `markdown`). Nothing is journaled — there is no work
-item yet.
+filled, `config.json` carries a confirmed `testCommand` (or an explicit `false`), the
+`operator:profile` region is written into `AGENTS.md`, and `tracker` is set to a mode whose
+connection you verified (or `markdown`). Nothing is journaled — there is no work item yet.
 
 ## Failure modes
 

@@ -77,6 +77,24 @@ tracker later. The CLI `init` interview stays as the offline fallback for hosts 
 loop, but the agent, not the CLI, does the rich setup — the CLI cannot survey a codebase or reach
 an MCP server.
 
+### 4. `op-init` also sets a communication profile in `AGENTS.md`
+
+The agent should not address a total novice and a staff engineer the same way, and not everyone
+works in English. `op-init` asks the operator three things — **language**, **verbosity**, and
+**operator expertise** (novice ↔ expert) — and writes them into `AGENTS.md`, because tone must apply
+to *every* turn (plain chat included) and only `AGENTS.md` is always-loaded by every host;
+`config.json`, read only on demand, cannot tune casual conversation.
+
+It goes in a **second managed region** with its own markers
+(`<!-- operator:profile:begin -->` / `<!-- operator:profile:end -->`), distinct from the router
+block's, placed just after it. This keeps the promise that everything outside Operator's markers is
+the user's: the profile is Operator's to manage, not smuggled into user prose. The markers cannot
+collide with the block's (`BEGIN_RE`/`END_RE` match `operator:begin`/`operator:end` literally), so
+`update` — which only replaces the block — **preserves** the profile as user data (like
+`config.json`), and `remove` strips both regions. The constitution's `## Communication` section is
+the authority on honoring it. Stack and routing are deliberately out of scope here: those live in
+the always-regenerated block and the constitution, not in per-operator tuning.
+
 ## Consequences
 
 - `op.mjs`, `gates.json`, and the lane machinery are **untouched**. `parseFrontmatter` already
@@ -97,3 +115,7 @@ an MCP server.
   a third tracker later is a `trackerConfig` shape plus touchpoint prose, no engine change.
 - Trying an external tracker is reversible: re-run `op-init`, pick `markdown`, and the local source
   of truth is already complete — the mirror was never authoritative.
+- `AGENTS.md` now has two Operator-managed regions (block + `operator:profile`); `fsutil` gains
+  `findProfileRegion`/`removeProfileRegion`, `remove` strips both, `update` preserves the profile,
+  and the README documents the split. The block's line budget is unaffected — the profile is
+  per-project content, never shipped in the payload.
