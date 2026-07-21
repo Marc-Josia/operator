@@ -38,7 +38,7 @@ npx --yes github:Marc-Josia/operator init
 To pin a specific release instead of the latest `main`:
 
 ```sh
-npx --yes "github:Marc-Josia/operator#v0.1.0" init
+npx --yes "github:Marc-Josia/operator#v0.2.0" init
 ```
 
 Requirements: Node ≥ 18 (for the installer and the gate checker) and a git repository (the gate
@@ -231,21 +231,56 @@ picks the lane mechanically:
 | review | `REVIEW` line with findings and resolution, security review if the diff touches protected paths, Definition of done checked | self-review line instead of full review |
 | ship | docs updated or waiver journaled, memory harvest (≤ 3 items) or `MEMORY none:` with a reason, memory files under caps, Retro filled | no memory-caps check |
 
-**Skills** come in two kinds, and the distinction is a rule, not a naming scheme:
-
-- Procedures (`op-init`, `op-discover`, `op-explore`, `op-roadmap`, `op-new`, `op-plan`,
-  `op-build`, `op-fix`, `op-ship`, `op-status`, `op-memory`) — the only things allowed to move
-  work-item state (`op-init`, `op-discover`, `op-explore`, and `op-roadmap` move none themselves;
-  op-init onboards and sets the tracker, discovery and the roadmap feed `op-new`, exploration feeds
-  `op-roadmap`).
-- Expertise packs (`operator-code-review`, `operator-security-review`,
-  `operator-test-strategy`, `operator-debugging`) — advice consumed by the procedures; they
-  never touch stage, lane, or journal.
+**Skills** come in two kinds, and the distinction is a rule, not a naming scheme — procedures
+(`op-*`) are the only things allowed to move work-item state; expertise packs (`operator-*`) only
+give advice. The full [Skills reference](#skills-reference) below covers all fifteen.
 
 **Memory** makes lessons survive the session. `.operator/memory/project.md` (stack, commands,
 quirks — surveyed automatically on first use), `conventions.md` (`C-NNN` rules, optionally
 scoped to paths), `lessons.md` (`L-NNN`: when X, do Y, because Z), `decisions/` (immutable
 ADRs), `archive/` (pruned, never deleted). Each file has a line cap so memory stays loadable.
+
+## Skills reference
+
+You almost never name a skill. Prefix a request with `/operator` and describe what you want in
+plain language; the always-loaded `AGENTS.md` block reads the request and routes it to the right
+procedure. This reference exists so you can see *what the router will do* and *why* — and so you
+can invoke a skill by name in hosts that support it. The routing table, in one line: a fuzzy idea →
+`op-discover`, a confirmed-but-foggy direction → `op-explore`, a project-sized effort →
+`op-roadmap`, a precise change → `op-new`, a bug → `op-fix`. The constitution holds the full tree.
+
+### Procedures (`op-*`) — they move work-item state
+
+Only these advance a work item through `intake → spec → build → review → ship → done`. Four of
+them (`op-init`, `op-discover`, `op-explore`, `op-roadmap`) move no state themselves — they set the
+project up or feed the ones that do.
+
+| Skill | What it is for | Reach it by saying… |
+|---|---|---|
+| **op-init** | First-run setup: survey the codebase into memory, confirm the test command, tune the communication profile (language, verbosity, novice-vs-expert), and choose the tracker (markdown / GitHub / Linear). Opens no work item, passes no gate. | *"set up Operator"*, *"onboard this repo"*, *"switch to GitHub tracking"*, *"adjust the tone"* |
+| **op-discover** | Problem-discovery interview that runs **before** `op-new` when the ask is vague or problem-shaped. Grills you one question at a time — recommending an answer to each, researching facts rather than asking them — until you share one confirmed problem statement, then hands off to `op-new` (or `op-roadmap` if it is project-sized). | *"onboarding feels bad"*, *"help me think this through"*, anything fuzzy |
+| **op-explore** | Maps the fog when a problem is confirmed but the path is unknowable — too foggy to carve even a first milestone. Records a decision map, resolves it one session at a time, and collapses into a roadmap once the way clears. | *"I know the goal but not the shape"*, or when `op-roadmap`'s first milestone won't carve |
+| **op-roadmap** | Decomposes an effort bigger than one work item — a whole app, a subsystem, a v2 — into an ordered roadmap of demonstrable milestones, each grouping issue-sized items, then feeds `op-new` one item at a time. | *"build an app like Airbnb"*, *"plan out the whole billing subsystem"* |
+| **op-new** | Intake for **all** new work: restate the request, triage it into a lane (quick / standard / full) with the honest scorecard, create the work item, pass the intake gate, and route onward to `op-plan` or `op-build`. Every feature, change, refactor, or chore enters here — even a one-liner. | *"add per-IP rate limiting"*, *"rename this module"*, *"bump the timeout"* |
+| **op-plan** | Specify and architect before any code: write the lane's spec (`spec-lite.md` or `spec.md`) with numbered, testable acceptance criteria, update Scope and Tasks, then **STOP** for your approval — the one mandatory human gate. | *"write the plan"*, *"spec this out"*, or automatically after `op-new` picks the standard/full lane |
+| **op-build** | Implement the approved item: the per-task implement → test → tick → journal loop, with scope discipline and escalation tripwires, ending in the mechanical build gate. | *"build it"*, *"go ahead"*, *"continue"* — or right after you approve a plan |
+| **op-fix** | The bug procedure: reproduce with a **failing test first**, root-cause with evidence, fix the cause (never the symptom) through a gated item, keep the regression test forever, and record the lesson. | *"X is broken"*, *"this crashes on empty input"*, *"the total is wrong"* — even an "obvious" one-liner |
+| **op-ship** | Review, deliver, and learn: fresh-context code review (plus security review if the diff touches protected paths), every finding fixed or waived, docs updated, memory harvested, retro written, review and ship gates passed. The only path from build to done. | *"ship it"*, *"wrap up"*, *"deliver"*, *"is this done?"* |
+| **op-status** | Read-only orientation across every work item and roadmap: reads each `workitem.md` from disk and reports the exact next action, flagging anything blocked. Changes nothing, so it is always safe. | *"where are we?"*, *"what's next?"*, *"is 001 done yet?"* — or resuming a session |
+| **op-memory** | Maintain durable memory in `.operator/memory/` — **record** a convention/lesson/fact, **consolidate** (dedupe, promote lessons to conventions, archive stale entries), or **gc** (enforce line caps). | *"remember: we never use default exports"*, *"always run lint before commit"*, or when a memory file hits its cap |
+
+### Expertise packs (`operator-*`) — advice only
+
+These never touch stage, lane, or journal. The procedures consult them; you rarely invoke them
+directly, though asking *"review this like a senior engineer"* or *"is this change safe?"* will
+pull the matching one.
+
+| Skill | What it is for | When it fires |
+|---|---|---|
+| **operator-code-review** | Reviewing a diff like a senior engineer: intent before code, priority correctness > security > maintainability > style, a concrete defect checklist, a blocker/major/minor/nit ladder, and tactics for AI-generated code. | `op-ship`'s review stage consumes it; `op-build` self-checks with it before the build gate |
+| **operator-security-review** | Surface-driven security review: injection, authn/authz, secrets, dependency risk, data exposure, CI/CD supply chain — with security outranking everything. | **Mandatory** when the diff or Scope touches a `protectedPaths` entry; `op-ship` runs it as a separate pass |
+| **operator-test-strategy** | What to test, at which seam and pyramid level, and when to stop: per-lane depth, mapping acceptance criteria to tests, mock only at system boundaries, the flaky-test policy, and picking the single regression test for a fix. | `op-build` plans each task's proof with it; `op-fix` picks its reproduction test with it |
+| **operator-debugging** | The scientific method on bugs: reproduce deterministically, isolate a minimal repro, test one falsifiable hypothesis at a time, verify the root cause with evidence **before** any fix, and fix the mechanism, not the symptom. | `op-fix` consumes it at its root-cause step; `op-build` when a mid-build failure resists quick diagnosis |
 
 ## Per-tool notes
 
