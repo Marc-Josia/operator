@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "mattpocock",
+      "repo": "mattpocock/skills",
+      "skills": [
+        "setup-matt-pocock-skills",
+        "grill-with-docs",
+        "grill-me",
+        "grilling",
+        "domain-modeling",
+        "to-spec",
+        "to-tickets",
+        "tdd",
+        "implement",
+        "code-review",
+        "codebase-design",
+        "improve-codebase-architecture",
+        "diagnosing-bugs",
+        "prototype",
+        "wayfinder",
+        "research",
+        "writing-for-agents",
+        "wizard"
+      ]
+    },
+    {
+      "id": "addyosmani",
+      "repo": "addyosmani/agent-skills",
+      "skills": [
+        "security-and-hardening",
+        "code-review-and-quality",
+        "deprecation-and-migration",
+        "observability-and-instrumentation",
+        "ci-cd-and-automation",
+        "shipping-and-launch",
+        "performance-optimization"
+      ]
+    }
+  ],
+  "operatorSkill": "operator",
+  "skip": ["ask-matt", "using-agent-skills"],
+  "references": {
+    "repo": "addyosmani/agent-skills",
+    "branch": "main",
+    "dir": "references",
+    "files": [
+      "accessibility-checklist.md",
+      "definition-of-done.md",
+      "observability-checklist.md",
+      "orchestration-patterns.md",
+      "performance-checklist.md",
+      "security-checklist.md",
+      "testing-patterns.md"
+    ]
+  }
+}

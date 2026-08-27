@@ -1,0 +1,28 @@
+{
+  "name": "@marcjosia/operator",
+  "version": "1.0.0",
+  "description": "Operator — compose Matt Pocock and Addy Osmani agent skills into one pipeline that works with any coding agent.",
+  "type": "module",
+  "bin": {
+    "operator": "src/bin/operator.mjs"
+  },
+  "files": [
+    "src"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": "github:Marc-Josia/operator",
+  "keywords": [
+    "ai",
+    "agents",
+    "skills",
+    "claude-code",
+    "codex",
+    "cursor",
+    "opencode"
+  ],
+  "scripts": {
+    "test": "node --test \"src/test/**/*.test.mjs\""
+  }
+}
