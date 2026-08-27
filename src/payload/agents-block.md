@@ -20,3 +20,29 @@ On-ramps are allowed. Skip stages that are already done.
 Standalone when they fit: `wayfinder`, `research`, `writing-for-agents`, `wizard`, `performance-optimization`.
 
 Checklists: `references/` at the project root (resolves `../../references/` from installed skills).
+
+## Code
+
+YAGNI. A small change, or one that is strictly necessary. Edge cases off the main path stay out.
+
+TypeScript: strict. No `any` without justification. No `@ts-ignore`. If unavoidable, `@ts-expect-error` with a comment.
+
+Tests target live behavior. No blanket smoke. No tests for a feature that was removed.
+
+Comments sit above a function, class, or module and say how to use it. Keep them aligned with the code.
+
+Tokens: color and radius come from theme tokens.
+
+## Files
+
+New files go under `src`, `tests`, `docs`, `config`, `tools`, `examples`, `prototype`, or `temp`. Root only when tooling requires it.
+
+## Docs
+
+Present tense. Current state, not history or the plan.
+
+`docs/architecture.md` is the system view. Update it when structure changes.
+
+A major feature that exists has a file in `docs/features/`.
+
+In-flight specs live in `docs/changes/<change-id>/`. Once implemented: write `docs/features/`, update architecture if structure changed, delete the change folder. No archive.

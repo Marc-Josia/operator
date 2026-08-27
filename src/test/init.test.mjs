@@ -54,6 +54,9 @@ test('init installs via skills CLI, writes references/, and upserts AGENTS.md', 
   const agentsMd = fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8');
   assert.ok(agentsMd.includes(START_MARKER));
   assert.ok(agentsMd.includes('only skill router'));
+  assert.ok(agentsMd.includes('YAGNI'));
+  assert.ok(agentsMd.includes('docs/architecture.md'));
+  assert.ok(agentsMd.includes('docs/changes/<change-id>/'));
   assert.ok(fs.existsSync(path.join(cwd, 'references', 'security-checklist.md')));
   assert.ok(fs.existsSync(path.join(cwd, 'references', '.operator-managed.json')));
 });
