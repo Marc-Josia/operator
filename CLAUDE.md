@@ -1,6 +1,6 @@
 # Operator
 
-This repository is **Operator**: a zero-dependency Node CLI that installs a curated Matt Pocock + Addy Osmani skill catalog (via `npx skills@latest`) and owns the **only** router that makes those two packs compose.
+This repository is **Operator**: a zero-dependency Node CLI that installs a curated Matt Pocock + Addy Osmani skill catalog (via `npx skills@latest`), plus pstack `unslop`, and owns the **only** router that makes those packs compose.
 
 This file is for people and agents working **on Operator**. It is not the block shipped to consumer repos. That lives in `src/payload/agents-block.md` and is wrapped with `<!-- operator:start -->` / `<!-- operator:end -->` on `init`/`update`. Do not put those markers in this file.
 
@@ -17,9 +17,9 @@ Shipped surface is `src/` plus root `package.json`. English in everything an age
 
 ## Invariants
 
-- Do not fork or patch Matt/Addy `SKILL.md`. Operator orchestrates; upstream stays upstream.
-- One router: `operator`. Never add `ask-matt` or `using-agent-skills` to the catalog (`catalog.skip`).
-- Matt owns Understand → Build (`tdd`, `implement`, `code-review`). Addy owns the Production overlay (`security-and-hardening` onward). Two reviews are sequential, not interchangeable.
+- Do not fork or patch Matt/Addy/pstack `SKILL.md`. Operator orchestrates; upstream stays upstream.
+- One router: `operator`. Never add `ask-matt`, `using-agent-skills`, or `poteto-mode` to the catalog (`catalog.skip`).
+- Matt owns Understand → Build (`tdd`, `implement`, `code-review`). Addy owns the Production overlay (`security-and-hardening` onward). Two reviews are sequential, not interchangeable. pstack `unslop` is a writing pass only.
 - Zero runtime dependencies. Shell out to `npx skills@latest`. Node ≥ 18, ESM.
 - `--copy` is implied on Windows. `remove` must not pass `--copy`.
 - `update` refreshes catalog skills, re-adds the local operator skill, re-fetches `references/`, and replaces only the managed AGENTS.md block. It does not touch the rest of a consumer repo.

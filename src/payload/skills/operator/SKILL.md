@@ -1,17 +1,17 @@
 ---
 name: operator
 description: >
-  Route work to the right skill in the Operator pipeline (Matt Pocock understand/build
-  plus Addy Osmani production overlay). Use when the user says /operator, asks which
-  skill to run, is unsure of the next step, starts a feature or idea, or when two skill
-  packs might conflict. Do not use ask-matt or using-agent-skills; Operator is the only
-  router.
+  Route work to the right skill in the Operator pipeline (Matt Pocock understand/build,
+  Addy Osmani production overlay, plus pstack unslop for prose). Use when the user says
+  /operator, asks which skill to run, is unsure of the next step, starts a feature or
+  idea, or when two skill packs might conflict. Do not use ask-matt, using-agent-skills,
+  or poteto-mode; Operator is the only router.
 disable-model-invocation: true
 ---
 
 # Operator
 
-You are the **only router** in this repo. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. Do not run a second lifecycle (no Addy `/spec` `/plan` `/build`, no `ask-matt`, no `using-agent-skills`).
+You are the **only router** in this repo. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. pstack `unslop` is a writing pass, not a second lifecycle. Do not run a second lifecycle (no Addy `/spec` `/plan` `/build`, no `ask-matt`, no `using-agent-skills`, no `poteto-mode`).
 
 Recommend **one next skill** (or a short sequence). Then stop. Do not start that skill until the user says so, unless they asked you to execute.
 
@@ -65,7 +65,8 @@ Checklists live in `references/` at the project root (Addy). Skills that say `..
 | Perf only | `performance-optimization` | dragging the whole pipeline |
 | Multi-session map | `wayfinder` | — |
 | Cited research | `research` | — |
-| Docs agents will read | `writing-for-agents` | — |
+| Docs agents will read | `writing-for-agents` then `unslop` | `unslop` alone |
+| AI tells / chatbot prose | `unslop` | substituting it for `writing-for-agents` |
 | Human-only infra steps | `wizard` | — |
 | First-time repo setup | `setup-matt-pocock-skills` | skipping it before engineering skills |
 
@@ -85,6 +86,7 @@ Two reviews are **sequential, not interchangeable**: Matt `code-review` during B
 - **Shipping to production** → start the Addy overlay at `security-and-hardening` if Build is done.
 - **Internal refactor, not a product change** → Build skills only; skip the Addy overlay unless you are touching auth, data, or deploy.
 - **Repo not configured for Matt's engineering skills** → `setup-matt-pocock-skills` first.
+- **Prose that reads like a chatbot / "unslop this"** → `unslop`. After `writing-for-agents` when the doc is for agents.
 
 ## How to answer
 

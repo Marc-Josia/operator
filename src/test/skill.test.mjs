@@ -12,9 +12,11 @@ test('operator skill has router frontmatter and arbitration rules', () => {
   assert.ok(skill.includes('disable-model-invocation: true'));
   assert.ok(skill.includes('ask-matt'));
   assert.ok(skill.includes('using-agent-skills'));
+  assert.ok(skill.includes('poteto-mode'));
   assert.ok(skill.includes('grill-with-docs'));
   assert.ok(skill.includes('security-and-hardening'));
   assert.ok(skill.includes('code-review-and-quality'));
   assert.ok(skill.includes('tdd'));
+  assert.ok(skill.includes('unslop'));
   assert.ok(skill.includes('Never Addy'));
 });

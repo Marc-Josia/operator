@@ -1,6 +1,6 @@
 # Operator
 
-This repo uses **Operator** as the only skill router. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. Do not use `ask-matt` or `using-agent-skills`. If you are unsure which skill to run, invoke `/operator`.
+This repo uses **Operator** as the only skill router. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. pstack `unslop` is a writing pass. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`. If you are unsure which skill to run, invoke `/operator`.
 
 ## Pipeline
 
@@ -17,7 +17,9 @@ On-ramps are allowed. Skip stages that are already done.
 - Small specified fix: `tdd` + `implement`. Skip the production overlay unless the change is production-facing.
 - First use: `/setup-matt-pocock-skills` once per repo.
 
-Standalone when they fit: `wayfinder`, `research`, `writing-for-agents`, `wizard`, `performance-optimization`.
+Standalone when they fit: `wayfinder`, `research`, `writing-for-agents`, `unslop`, `wizard`, `performance-optimization`.
+
+Docs agents will read: `writing-for-agents`. Any prose that still reads like a chatbot: `unslop`.
 
 Checklists: `references/` at the project root (resolves `../../references/` from installed skills).
 

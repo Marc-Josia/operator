@@ -37,10 +37,15 @@
         "shipping-and-launch",
         "performance-optimization"
       ]
+    },
+    {
+      "id": "pstack",
+      "repo": "https://github.com/cursor/plugins/tree/main/pstack",
+      "skills": ["unslop"]
     }
   ],
   "operatorSkill": "operator",
-  "skip": ["ask-matt", "using-agent-skills"],
+  "skip": ["ask-matt", "using-agent-skills", "poteto-mode"],
   "references": {
     "repo": "addyosmani/agent-skills",
     "branch": "main",

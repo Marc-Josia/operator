@@ -34,6 +34,8 @@ const ADDY = [
   'performance-optimization',
 ];
 
+const PSTACK = ['unslop'];
+
 const REF_FILES = [
   'accessibility-checklist.md',
   'definition-of-done.md',
@@ -44,22 +46,29 @@ const REF_FILES = [
   'testing-patterns.md',
 ];
 
-test('catalog lists the curated Matt + Addy skills and skips competing routers', () => {
+test('catalog lists the curated Matt + Addy + pstack skills and skips competing routers', () => {
   const catalog = loadCatalog(packageRoot());
   const matt = catalog.sources.find((s) => s.id === 'mattpocock');
   const addy = catalog.sources.find((s) => s.id === 'addyosmani');
+  const pstack = catalog.sources.find((s) => s.id === 'pstack');
   assert.ok(matt);
   assert.ok(addy);
+  assert.ok(pstack);
   assert.equal(matt.repo, 'mattpocock/skills');
   assert.equal(addy.repo, 'addyosmani/agent-skills');
+  assert.equal(pstack.repo, 'https://github.com/cursor/plugins/tree/main/pstack');
   assert.deepEqual(matt.skills, MATT);
   assert.deepEqual(addy.skills, ADDY);
+  assert.deepEqual(pstack.skills, PSTACK);
   assert.equal(catalog.operatorSkill, 'operator');
   assert.ok(catalog.skip.includes('ask-matt'));
   assert.ok(catalog.skip.includes('using-agent-skills'));
+  assert.ok(catalog.skip.includes('poteto-mode'));
   const names = allCatalogSkills(catalog);
   assert.ok(!names.includes('ask-matt'));
   assert.ok(!names.includes('using-agent-skills'));
+  assert.ok(!names.includes('poteto-mode'));
+  assert.ok(names.includes('unslop'));
   assert.deepEqual(catalog.references.files, REF_FILES);
-  assert.deepEqual(managedSkillNames(catalog), [...MATT, ...ADDY, 'operator']);
+  assert.deepEqual(managedSkillNames(catalog), [...MATT, ...ADDY, ...PSTACK, 'operator']);
 });

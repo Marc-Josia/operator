@@ -44,8 +44,10 @@ test('init installs via skills CLI, writes references/, and upserts AGENTS.md', 
   assert.ok(calls[0].includes('grill-with-docs'));
   assert.equal(calls[1][3], 'addyosmani/agent-skills');
   assert.ok(calls[1].includes('security-and-hardening'));
-  assert.equal(calls[2][3], payloadDir(root));
-  assert.ok(calls[2].includes('operator'));
+  assert.equal(calls[2][3], 'https://github.com/cursor/plugins/tree/main/pstack');
+  assert.ok(calls[2].includes('unslop'));
+  assert.equal(calls[3][3], payloadDir(root));
+  assert.ok(calls[3].includes('operator'));
   for (const args of calls) {
     assert.ok(args.includes('-y'));
     assert.deepEqual(args.slice(args.indexOf('--agent'), args.indexOf('--agent') + 2), ['--agent', 'cursor']);
@@ -54,6 +56,7 @@ test('init installs via skills CLI, writes references/, and upserts AGENTS.md', 
   const agentsMd = fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8');
   assert.ok(agentsMd.includes(START_MARKER));
   assert.ok(agentsMd.includes('only skill router'));
+  assert.ok(agentsMd.includes('unslop'));
   assert.ok(agentsMd.includes('YAGNI'));
   assert.ok(agentsMd.includes('docs/architecture.md'));
   assert.ok(agentsMd.includes('docs/changes/<change-id>/'));
@@ -141,6 +144,7 @@ test('remove strips the AGENTS.md block and optionally purges references', async
   assert.equal(calls.length, 1);
   assert.ok(calls[0].includes('remove'));
   assert.ok(calls[0].includes('operator'));
+  assert.ok(calls[0].includes('unslop'));
   assert.equal(fs.existsSync(path.join(cwd, 'AGENTS.md')), false);
   assert.equal(fs.existsSync(path.join(cwd, 'references', 'security-checklist.md')), false);
 });

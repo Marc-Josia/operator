@@ -1,6 +1,6 @@
 # Operator
 
-Operator installs a curated set of [Matt Pocock](https://github.com/mattpocock/skills) and [Addy Osmani](https://github.com/addyosmani/agent-skills) skills, then puts **one router** on top so the two packs work as a single pipeline. It targets any coding agent the [Vercel skills CLI](https://github.com/vercel-labs/skills) supports (Cursor, Codex, Claude Code, OpenCode, Gemini, Copilot, and dozens more).
+Operator installs a curated set of [Matt Pocock](https://github.com/mattpocock/skills) and [Addy Osmani](https://github.com/addyosmani/agent-skills) skills, plus [pstack](https://github.com/cursor/plugins/tree/main/pstack) `unslop`, then puts **one router** on top so those packs work as a single pipeline. It targets any coding agent the [Vercel skills CLI](https://github.com/vercel-labs/skills) supports (Cursor, Codex, Claude Code, OpenCode, Gemini, Copilot, and dozens more).
 
 Operator does **not** fork those skills. It pulls them current, installs them, and owns only the orchestration layer.
 
@@ -36,6 +36,8 @@ operator init -g          # user-wide instead of this project
 
 **Addy Osmani** (Production overlay): `security-and-hardening`, `code-review-and-quality`, `deprecation-and-migration`, `observability-and-instrumentation`, `ci-cd-and-automation`, `shipping-and-launch`, `performance-optimization`.
 
+**pstack** (writing pass): `unslop`. Not the rest of pstack. `poteto-mode` is a competing router.
+
 **Addy `references/`** is copied to the project root so paths like `../../references/security-checklist.md` resolve from installed skills.
 
 **Operator** adds:
@@ -43,7 +45,7 @@ operator init -g          # user-wide instead of this project
 - the `operator` skill (`/operator`) — the only router
 - a managed block in `AGENTS.md` (markers `<!-- operator:start -->` / `<!-- operator:end -->`) so agents that miss the skill still see the map
 
-Not installed, on purpose: `ask-matt` and `using-agent-skills`. Two meta-routers fight over the next step.
+Not installed, on purpose: `ask-matt`, `using-agent-skills`, and `poteto-mode`. Two meta-routers fight over the next step.
 
 ## Pipeline
 
