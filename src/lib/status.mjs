@@ -1,74 +1,57 @@
-// `operator status` — table of work items, for convenience from the installer.
-//
-// The runtime gate checker (`.operator/bin/op.mjs status`) prints the same view
-// from inside the user project. The payload must stay standalone (it cannot
-// import this package), so the ~40 lines of overlap are accepted duplication.
+import { loadCatalog, managedSkillNames } from './catalog.mjs';
+import { referencesStatus } from './references.mjs';
+import { agentsBlockStatus } from './agents-md.mjs';
+import { destRoot, diffSkills, listInstalledSkills } from './scan.mjs';
 
-import fs from 'node:fs';
-import path from 'node:path';
-import { OperatorError, journalLines, parseFrontmatter } from './fsutil.mjs';
+/**
+ * @param {{
+ *   cwd?: string,
+ *   packageRoot: string,
+ *   global?: boolean,
+ * }} opts
+ */
+export function status(opts) {
+  const cwd = opts.cwd ?? process.cwd();
+  const catalog = loadCatalog(opts.packageRoot);
+  const root = destRoot(cwd, opts.global);
+  const installed = listInstalledSkills(root);
+  const expected = managedSkillNames(catalog);
+  const skills = diffSkills(expected, installed);
+  const refs = referencesStatus(root);
+  const agentsMd = agentsBlockStatus(cwd);
 
-export async function status(opts = {}) {
-  const cwd = path.resolve(opts.cwd ?? process.cwd());
-  const log = opts.log ?? console.log;
-
-  const operatorDir = path.join(cwd, '.operator');
-  if (!fs.existsSync(operatorDir)) {
-    throw new OperatorError('.operator/ not found — run `operator init` first.');
+  const lines = [];
+  lines.push(`Operator status (${opts.global ? 'global' : 'project'})`);
+  lines.push('');
+  lines.push(`Skills: ${skills.present.length}/${expected.length} installed`);
+  for (const name of expected) {
+    const mark = installed.has(name) ? 'ok' : 'missing';
+    const where = installed.get(name)?.join(', ') ?? '';
+    lines.push(`  [${mark}] ${name}${where ? `  (${where})` : ''}`);
   }
-
-  const workDir = path.join(operatorDir, 'work');
-  const items = [];
-  if (fs.existsSync(workDir)) {
-    for (const entry of fs.readdirSync(workDir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-      if (!entry.isDirectory()) continue;
-      const wiPath = path.join(workDir, entry.name, 'workitem.md');
-      if (!fs.existsSync(wiPath)) continue;
-      const content = fs.readFileSync(wiPath, 'utf8');
-      const { data, error } = parseFrontmatter(content);
-      if (error) {
-        items.push({ id: entry.name, error });
-        continue;
-      }
-      items.push({
-        id: data.id ?? entry.name,
-        lane: data.lane ?? '?',
-        stage: data.stage ?? '?',
-        next: data.next ?? '',
-        updated: data.updated ?? '',
-        journal: journalLines(content).slice(-3),
-      });
-    }
-  }
-
-  if (items.length === 0) {
-    log('No work items yet. Ask your agent for a change — the AGENTS.md routing engages op-new.');
-    return { items: [], active: null };
-  }
-
-  // Table -----------------------------------------------------------------------
-  const rows = [
-    ['ID', 'LANE', 'STAGE', 'NEXT'],
-    ...items.map((it) => (it.error ? [it.id, '-', 'INVALID', it.error] : [it.id, it.lane, it.stage, it.next])),
-  ];
-  const widths = [0, 1, 2].map((col) => Math.max(...rows.map((r) => String(r[col]).length)));
-  for (const row of rows) {
-    log([0, 1, 2].map((col) => String(row[col]).padEnd(widths[col])).join('  ') + '  ' + row[3]);
-  }
-
-  // Active item: the most recently updated item that is not done ------------------
-  const active =
-    items
-      .filter((it) => !it.error && it.stage !== 'done')
-      .sort((a, b) => String(b.updated).localeCompare(String(a.updated)))[0] ?? null;
-  log('');
-  if (active) {
-    log(`Active: ${active.id} (${active.lane} lane, ${active.stage} stage)`);
-    for (const line of active.journal) log(`  ${line}`);
-    if (active.next) log(`Next action: ${active.next}`);
-    log(`Advance it with: node .operator/bin/op.mjs gate ${active.id}`);
+  lines.push('');
+  if (!refs.present) {
+    lines.push('References: missing (expected ./references)');
+  } else if (!refs.managed) {
+    lines.push('References: present, not managed by Operator');
+  } else if (refs.missing.length > 0) {
+    lines.push(`References: managed, missing ${refs.missing.join(', ')}`);
   } else {
-    log('All work items are done.');
+    lines.push(`References: ok (${refs.files.length} files from ${refs.source})`);
   }
-  return { items, active };
+  lines.push('');
+  if (!agentsMd.present) {
+    lines.push('AGENTS.md: missing');
+  } else if (!agentsMd.managed) {
+    lines.push('AGENTS.md: present, Operator block missing');
+  } else {
+    lines.push('AGENTS.md: Operator block present');
+  }
+
+  const ok = skills.missing.length === 0
+    && refs.managed
+    && refs.missing.length === 0
+    && agentsMd.managed;
+  console.log(lines.join('\n'));
+  return { ok, skills, refs, agentsMd };
 }

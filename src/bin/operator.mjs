@@ -1,54 +1,47 @@
 #!/usr/bin/env node
-// operator — installer CLI for the Operator toolkit.
-// Zero dependencies. ESM. Node >= 18. Runs via `npx --yes github:Marc-Josia/operator <cmd>`.
-
-import fs from 'node:fs';
 import path from 'node:path';
-import { OperatorError, defaultPackageRoot } from '../lib/fsutil.mjs';
+import { OperatorError, defaultPackageRoot, readJson } from '../lib/fsutil.mjs';
 import { init } from '../lib/init.mjs';
 import { update } from '../lib/update.mjs';
-import { doctor } from '../lib/doctor.mjs';
 import { status } from '../lib/status.mjs';
 import { remove } from '../lib/remove.mjs';
 
-const HELP = `operator — make AI coding agents work like a senior engineering team
+const HELP = `operator — compose Matt Pocock + Addy Osmani skills into one pipeline
 
 Usage: operator <command> [options]
 
 Commands:
-  init      Install Operator into the current project
-  update    Refresh managed files from this package's payload (never touches
-            work/, memory/, or config.json)
-  doctor    Health-check the install; --fix repairs mechanical issues
-  status    Show work items, the active item, and the exact next action
-  remove    Uninstall; keeps work/ and memory/ unless --purge
+  init      Install the catalog, references/, the operator skill, and the AGENTS.md block
+  update    Refresh catalog skills, references/, the operator skill, and AGENTS.md
+  status    Show installed skills vs catalog, references/, and the AGENTS.md block
+  remove    Uninstall catalog skills and the AGENTS.md block
 
 Options:
-  init:    --tools a,b     adapters to apply (claude, gemini, codex, opencode,
-                           cursor) or "none"; default: detect
-           --test-cmd CMD  preset the project test command
-           --yes, -y       skip the interview, accept defaults
-           --force         reinstall over an existing install (work/, memory/,
-                           and config.json are preserved)
-  update:  --force         allow a version downgrade (stale npx cache override)
-  doctor:  --fix           repair mechanical issues (markers, import, mirror)
-           --strict        exit non-zero on warnings too (for CI)
-  remove:  --purge         also delete .operator/work/ and .operator/memory/
-  --version, -v            print the package version
-  --help, -h               show this help
+  init / update / remove:
+    --agent a,b    target agents (cursor, claude-code, codex, opencode, …)
+                   or "*" for every agent the skills CLI supports
+    -g, --global   install to the user directory instead of the project
+    --copy         copy files instead of symlinking (on by default on Windows)
+    -y, --yes      non-interactive (always passed through to the skills CLI)
+  remove:
+    --purge        also delete Operator-managed files in references/
+  --version, -v    print the package version
+  --help, -h       show this help
 
-Exit codes: 0 ok, 1 failure, 2 usage error.`;
+After init, run /setup-matt-pocock-skills once in your agent, then /operator.
+
+Exit codes: 0 ok, 1 failure, 2 usage error.
+`;
 
 const VALUE_FLAGS = new Map([
-  ['--tools', 'tools'],
-  ['--test-cmd', 'testCmd'],
+  ['--agent', 'agent'],
 ]);
 const BOOL_FLAGS = new Map([
   ['--yes', 'yes'],
   ['-y', 'yes'],
-  ['--force', 'force'],
-  ['--fix', 'fix'],
-  ['--strict', 'strict'],
+  ['--global', 'global'],
+  ['-g', 'global'],
+  ['--copy', 'copy'],
   ['--purge', 'purge'],
   ['--help', 'help'],
   ['-h', 'help'],
@@ -56,7 +49,11 @@ const BOOL_FLAGS = new Map([
   ['-v', 'version'],
 ]);
 
-function parseArgs(argv) {
+/**
+ * @param {string[]} argv
+ */
+export function parseArgs(argv) {
+  /** @type {Record<string, string | boolean | string[] | undefined>} */
   const flags = {};
   const positional = [];
   for (let i = 0; i < argv.length; i++) {
@@ -71,7 +68,9 @@ function parseArgs(argv) {
       const key = VALUE_FLAGS.get(name);
       const value = eq === -1 ? argv[++i] : arg.slice(eq + 1);
       if (value === undefined) throw new OperatorError(`${name} requires a value`, 2);
-      flags[key] = value;
+      const prev = flags[key];
+      const next = String(value);
+      flags[key] = prev ? `${prev},${next}` : next;
       continue;
     }
     if (arg.startsWith('-')) throw new OperatorError(`unknown option: ${arg}\n\n${HELP}`, 2);
@@ -80,56 +79,69 @@ function parseArgs(argv) {
   return { flags, positional };
 }
 
-function packageVersion() {
-  const pkg = JSON.parse(fs.readFileSync(path.join(defaultPackageRoot(), 'package.json'), 'utf8'));
-  return pkg.version;
+/** @param {unknown} value */
+function agentsFromFlag(value) {
+  if (typeof value !== 'string' || value.length === 0) return undefined;
+  return value.split(',').map((part) => part.trim()).filter(Boolean);
 }
 
-async function main() {
-  const { flags, positional } = parseArgs(process.argv.slice(2));
-  const command = positional[0];
-
-  if (flags.version) {
-    console.log(packageVersion());
+async function main(argv) {
+  const { flags, positional } = parseArgs(argv);
+  if (flags.help) {
+    console.log(HELP);
     return 0;
   }
-  if (flags.help || !command) {
-    console.log(HELP);
-    return command ? 0 : flags.help ? 0 : 2;
+  if (flags.version) {
+    const pkg = readJson(path.join(defaultPackageRoot(), 'package.json'));
+    console.log(pkg.version);
+    return 0;
   }
+  const command = positional[0];
+  if (!command) throw new OperatorError(`missing command\n\n${HELP}`, 2);
+  if (positional.length > 1) throw new OperatorError(`unexpected argument: ${positional[1]}\n\n${HELP}`, 2);
+
+  const packageRoot = defaultPackageRoot();
+  const shared = {
+    packageRoot,
+    cwd: process.cwd(),
+    agents: agentsFromFlag(flags.agent),
+    global: Boolean(flags.global),
+    copy: Boolean(flags.copy),
+  };
 
   switch (command) {
     case 'init':
-      await init(flags);
+      await init(shared);
       return 0;
     case 'update':
-      await update(flags);
+      await update(shared);
       return 0;
-    case 'doctor': {
-      const result = await doctor(flags);
+    case 'status': {
+      const result = status(shared);
       return result.ok ? 0 : 1;
     }
-    case 'status':
-      await status(flags);
-      return 0;
     case 'remove':
-      await remove(flags);
+      await remove({ ...shared, purge: Boolean(flags.purge) });
       return 0;
     default:
       throw new OperatorError(`unknown command: ${command}\n\n${HELP}`, 2);
   }
 }
 
-main()
-  .then((code) => {
-    process.exitCode = code;
-  })
-  .catch((err) => {
-    if (err instanceof OperatorError) {
-      console.error(`operator: ${err.message}`);
-      process.exitCode = err.code ?? 1;
-    } else {
-      console.error(err);
-      process.exitCode = 1;
-    }
-  });
+const isDirect = process.argv[1] && (
+  process.argv[1].endsWith('operator.mjs')
+  || process.argv[1].endsWith('operator')
+);
+
+if (isDirect) {
+  main(process.argv.slice(2)).then(
+    (code) => process.exit(code),
+    (err) => {
+      const code = err instanceof OperatorError ? err.code : 1;
+      console.error(err instanceof OperatorError ? err.message : err);
+      process.exit(code);
+    },
+  );
+}
+
+export { HELP, main };

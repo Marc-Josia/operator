@@ -1,44 +1,50 @@
 # Operator
 
-This project has **Operator** installed — an engineering method (work items, gates, durable
-memory) the operator engages deliberately. By default, work as a normal coding agent: answer
-and make changes directly, and do **not** invoke `op-*`/`operator-*` skills, create work items,
-or route requests.
+This repo uses **Operator** as the only skill router. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. pstack `unslop` is a writing pass. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`. If you are unsure which skill to run, invoke `/operator`.
 
-## Engaging Operator
+## Pipeline
 
-The method engages only when the operator's message starts with **`/operator`** (or explicitly
-asks for Operator by name). What follows `/operator` is the request, in plain language: classify
-it and run the matching procedure yourself — never ask "which command?". Bare `/operator` with no
-request → run `op-status` and report where things stand.
+`grill-with-docs` → `domain-modeling` → `to-spec` → `to-tickets` → (`prototype` throwaway?) → `tdd` → `implement` → `code-review` → `codebase-design` → `improve-codebase-architecture` → `security-and-hardening` → `code-review-and-quality` → `deprecation-and-migration` → `observability-and-instrumentation` → `ci-cd-and-automation` → `shipping-and-launch`
 
-When engaged you are the **router**. Read the constitution's `## Routing` section and dispatch to
-the one procedure that fits: new work, a bug, a spec, a build, a ship, a status check, a memory
-correction — plus the discovery, exploration, and roadmap procedures for work too fuzzy or too big
-for a single item. Expertise packs (`operator-*`) advise; they never move work-item state. Resuming
-an item already in flight? Its `stage:` names the procedure — check `op-status` first if unsure.
+On-ramps are allowed. Skip stages that are already done.
 
-If your tool supports skills or slash commands, invoke them. Otherwise read
-`.agents/skills/<name>/SKILL.md` and follow it literally.
+## Arbitration
 
-## Iron rules (once engaged)
+- Tests: always Matt `tdd`. Never Addy `test-driven-development`.
+- Two reviews, in order: Matt `code-review` (Standards + Spec) during Build; Addy `code-review-and-quality` (five-axis) during Production, after security.
+- Bugs: `diagnosing-bugs`.
+- Vague idea: `grill-with-docs` (or `grill-me` if there is no repo).
+- Small specified fix: `tdd` + `implement`. Skip the production overlay unless the change is production-facing.
+- First use: `/setup-matt-pocock-skills` once per repo.
 
-1. **Understand before you build.** Development work happens inside a work item
-   (`.operator/work/<id>/workitem.md`). Standard- and full-lane items need an approved spec
-   (approval journaled) before any implementation code is written.
-2. **Gates are checked, not asserted.** Run `node .operator/bin/op.mjs gate <id>` to pass a
-   stage. Never claim a gate passed without the checker's output (no Node? apply the checklist
-   in `.operator/gates.json` manually and journal the evidence).
-3. **Only `op-*` procedures move work-item state.** Expertise packs (`operator-*`) advise;
-   they never change stage, lane, or journal. The journal is append-only.
-4. **Load memory before you touch code.** Read `.operator/memory/project.md` at task start,
-   plus every rule in `.operator/memory/conventions.md` whose `paths:` matches files you will
-   touch. If `project.md` is still an empty seed, survey the codebase and fill it first.
-5. **Protected paths never travel the quick lane** (list: `.operator/config.json`).
+Standalone when they fit: `wayfinder`, `research`, `writing-for-agents`, `unslop`, `wizard`, `performance-optimization`.
 
-## System documents
+Docs agents will read: `writing-for-agents`. Any prose that still reads like a chatbot: `unslop`.
 
-- `.operator/constitution.md` — values, laws, orchestration policy, and the full routing tree.
-  Read it when engaging Operator or resuming a work item.
-- `.operator/work/<id>/workitem.md` — the single source of truth for each work item.
-- `.operator/memory/` — durable project knowledge. Never duplicate what is already there.
+Checklists: `references/` at the project root (resolves `../../references/` from installed skills).
+
+## Code
+
+YAGNI. A small change, or one that is strictly necessary. Edge cases off the main path stay out.
+
+TypeScript: strict. No `any` without justification. No `@ts-ignore`. If unavoidable, `@ts-expect-error` with a comment.
+
+Tests target live behavior. No blanket smoke. No tests for a feature that was removed.
+
+Comments sit above a function, class, or module and say how to use it. Keep them aligned with the code.
+
+Tokens: color and radius come from theme tokens.
+
+## Files
+
+New files go under `src`, `tests`, `docs`, `config`, `tools`, `examples`, `prototype`, or `temp`. Root only when tooling requires it.
+
+## Docs
+
+Present tense. Current state, not history or the plan.
+
+`docs/architecture.md` is the system view. Update it when structure changes.
+
+A major feature that exists has a file in `docs/features/`.
+
+In-flight specs live in `docs/changes/<change-id>/`. Once implemented: write `docs/features/`, update architecture if structure changed, delete the change folder. No archive.

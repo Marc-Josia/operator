@@ -1,34 +1,86 @@
 # Operator
 
-**Operator** is an agent-agnostic toolkit that makes AI coding agents work like a senior
-engineering team: the human decides, Operator organizes, agents execute.
+Operator installs a curated set of [Matt Pocock](https://github.com/mattpocock/skills) and [Addy Osmani](https://github.com/addyosmani/agent-skills) skills, plus [pstack](https://github.com/cursor/plugins/tree/main/pstack) `unslop`, then puts **one router** on top so those packs work as a single pipeline. It targets any coding agent the [Vercel skills CLI](https://github.com/vercel-labs/skills) supports (Cursor, Codex, Claude Code, OpenCode, Gemini, Copilot, and dozens more).
 
-**→ Toolkit documentation, installation, and usage: [`src/README.md`](src/README.md)**
+Operator does **not** fork those skills. It pulls them current, installs them, and owns only the orchestration layer.
 
 ```bash
 npx --yes github:Marc-Josia/operator init
 ```
 
-## Repository layout
+Then, in your agent, run `/setup-matt-pocock-skills` once, and start work with `/operator`.
 
-This repository separates the toolkit from the environment used to build it
-(see [`AGENTS.md`](AGENTS.md)):
-
-- **`src/`** — the toolkit. Everything that ships to users lives here, in English,
-  agent-agnostic. Nothing outside `src/` (plus the root `package.json` distribution glue)
-  is part of it.
-- `docs/adr/` — architecture decision records for the toolkit's own design.
-- `AGENTS.md`, `CLAUDE.md`, `.claude/`, `start.md`, `constitution-template.md` — the
-  development environment: contributor rules, mission documents, and dev-only tooling.
-  None of this ships.
-
-## Contributing
+## Commands
 
 ```bash
-npm test                 # node:test suite for the CLI and the runtime gate checker
-npm run build:manifest   # regenerate src/manifest.json after editing src/payload/
+npx --yes github:Marc-Josia/operator init
+npx --yes github:Marc-Josia/operator update
+npx --yes github:Marc-Josia/operator status
+npx --yes github:Marc-Josia/operator remove
+npx --yes github:Marc-Josia/operator remove --purge
 ```
 
-Rules for contributions (human or agent) are in [`AGENTS.md`](AGENTS.md). Design rationale
-lives in `docs/adr/` — read ADR-0007 (mechanical gates) and ADR-0002 (managed AGENTS.md
-block) first to understand the architecture.
+If the package is linked locally:
+
+```bash
+operator init --agent cursor,claude-code,codex,opencode -y
+operator init --agent "*"
+operator init -g          # user-wide instead of this project
+```
+
+`--copy` is on by default on Windows (symlinks are unreliable there). `-y` is always passed through to `npx skills`.
+
+## What gets installed
+
+**Matt Pocock** (Understand → Build): `setup-matt-pocock-skills`, `grill-with-docs`, `grill-me`, `grilling`, `domain-modeling`, `to-spec`, `to-tickets`, `tdd`, `implement`, `code-review`, `codebase-design`, `improve-codebase-architecture`, `diagnosing-bugs`, `prototype`, `wayfinder`, `research`, `writing-for-agents`, `wizard`.
+
+**Addy Osmani** (Production overlay): `security-and-hardening`, `code-review-and-quality`, `deprecation-and-migration`, `observability-and-instrumentation`, `ci-cd-and-automation`, `shipping-and-launch`, `performance-optimization`.
+
+**pstack** (writing pass): `unslop`. Not the rest of pstack. `poteto-mode` is a competing router.
+
+**Addy `references/`** is copied to the project root so paths like `../../references/security-checklist.md` resolve from installed skills.
+
+**Operator** adds:
+
+- the `operator` skill (`/operator`) — the only router
+- a managed block in `AGENTS.md` (markers `<!-- operator:start -->` / `<!-- operator:end -->`) so agents that miss the skill still see the map
+
+Not installed, on purpose: `ask-matt`, `using-agent-skills`, and `poteto-mode`. Two meta-routers fight over the next step.
+
+## Pipeline
+
+```
+IDEA
+  → grill-with-docs
+  → domain-modeling
+  → to-spec
+  → to-tickets
+  → prototype?          (throwaway only)
+  → tdd                 (Matt)
+  → implement
+  → code-review         (Matt: Standards + Spec)
+  → codebase-design
+  → improve-codebase-architecture
+  → security-and-hardening
+  → code-review-and-quality
+  → deprecation-and-migration
+  → observability-and-instrumentation
+  → ci-cd-and-automation
+  → shipping-and-launch
+```
+
+On-ramps are allowed. A small specified fix can go straight to `tdd` + `implement`. A production launch runs the Addy overlay after Build.
+
+Arbitration, in short:
+
+- Tests are always Matt `tdd`
+- Two reviews, in order: Matt during Build, Addy during Production (after security)
+- Bugs go to `diagnosing-bugs`
+
+## Develop
+
+```bash
+npm test
+```
+
+Node ≥ 18. Zero runtime dependencies; Operator shells out to `npx skills@latest`.
