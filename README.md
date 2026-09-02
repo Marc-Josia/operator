@@ -33,7 +33,7 @@ operator init -g --agent cursor       # user-wide instead of this project
 
 ## What gets installed
 
-**Matt Pocock** (Understand → Build): `setup-matt-pocock-skills`, `grill-with-docs`, `grill-me`, `grilling`, `domain-modeling`, `to-spec`, `to-tickets`, `tdd`, `implement`, `code-review`, `codebase-design`, `improve-codebase-architecture`, `diagnosing-bugs`, `prototype`, `wayfinder`, `research`, `writing-for-agents`, `wizard`.
+**Matt Pocock** (Understand → Build): `setup-matt-pocock-skills`, `grill-with-docs`, `grill-me`, `grilling`, `domain-modeling`, `to-spec`, `to-tickets`, `tdd`, `implement`, `code-review`, `codebase-design`, `improve-codebase-architecture`, `diagnosing-bugs`, `prototype`, `wayfinder`, `triage`, `handoff`, `research`, `writing-for-agents`, `wizard`.
 
 **Addy Osmani** (Production overlay): `security-and-hardening`, `code-review-and-quality`, `deprecation-and-migration`, `observability-and-instrumentation`, `ci-cd-and-automation`, `shipping-and-launch`, `performance-optimization`.
 
@@ -50,32 +50,30 @@ Not installed, on purpose: `ask-matt`, `using-agent-skills`, and `poteto-mode`. 
 
 ## Pipeline
 
+`/operator` runs a phase detector (first true branch). One skill per pass. Build entry is `implement` (it drives `tdd` at agreed seams, then Matt `code-review`). `prototype` only when UI/state shape is still the question.
+
 ```
 IDEA
   → grill-with-docs
-  → domain-modeling
   → to-spec
   → to-tickets
-  → prototype?          (throwaway only)
-  → tdd                 (Matt)
-  → implement
-  → code-review         (Matt: Standards + Spec)
-  → codebase-design
-  → improve-codebase-architecture
+  → prototype?          (throwaway; then detector again)
+  → implement           (tdd at seams, then Matt code-review)
+  → codebase-design / improve-codebase-architecture if seams still friction
   → security-and-hardening
-  → code-review-and-quality
-  → deprecation-and-migration
   → observability-and-instrumentation
   → ci-cd-and-automation
+  → code-review-and-quality
+  → deprecation-and-migration   (if old code is leaving)
   → shipping-and-launch
 ```
 
-On-ramps are allowed. A small specified fix can go straight to `tdd` + `implement`. A production launch runs the Addy overlay after Build.
+Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
 
 Arbitration, in short:
 
 - Tests are always Matt `tdd`
-- Two reviews, in order: Matt during Build, Addy during Production (after security)
+- Two reviews, in order: Matt after `implement`, Addy during Production (after CI)
 - Bugs go to `diagnosing-bugs`
 
 ## Develop
