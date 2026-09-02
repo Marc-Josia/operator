@@ -19,4 +19,13 @@ test('operator skill has router frontmatter and arbitration rules', () => {
   assert.ok(skill.includes('tdd'));
   assert.ok(skill.includes('unslop'));
   assert.ok(skill.includes('Never Addy'));
+  assert.ok(skill.includes('triage'));
+  assert.ok(skill.includes('handoff'));
+  assert.ok(skill.includes('Take the first true branch'));
+  assert.ok(skill.includes('Entry is `implement`'));
+  const production = skill.slice(skill.indexOf('### Production'));
+  assert.ok(
+    production.indexOf('observability-and-instrumentation') <
+      production.indexOf('code-review-and-quality'),
+  );
 });

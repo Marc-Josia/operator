@@ -1,23 +1,26 @@
 # Operator
 
-This repo uses **Operator** as the only skill router. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. pstack `unslop` is a writing pass. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`. If you are unsure which skill to run, invoke `/operator`.
+This repo uses **Operator** as the only skill router. Invoke `/operator`. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. pstack `unslop` is a writing pass. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`.
 
-## Pipeline
+A **phase** is one skill's work. One phase per pass. `/operator` runs the detector, follows the current skill, then names the next and waits. Jumping from a loose idea to `implement` is the failure this map exists to stop.
 
-`grill-with-docs` → `domain-modeling` → `to-spec` → `to-tickets` → (`prototype` throwaway?) → `tdd` → `implement` → `code-review` → `codebase-design` → `improve-codebase-architecture` → `security-and-hardening` → `code-review-and-quality` → `deprecation-and-migration` → `observability-and-instrumentation` → `ci-cd-and-automation` → `shipping-and-launch`
+## Detector
 
-On-ramps are allowed. Skip stages that are already done.
+First true branch: named skill → loose idea (`grill-with-docs`, or `grill-me` if there is no repo) → shared understanding, no spec (`to-spec`) → spec, no tickets (`to-tickets`) → UI/state shape still open (`prototype`, then detector again) → ready to code (`implement`: `tdd` at agreed seams, then Matt `code-review`) → seam friction (`codebase-design` / `improve-codebase-architecture`) → headed to production (overlay below).
+
+## Production overlay
+
+One skill per pass, in this order: `security-and-hardening` → `observability-and-instrumentation` → `ci-cd-and-automation` → `code-review-and-quality` → `deprecation-and-migration` if old code is leaving → `shipping-and-launch`.
 
 ## Arbitration
 
-- Tests: always Matt `tdd`. Never Addy `test-driven-development`.
-- Two reviews, in order: Matt `code-review` (Standards + Spec) during Build; Addy `code-review-and-quality` (five-axis) during Production, after security.
+- Tests: always Matt `tdd`. Never Addy `test-driven-development`. Build entry is `implement`, which drives `tdd`.
+- Two reviews, in order: Matt `code-review` (Standards + Spec) after `implement`; Addy `code-review-and-quality` (five-axis) during Production, after CI.
 - Bugs: `diagnosing-bugs`.
-- Vague idea: `grill-with-docs` (or `grill-me` if there is no repo).
-- Small specified fix: `tdd` + `implement`. Skip the production overlay unless the change is production-facing.
+- Auth, input, secrets already during Build: `security-and-hardening` as an overlay, not instead of the phase.
 - First use: `/setup-matt-pocock-skills` once per repo.
 
-Standalone when they fit: `wayfinder`, `research`, `writing-for-agents`, `unslop`, `wizard`, `performance-optimization`.
+Overlays on top of the phase: `unslop`, `performance-optimization`. Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
 
 Docs agents will read: `writing-for-agents`. Any prose that still reads like a chatbot: `unslop`.
 
