@@ -17,12 +17,17 @@ Commands:
   remove    Uninstall catalog skills and the AGENTS.md block
 
 Options:
+  init:
+    With no --agent, Operator shows a checkbox list (TTY only):
+    ↑/↓ move, space check, enter confirm. -y skips it and requires --agent.
   init / update / remove:
     --agent a,b    target agents (cursor, claude-code, codex, opencode, …)
                    or "*" for every agent the skills CLI supports
     -g, --global   install to the user directory instead of the project
     --copy         copy files instead of symlinking (on by default on Windows)
     -y, --yes      non-interactive (always passed through to the skills CLI)
+  update / remove:
+    omit --agent to reuse the agents saved at init
   remove:
     --purge        also delete Operator-managed files in references/
   --version, -v    print the package version
@@ -107,6 +112,7 @@ async function main(argv) {
     agents: agentsFromFlag(flags.agent),
     global: Boolean(flags.global),
     copy: Boolean(flags.copy),
+    yes: Boolean(flags.yes),
   };
 
   switch (command) {

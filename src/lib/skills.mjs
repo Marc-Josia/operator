@@ -11,9 +11,9 @@ import { OperatorError } from './fsutil.mjs';
 
 /** @param {string[] | undefined} agents */
 export function normalizeAgents(agents) {
-  if (!agents || agents.length === 0) return ['*'];
-  const expanded = agents.flatMap((value) => value.split(',')).map((value) => value.trim()).filter(Boolean);
-  return expanded.length > 0 ? expanded : ['*'];
+  if (!agents || agents.length === 0) return [];
+  const expanded = agents.flatMap((value) => String(value).split(',')).map((value) => value.trim()).filter(Boolean);
+  return [...new Set(expanded)];
 }
 
 /** @param {boolean | undefined} copy */
@@ -29,6 +29,9 @@ export function shouldCopy(copy) {
 export function applyFlags(args, flags, opts = {}) {
   const includeCopy = opts.includeCopy !== false;
   const agents = normalizeAgents(flags.agents);
+  if (agents.length === 0) {
+    throw new OperatorError('missing --agent', 2);
+  }
   for (const agent of agents) {
     args.push('--agent', agent);
   }

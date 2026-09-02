@@ -1,6 +1,6 @@
 # Operator
 
-Operator installs a curated set of [Matt Pocock](https://github.com/mattpocock/skills) and [Addy Osmani](https://github.com/addyosmani/agent-skills) skills, plus [pstack](https://github.com/cursor/plugins/tree/main/pstack) `unslop`, then puts **one router** on top so those packs work as a single pipeline. It targets any coding agent the [Vercel skills CLI](https://github.com/vercel-labs/skills) supports (Cursor, Codex, Claude Code, OpenCode, Gemini, Copilot, and dozens more).
+Operator installs a curated set of [Matt Pocock](https://github.com/mattpocock/skills) and [Addy Osmani](https://github.com/addyosmani/agent-skills) skills, plus [pstack](https://github.com/cursor/plugins/tree/main/pstack) `unslop`, then puts **one router** on top so those packs work as a single pipeline. On `init`, you pick which coding agents to install for (Cursor, Claude Code, Codex, and so on). Operator does not install a folder for every agent the [Vercel skills CLI](https://github.com/vercel-labs/skills) knows about unless you ask for `*`.
 
 Operator does **not** fork those skills. It pulls them current, installs them, and owns only the orchestration layer.
 
@@ -23,12 +23,13 @@ npx --yes github:Marc-Josia/operator remove --purge
 If the package is linked locally:
 
 ```bash
+operator init                         # checkboxes: ↑/↓, space to select, enter
 operator init --agent cursor,claude-code,codex,opencode -y
-operator init --agent "*"
-operator init -g          # user-wide instead of this project
+operator init --agent "*"             # every agent the skills CLI supports
+operator init -g --agent cursor       # user-wide instead of this project
 ```
 
-`--copy` is on by default on Windows (symlinks are unreliable there). `-y` is always passed through to `npx skills`.
+`--copy` is on by default on Windows (symlinks are unreliable there). `-y` is always passed through to `npx skills`. Without `--agent`, `-y` is an error: Operator will not guess `*` and scatter skill folders.
 
 ## What gets installed
 

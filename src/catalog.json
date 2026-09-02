@@ -46,6 +46,20 @@
   ],
   "operatorSkill": "operator",
   "skip": ["ask-matt", "using-agent-skills", "poteto-mode"],
+  "agents": [
+    { "id": "cursor", "label": "Cursor" },
+    { "id": "claude-code", "label": "Claude Code" },
+    { "id": "codex", "label": "Codex" },
+    { "id": "opencode", "label": "OpenCode" },
+    { "id": "gemini-cli", "label": "Gemini CLI" },
+    { "id": "github-copilot", "label": "GitHub Copilot" },
+    { "id": "windsurf", "label": "Windsurf" },
+    { "id": "openhands", "label": "OpenHands" },
+    { "id": "amp", "label": "Amp" },
+    { "id": "cline", "label": "Cline" },
+    { "id": "continue", "label": "Continue" },
+    { "id": "goose", "label": "Goose" }
+  ],
   "references": {
     "repo": "addyosmani/agent-skills",
     "branch": "main",

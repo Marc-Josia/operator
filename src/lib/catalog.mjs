@@ -16,10 +16,16 @@ import { readJson } from './fsutil.mjs';
  * }} CatalogReferences
  *
  * @typedef {{
+ *   id: string,
+ *   label: string,
+ * }} CatalogAgent
+ *
+ * @typedef {{
  *   version: number,
  *   sources: CatalogSource[],
  *   operatorSkill: string,
  *   skip: string[],
+ *   agents: CatalogAgent[],
  *   references: CatalogReferences,
  * }} Catalog
  */
@@ -35,6 +41,9 @@ export function loadCatalog(packageRoot) {
   const catalog = readJson(catalogPath(packageRoot));
   if (!Array.isArray(catalog.sources) || catalog.sources.length === 0) {
     throw new Error('catalog.json is missing sources');
+  }
+  if (!Array.isArray(catalog.agents) || catalog.agents.length === 0) {
+    throw new Error('catalog.json is missing agents');
   }
   return catalog;
 }

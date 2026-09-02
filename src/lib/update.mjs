@@ -4,6 +4,7 @@ import { addSkills, updateSkills } from './skills.mjs';
 import { installReferences } from './references.mjs';
 import { upsertAgentsBlock } from './agents-md.mjs';
 import { destRoot } from './scan.mjs';
+import { resolveAgents } from './target-agents.mjs';
 
 /**
  * Refresh catalog skills, Operator's own skill, references/, and the AGENTS.md block.
@@ -13,17 +14,32 @@ import { destRoot } from './scan.mjs';
  *   cwd?: string,
  *   packageRoot: string,
  *   agents?: string[],
+ *   yes?: boolean,
  *   global?: boolean,
  *   copy?: boolean,
  *   runner?: (args: string[], opts: { cwd?: string }) => Promise<void>,
  *   fetchFn?: typeof fetch,
+ *   promptFn?: (knownAgents: { id: string, label: string }[]) => Promise<string[]>,
+ *   stdin?: NodeJS.ReadableStream,
+ *   stdout?: NodeJS.WritableStream,
  * }} opts
  */
 export async function update(opts) {
   const cwd = opts.cwd ?? process.cwd();
   const catalog = loadCatalog(opts.packageRoot);
-  const flags = {
+  const root = destRoot(cwd, opts.global);
+  const agents = await resolveAgents({
     agents: opts.agents,
+    yes: opts.yes,
+    command: 'update',
+    destRoot: root,
+    knownAgents: catalog.agents,
+    promptFn: opts.promptFn,
+    stdin: opts.stdin,
+    stdout: opts.stdout,
+  });
+  const flags = {
+    agents,
     global: opts.global,
     copy: opts.copy,
     cwd,
@@ -45,7 +61,8 @@ export async function update(opts) {
 
   await installReferences({
     catalog,
-    destRoot: destRoot(cwd, opts.global),
+    destRoot: root,
+    agents,
     fetchFn: opts.fetchFn,
   });
 

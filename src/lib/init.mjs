@@ -4,6 +4,7 @@ import { addSkills } from './skills.mjs';
 import { installReferences } from './references.mjs';
 import { upsertAgentsBlock } from './agents-md.mjs';
 import { destRoot } from './scan.mjs';
+import { resolveAgents } from './target-agents.mjs';
 
 const NEXT_STEPS = `
 Operator is installed.
@@ -22,17 +23,32 @@ to pick the right skill for what you're doing.
  *   cwd?: string,
  *   packageRoot: string,
  *   agents?: string[],
+ *   yes?: boolean,
  *   global?: boolean,
  *   copy?: boolean,
  *   runner?: (args: string[], opts: { cwd?: string }) => Promise<void>,
  *   fetchFn?: typeof fetch,
+ *   promptFn?: (knownAgents: { id: string, label: string }[]) => Promise<string[]>,
+ *   stdin?: NodeJS.ReadableStream,
+ *   stdout?: NodeJS.WritableStream,
  * }} opts
  */
 export async function init(opts) {
   const cwd = opts.cwd ?? process.cwd();
   const catalog = loadCatalog(opts.packageRoot);
-  const flags = {
+  const root = destRoot(cwd, opts.global);
+  const agents = await resolveAgents({
     agents: opts.agents,
+    yes: opts.yes,
+    command: 'init',
+    destRoot: root,
+    knownAgents: catalog.agents,
+    promptFn: opts.promptFn,
+    stdin: opts.stdin,
+    stdout: opts.stdout,
+  });
+  const flags = {
+    agents,
     global: opts.global,
     copy: opts.copy,
     cwd,
@@ -55,7 +71,8 @@ export async function init(opts) {
 
   await installReferences({
     catalog,
-    destRoot: destRoot(cwd, opts.global),
+    destRoot: root,
+    agents,
     fetchFn: opts.fetchFn,
   });
 

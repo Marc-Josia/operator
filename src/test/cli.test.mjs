@@ -25,8 +25,10 @@ test('parseArgs rejects unknown options', () => {
   });
 });
 
-test('help text names the four commands', () => {
+test('help text names the four commands and the agent prompt', () => {
   for (const command of ['init', 'update', 'status', 'remove']) {
     assert.ok(HELP.includes(command));
   }
+  assert.ok(HELP.includes('checkbox list'));
+  assert.ok(HELP.includes('space check'));
 });

@@ -2,9 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { applyFlags, buildAddArgs, buildRemoveArgs, buildUpdateArgs, normalizeAgents, shouldCopy } from '../lib/skills.mjs';
 
-test('normalizeAgents defaults to all agents', () => {
-  assert.deepEqual(normalizeAgents(undefined), ['*']);
-  assert.deepEqual(normalizeAgents([]), ['*']);
+test('normalizeAgents does not default to all agents', () => {
+  assert.deepEqual(normalizeAgents(undefined), []);
+  assert.deepEqual(normalizeAgents([]), []);
   assert.deepEqual(normalizeAgents(['cursor,claude-code', 'codex']), ['cursor', 'claude-code', 'codex']);
 });
 
@@ -29,6 +29,7 @@ test('buildAddArgs supports all-agents and global', () => {
   const args = buildAddArgs({
     repo: 'addyosmani/agent-skills',
     skills: ['security-and-hardening'],
+    agents: ['*'],
     global: true,
     copy: true,
   });
@@ -58,8 +59,12 @@ test('shouldCopy is true when requested', () => {
   assert.equal(shouldCopy(true), true);
 });
 
-test('applyFlags always passes -y', () => {
-  const args = applyFlags(['cmd'], { copy: true });
+test('applyFlags always passes -y and requires agents', () => {
+  const args = applyFlags(['cmd'], { agents: ['cursor'], copy: true });
   assert.ok(args.includes('-y'));
   assert.ok(args.includes('--copy'));
+  assert.throws(() => applyFlags(['cmd'], { copy: true }), (err) => {
+    assert.equal(err.code, 2);
+    return true;
+  });
 });
