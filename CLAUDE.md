@@ -22,6 +22,7 @@ Shipped surface is `src/` plus root `package.json`. English in everything an age
 - Matt owns Understand → Build (`tdd`, `implement`, `code-review`). Addy owns the Production overlay (`security-and-hardening` onward). Two reviews are sequential, not interchangeable. pstack `unslop` is a writing pass only.
 - Zero runtime dependencies. Shell out to `npx skills@latest`. Node ≥ 18, ESM.
 - `--copy` is implied on Windows. `remove` must not pass `--copy`.
+- Never default `--agent` to `*`. Init prompts (TTY) or requires `--agent` with `-y`. `update`/`remove` reuse agents saved in `references/.operator-managed.json`.
 - `update` refreshes catalog skills, re-adds the local operator skill, re-fetches `references/`, and replaces only the managed AGENTS.md block. It does not touch the rest of a consumer repo.
 - `references/` in a consumer project is Addy’s checklists so `../../references/` resolves. Purge only files listed in `references/.operator-managed.json`.
 
@@ -31,7 +32,7 @@ Shipped surface is `src/` plus root `package.json`. English in everything an age
 
 - Add/drop a curated skill → `src/catalog.json` and the tests in `src/test/catalog.test.mjs`. Keep payload router + agents-block in sync with the same names.
 - Change routing/arbitration → both `src/payload/skills/operator/SKILL.md` and `src/payload/agents-block.md` (skill is detailed; block stays short).
-- Change CLI flags or `npx skills` argv → `src/lib/skills.mjs` and `src/test/skills.test.mjs`. Prefer injecting `runner` / `fetchFn` over hitting the network in tests.
+- Change CLI flags or `npx skills` argv → `src/lib/skills.mjs` and `src/test/skills.test.mjs`. Agent picker → `src/lib/target-agents.mjs`. Prefer injecting `runner` / `fetchFn` / `promptFn` over hitting the network or stdin in tests.
 
 ```bash
 npm test

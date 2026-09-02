@@ -40,25 +40,38 @@ export async function fetchText(url, opts = {}) {
   return res.text();
 }
 
+/** @param {string} destRoot */
+export function readSavedAgents(destRoot) {
+  const marker = markerPath(destRoot);
+  if (!pathExists(marker)) return undefined;
+  const managed = readJson(marker);
+  if (!Array.isArray(managed.agents) || managed.agents.length === 0) return undefined;
+  return managed.agents.map(String);
+}
+
 /**
  * @param {{
  *   catalog: { references: { repo: string, branch: string, dir: string, files: string[] } },
  *   destRoot: string,
+ *   agents?: string[],
  *   fetchFn?: typeof fetch,
  * }} opts
  */
 export async function installReferences(opts) {
   const { repo, branch, dir, files } = opts.catalog.references;
   const dest = referencesDir(opts.destRoot);
+  const existingAgents = readSavedAgents(opts.destRoot);
   for (const file of files) {
     const url = rawUrl(repo, branch, dir, file);
     const body = await fetchText(url, { fetchFn: opts.fetchFn });
     writeText(path.join(dest, file), body);
   }
+  const agents = opts.agents && opts.agents.length > 0 ? opts.agents : existingAgents;
   writeJson(markerPath(opts.destRoot), {
     source: `${repo}/${dir}`,
     branch,
     files: [...files],
+    ...(agents && agents.length > 0 ? { agents } : {}),
   });
 }
 

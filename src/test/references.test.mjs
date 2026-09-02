@@ -32,7 +32,7 @@ test('installReferences writes files and a managed marker', async () => {
   const destRoot = tmpDir();
   const catalog = loadCatalog(packageRoot());
   const { fetchFn, urls } = mockFetch('# security');
-  await installReferences({ catalog, destRoot, fetchFn });
+  await installReferences({ catalog, destRoot, fetchFn, agents: ['cursor'] });
   assert.equal(urls.length, catalog.references.files.length);
   for (const file of catalog.references.files) {
     const text = fs.readFileSync(path.join(destRoot, 'references', file), 'utf8');
@@ -43,6 +43,8 @@ test('installReferences writes files and a managed marker', async () => {
   assert.equal(status.missing.length, 0);
   assert.equal(status.files.length, catalog.references.files.length);
   assert.ok(fs.existsSync(markerPath(destRoot)));
+  const marker = JSON.parse(fs.readFileSync(markerPath(destRoot), 'utf8'));
+  assert.deepEqual(marker.agents, ['cursor']);
 });
 
 test('removeReferences --purge deletes only Operator-managed files', async () => {

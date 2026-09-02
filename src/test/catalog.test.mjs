@@ -71,4 +71,9 @@ test('catalog lists the curated Matt + Addy + pstack skills and skips competing 
   assert.ok(names.includes('unslop'));
   assert.deepEqual(catalog.references.files, REF_FILES);
   assert.deepEqual(managedSkillNames(catalog), [...MATT, ...ADDY, ...PSTACK, 'operator']);
+  assert.ok(catalog.agents.length > 0);
+  assert.equal(catalog.agents[0].id, 'cursor');
+  assert.ok(catalog.agents.some((agent) => agent.id === 'claude-code'));
+  assert.ok(catalog.agents.some((agent) => agent.id === 'windsurf'));
+  assert.ok(catalog.agents.some((agent) => agent.id === 'openhands'));
 });

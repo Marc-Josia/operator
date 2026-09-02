@@ -62,6 +62,8 @@ test('init installs via skills CLI, writes references/, and upserts AGENTS.md', 
   assert.ok(agentsMd.includes('docs/changes/<change-id>/'));
   assert.ok(fs.existsSync(path.join(cwd, 'references', 'security-checklist.md')));
   assert.ok(fs.existsSync(path.join(cwd, 'references', '.operator-managed.json')));
+  const managed = JSON.parse(fs.readFileSync(path.join(cwd, 'references', '.operator-managed.json'), 'utf8'));
+  assert.deepEqual(managed.agents, ['cursor']);
 });
 
 test('status reports missing skills and an ok install when the catalog is present', async () => {
@@ -97,6 +99,7 @@ test('update re-adds the operator skill and refreshes AGENTS.md', async () => {
   await init({
     cwd,
     packageRoot: root,
+    agents: ['cursor'],
     copy: true,
     runner: async () => {},
     fetchFn: mockFetch(),
@@ -120,12 +123,48 @@ test('update re-adds the operator skill and refreshes AGENTS.md', async () => {
   assert.ok(text.includes(START_MARKER));
 });
 
+test('init without --agent uses the interactive choice', async () => {
+  const cwd = tmpDir();
+  const root = packageRoot();
+  /** @type {string[][]} */
+  const calls = [];
+  await init({
+    cwd,
+    packageRoot: root,
+    copy: true,
+    runner: async (args) => {
+      calls.push(args);
+    },
+    fetchFn: mockFetch(),
+    promptFn: async () => ['claude-code'],
+  });
+  for (const args of calls) {
+    assert.deepEqual(args.slice(args.indexOf('--agent'), args.indexOf('--agent') + 2), ['--agent', 'claude-code']);
+  }
+  const managed = JSON.parse(fs.readFileSync(path.join(cwd, 'references', '.operator-managed.json'), 'utf8'));
+  assert.deepEqual(managed.agents, ['claude-code']);
+});
+
+test('init -y without --agent fails', async () => {
+  await assert.rejects(
+    () => init({
+      cwd: tmpDir(),
+      packageRoot: packageRoot(),
+      yes: true,
+      runner: async () => {},
+      fetchFn: mockFetch(),
+    }),
+    (err) => err.code === 2,
+  );
+});
+
 test('remove strips the AGENTS.md block and optionally purges references', async () => {
   const cwd = tmpDir();
   const root = packageRoot();
   await init({
     cwd,
     packageRoot: root,
+    agents: ['cursor'],
     copy: true,
     runner: async () => {},
     fetchFn: mockFetch(),
