@@ -1,6 +1,6 @@
 {
   "name": "@marcjosia/operator",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Operator — compose Matt Pocock and Addy Osmani agent skills into one pipeline that works with any coding agent.",
   "type": "module",
   "bin": {
