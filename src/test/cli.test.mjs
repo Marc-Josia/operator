@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseArgs, HELP } from '../bin/operator.mjs';
+import { parseArgs, HELP, main } from '../bin/operator.mjs';
 import { OperatorError } from '../lib/fsutil.mjs';
 
 test('parseArgs reads commands and flags', () => {
@@ -31,4 +31,19 @@ test('help text names the four commands and the agent prompt', () => {
   }
   assert.ok(HELP.includes('checkbox list'));
   assert.ok(HELP.includes('space check'));
+});
+
+test('loop arguments preserve paths and reject invalid action/flag combinations', async () => {
+  assert.deepEqual(parseArgs(['loop', 'start', '--contract', 'docs/my feature.json']), {
+    positional: ['loop', 'start'], flags: { contract: 'docs/my feature.json' },
+  });
+  assert.throws(() => parseArgs(['loop', 'start', '--contract', 'a', '--contract', 'b']), /cannot be repeated/);
+  for (const args of [
+    ['loop'], ['loop', 'start'], ['loop', 'resume'],
+    ['loop', 'start', '--contract', 'a', '--id', 'b'],
+    ['loop', 'resume', '--id', 'a', '--contract', 'b'],
+    ['loop', 'status', '--id', 'a', '--contract', 'b'],
+    ['loop', 'start', '--contract', 'a', '--yes'],
+    ['status', '--contract', 'a'],
+  ]) await assert.rejects(main(args), (error) => error instanceof OperatorError && error.code === 2);
 });
