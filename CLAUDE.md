@@ -19,7 +19,7 @@ Shipped surface is `src/` plus root `package.json`. English in everything an age
 
 - Do not fork or patch Matt/Addy/pstack `SKILL.md`. Operator orchestrates; upstream stays upstream.
 - One router: `operator`. Never add `ask-matt`, `using-agent-skills`, or `poteto-mode` to the catalog (`catalog.skip`).
-- Matt owns Understand → Build (`implement` drives `tdd` then `code-review`). Addy owns the Production overlay (`security-and-hardening` → observability → CI → `code-review-and-quality` → deprecation if needed → shipping). Two reviews are sequential, not interchangeable. pstack `unslop` is a writing pass only. `/operator` is the only router.
+- Route proportionally: clear, localized, low-risk corrections use direct implementation and focused verification; complex features use Matt's Understand → Build skills (`implement` drives `tdd` then `code-review`). Addy owns the Production overlay: select relevant checks and preserve their order (`security-and-hardening` → observability → CI → `code-review-and-quality` → deprecation → shipping). When both reviews apply, they are sequential, not interchangeable. Continue within the authorized scope without a mandatory stop per phase; selected skills retain their requirements, subject to user instructions. pstack `unslop` is a writing pass only. `/operator` is the only router.
 - Zero runtime dependencies. Shell out to `npx skills@latest`. Node ≥ 18, ESM.
 - `--copy` is implied on Windows. `remove` must not pass `--copy`.
 - Never default `--agent` to `*`. Init prompts (TTY) or requires `--agent` with `-y`. `update`/`remove` reuse agents saved in `references/.operator-managed.json`.

@@ -13,11 +13,11 @@ disable-model-invocation: true
 
 You are the **only router** in this repo. Invoke as `/operator`. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. pstack `unslop` is a writing pass, not a second lifecycle. Do not run a second lifecycle (no Addy `/spec` `/plan` `/build`, no `ask-matt`, no `using-agent-skills`, no `poteto-mode`).
 
-A **phase** is one skill's work. One phase per pass. When that skill's completion criterion holds, name the next skill and wait. Follow a named skill even if the user invoked it: read its `SKILL.md` and run it. If this map and a `SKILL.md` disagree, the `SKILL.md` is right.
+A **phase** is one skill's work, not a turn limit. Choose a path proportional to the request's uncertainty, scope, and risk. Continue through applicable phases within the user's authorized scope. Stop when the requested outcome is verified, a material decision or permission is missing, or a selected skill requires user input. Do not wait merely because a phase ended.
 
-Jumping from a loose idea to `implement` is the failure this skill exists to stop.
+Read every selected skill's `SKILL.md` and follow its requirements. The user's instructions take precedence; otherwise a selected skill's requirements take precedence over this map. Select skills only when their full workflow is warranted. The direct correction path below does not invoke `implement` or waive its requirements.
 
-When the user runs `/operator`, run the detector, then follow the current phase skill to the bound below.
+When the user runs `/operator`, run the detector. If the request is only to recommend a skill, explain the choice and stop there. Otherwise briefly state the chosen path and why, then execute it; reassess if new evidence changes scope or risk. Clarify loose ideas before building, but do not manufacture specs or tickets for an already clear correction.
 
 Checklists live in `references/` at the project root (Addy). Skills that say `../../references/…` resolve there.
 
@@ -25,83 +25,92 @@ If setup has not been run in this repo, say so and put `setup-matt-pocock-skills
 
 ## Detector
 
-Take the first true branch.
+Take the first true branch for pending work only. After completing it, reassess remaining work against the user's requested outcome. Do not rerun a completed skill unless new evidence or edits invalidate its outcome.
 
-1. The user named a skill (other than `operator`). That is the phase. Follow it.
-2. Loose idea or untested plan, and no shared understanding yet. Phase is `grill-with-docs` (it loads `grilling` and `domain-modeling`). If the working directory is not a repo, `grill-me`.
-3. Shared understanding, no spec yet. Phase is `to-spec`.
-4. Spec exists, no tickets. Phase is `to-tickets`.
-5. UI or state shape is still the open question. Phase is `prototype`. After that, return to this detector.
-6. A ticket or spec is ready to code. Phase is `implement`. It uses `tdd` at seams the user agreed (never Addy `test-driven-development`), then Matt `code-review`.
-7. After that review, module or seam friction. Consult `codebase-design`. If the work is a deepening scan of the codebase, phase is `improve-codebase-architecture`.
-8. The change is headed to production (merge, deploy, ship). Run the production overlay in order, still one phase per pass: `security-and-hardening`, then `observability-and-instrumentation`, then `ci-cd-and-automation`, then `code-review-and-quality`, then `deprecation-and-migration` if old code is leaving, then `shipping-and-launch`.
+1. The user named a skill (other than `operator`). Follow it without automatically expanding the request to the rest of the pipeline.
+2. A localized, low-risk correction has clear expected behavior and a known cause. Use the direct correction path below. Small diffs involving auth, sensitive data, public contracts, or migrations are not low-risk merely because they are small.
+3. A bug's cause is unclear, behavior is intermittent, or performance needs diagnosis. Use `diagnosing-bugs` before selecting the build path.
+4. A feature, consequential correction, or design has unresolved requirements. Use `grill-with-docs` (it loads `grilling` and `domain-modeling`), or `grill-me` without a repo. Shared understanding for complex work leads to `to-spec`; reuse an adequate existing spec.
+5. UI or state shape is still the open question. Use `prototype`, then return to this detector.
+6. An understood feature or consequential correction needs a spec. Use `to-spec`. A spec needs separate work units or dependency tracking: use `to-tickets`. Tickets are not required for every spec.
+7. A feature or consequential correction has a ticket or spec ready to code. Use `implement`. It uses `tdd` at agreed seams (never Addy `test-driven-development`), then Matt `code-review`.
+8. Remaining module or seam friction warrants design work. Consult `codebase-design`; use `improve-codebase-architecture` for a requested deepening scan.
+9. Implementation is verified and delivery (merge, deploy, ship) is requested. Select the relevant production checks below and run them in order.
 
-Detector done: the current phase skill has been followed to the bound below, and the next skill is named.
+If the requested outcome is complete, report the change and verification. Do not add phases solely because no spec or tickets exist, or because production could be a future destination.
 
 ## Lanes
 
+### Direct correction
+
+Inspect the affected code and expected behavior, make the smallest sufficient change, and verify it with a focused regression check or the relevant existing checks. For a behavior bug, reproduce it before the fix where practical and confirm the check passes afterward. For prose or configuration corrections, validate the affected artifact rather than inventing a test suite.
+
+Review the diff for unintended changes and report the result and verification limits. This path does not require a spec, tickets, an implementation ledger, or two formal reviews. If investigation reveals an unclear cause, wider scope, or consequential risk, return to the detector and select the needed diagnosis, specification, or hardening work. Delivery still uses the production selection below when requested.
+
 ### Understand
 
-Matt. Sharpen the idea until it is tickets.
+Matt. Resolve uncertainty and specify complex work. Create tickets when decomposition helps execution.
 
 | Phase | Done when | Next |
 | --- | --- | --- |
 | `grill-with-docs` | Grilling frontier is empty and the user confirmed shared understanding. Domain terms that actually resolved are written down. | `to-spec` |
-| `to-spec` | Spec exists and is ready for an agent. Seams confirmed with the user. | `to-tickets` |
+| `to-spec` | Spec exists and is ready for an agent. Seams confirmed with the user. | `to-tickets` if decomposition is needed, `prototype` if shape is unresolved, otherwise `implement` |
 | `to-tickets` | User approved the breakdown. Tickets exist with blocking edges and are ready for an agent. | `prototype` if shape is still in question, otherwise `implement` |
 
-Human entry for a new idea is `/operator` (detector branch 2) or `/grill-with-docs`. `grilling` is the engine those two load, never the entry.
+Human entry for a new idea is `/operator` or `/grill-with-docs`. `grilling` is the engine those two load, never the entry.
 
 Work too big for one grill-to-spec session is not this lane. Use `wayfinder`.
 
 ### Build
 
-Matt. Make the change. Entry is `implement`, not a standalone `tdd` stage.
+Matt. Entry is `implement` for features and consequential corrections ready to code; simple corrections use the direct path. `tdd` is not a mandatory standalone stage.
 
 | Phase | Done when | Next |
 | --- | --- | --- |
 | `prototype` | Throwaway artifact exists and the user has reacted to the design question. Nothing from it is kept except decisions that feed the spec or tickets. | Detector, usually `implement` |
-| `implement` | Ledger full (`temp/implement-ledger.md`: every row evidenced or abandoned). `tdd` at agreed seams. Typecheck and tests run. Matt `code-review` reported, parent having re-run ledger CHECKs. Work committed on the current branch. | `codebase-design` / `improve-codebase-architecture` if seams are the leftover friction, otherwise production |
-| `codebase-design` | Reference, not a session. Done when the design uses *module*, *interface*, *depth*, *seam*, *adapter*, *leverage*, *locality* without drifting to component / service / API / boundary. | `improve-codebase-architecture` when scanning for deepening, otherwise production |
-| `improve-codebase-architecture` | HTML report opened, user picked a candidate, that candidate grilled. | Production |
+| `implement` | Ledger full (`temp/implement-ledger.md`: every row evidenced or abandoned). `tdd` at agreed seams. Typecheck and tests run. Matt `code-review` reported, parent having re-run ledger CHECKs. Work committed on the current branch. | Design work if seams remain unresolved; production if delivery is requested; otherwise report completion |
+| `codebase-design` | Reference, not a session. Done when the design uses *module*, *interface*, *depth*, *seam*, *adapter*, *leverage*, *locality* without drifting to component / service / API / boundary. | `improve-codebase-architecture` when scanning for deepening; otherwise finish the requested work |
+| `improve-codebase-architecture` | HTML report opened, user picked a candidate, that candidate grilled. | Finish the requested work; production only if delivery is requested |
 
 `tdd` and Matt `code-review` also run as their own phase when the user names them, or when `implement` calls them.
 
 ### Production
 
-Addy. One skill at a time, in this order. A phase is done when that skill's own process is complete.
+Addy. Select checks from the actual delivery risk and existing evidence. State which checks apply and briefly explain any omitted checks. Reuse current evidence for unchanged areas; rerun checks affected by new edits or failures. Repository-required checks still apply.
 
-1. `security-and-hardening`
-2. `observability-and-instrumentation`
-3. `ci-cd-and-automation`
-4. `code-review-and-quality` (five-axis review reported)
-5. `deprecation-and-migration` if old code is leaving
-6. `shipping-and-launch` (pre-launch checklist, monitoring, rollout, and rollback in place)
+Run selected skills in this order, completing each skill's own process:
 
-After 6, the map ends.
+1. `security-and-hardening` for changed auth, trust, input handling, secrets, sensitive data, or external integrations.
+2. `observability-and-instrumentation` for changed runtime behavior that needs new signals or incident visibility.
+3. `ci-cd-and-automation` for changed build, test, deployment, or release automation, or a gap in delivery checks.
+4. `code-review-and-quality` when delivery needs a broader production review (for example, a substantial change, multiple systems affected, or a repository requirement). A verified low-risk correction does not automatically need a second formal review.
+5. `deprecation-and-migration` for removed or changed public contracts, persisted data, or compatibility transitions.
+6. `shipping-and-launch` for a deployment or launch requiring rollout, monitoring, and rollback planning. An ordinary merge uses the repository's merge checks without automatically adding a launch workflow.
+
+Continue between selected checks without an artificial turn boundary. Complete the authorized delivery action once its prerequisites hold; request permission only where it is actually missing.
 
 ## Overlaps
 
 Two skills can cover the same English word. The detector picks.
 
-**Review.** After `implement`, use `code-review` (Matt: Standards and Spec). Before merge or ship, use `code-review-and-quality` (Addy: five axes). Sequential, not interchangeable.
+**Review.** `implement` includes `code-review` (Matt: Standards and Spec). Add `code-review-and-quality` (Addy: five axes) when production risk warrants it or the user or repository requires it. When both apply, Matt precedes Addy; neither replaces the other. Direct corrections receive a focused diff review without automatically invoking either formal review.
 
-**Debug.** User reports a hard bug, slowness, or something broken. Use `diagnosing-bugs` (Matt: build a red loop first). After the fix, `tdd` for the regression test. Do not use Addy debugging skills.
+**Debug.** Use `diagnosing-bugs` (Matt: build a red loop first) for unclear or difficult bugs and unexplained slowness. A known, localized cause can use the direct correction path with focused regression verification. Do not use Addy debugging skills.
 
 **Grill.** Entry is `grill-with-docs`. Use `grill-me` only when grilling without writing docs. `grilling` is the engine those two load, never the entry. Do not use Addy `interview-me`.
 
-**Spec / tickets.** `to-spec` then `to-tickets`. Do not use Addy spec/plan skills.
+**Spec / tickets.** Use `to-spec` for features or consequential corrections needing a specification, then `to-tickets` when decomposition is needed. Do not use Addy spec/plan skills.
 
-**Tests.** Always Matt `tdd`. Never Addy `test-driven-development`.
+**Tests.** When a testing skill is needed, use Matt `tdd`. Never Addy `test-driven-development`. Running focused existing checks on a direct correction does not require invoking a testing skill.
 
-**Implementation.** `implement`. Do not use Addy `incremental-implementation`.
+**Implementation.** Use the direct correction path for clear, low-risk fixes; `implement` for features and consequential corrections. Do not use Addy `incremental-implementation`.
 
 ## Overlays
 
 These fire in addition to the phase, not instead of it.
 
 - Any prose: `unslop`
-- Auth, untrusted input, secrets, or third parties, already during Build: `security-and-hardening`
+- Changes to auth, untrusted input handling, secrets, sensitive data, or external integrations, already during Build: `security-and-hardening`
 - Measured perf, Core Web Vitals, or N+1: `performance-optimization`
 - Any number in a final report: re-measure it at report time, or label it unverified
 

@@ -50,31 +50,40 @@ Not installed, on purpose: `ask-matt`, `using-agent-skills`, and `poteto-mode`. 
 
 ## Pipeline
 
-`/operator` runs a phase detector (first true branch). One skill per pass. Build entry is `implement` (it drives `tdd` at agreed seams, then Matt `code-review`). `prototype` only when UI/state shape is still the question.
+`/operator` selects a path proportional to the request's uncertainty, scope, and risk. It continues through applicable phases within the user's authorized scope, stopping for completion, missing decisions or permissions, or user input required by a selected skill.
+
+- Clear, localized, low-risk correction: inspect → fix directly → focused verification and diff review. No mandatory spec, tickets, ledger, or two formal reviews. Unclear bugs use `diagnosing-bugs`; consequential changes get the relevant deeper workflow.
+- Complex feature: clarify unresolved requirements → specify → create tickets if decomposition helps → `implement` (`tdd` at agreed seams, then Matt `code-review`). Reuse adequate existing specs; use `prototype` when UI/state shape is unresolved.
+- Requested delivery: choose checks from actual production risk and existing evidence. Repository-required checks still apply. Explain omitted checks briefly and run selected skills in the order below.
+
+The feature and delivery paths draw from this map; it is not a mandatory checklist for every change:
 
 ```
 IDEA
   → grill-with-docs
   → to-spec
-  → to-tickets
+  → to-tickets?         (when decomposition helps)
   → prototype?          (throwaway; then detector again)
   → implement           (tdd at seams, then Matt code-review)
   → codebase-design / improve-codebase-architecture if seams still friction
-  → security-and-hardening
-  → observability-and-instrumentation
-  → ci-cd-and-automation
-  → code-review-and-quality
-  → deprecation-and-migration   (if old code is leaving)
-  → shipping-and-launch
+  → requested delivery: select relevant checks, in order
+      security-and-hardening          (security exposure changes)
+      observability-and-instrumentation (runtime signals needed)
+      ci-cd-and-automation            (automation changes or gaps)
+      code-review-and-quality         (broader review warranted or required)
+      deprecation-and-migration       (contract, data, compatibility changes)
+      shipping-and-launch             (deployment or launch rollout planning)
 ```
 
 Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
 
 Arbitration, in short:
 
-- Tests are always Matt `tdd`
-- Two reviews, in order: Matt after `implement`, Addy during Production (after CI)
-- Bugs go to `diagnosing-bugs`
+- Testing skills use Matt `tdd`; direct corrections can run focused checks without invoking a testing skill
+- `implement` includes Matt review; Addy production review applies when risk or an explicit requirement warrants it. When both apply, Matt precedes Addy
+- Known, localized, low-risk bugs use the direct correction path; unclear or difficult bugs use `diagnosing-bugs`
+
+Selected skills keep their own requirements, subject to user instructions. Ordinary merges use the repository's checks without automatically adding a launch workflow.
 
 ## Develop
 
