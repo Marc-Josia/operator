@@ -1,60 +1,55 @@
 # Operator
 
-You are **Operator** — this project's engineering system. The human is the Operator, your tech
-lead: they decide, you organize, agents execute. You are a highly competent employee: follow the
-method below, and never freelance outside the mandate you were given.
+This repo uses **Operator** as the only skill router. Invoke `/operator`. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. pstack `unslop` is a writing pass. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`.
 
-## Iron rules
+A **phase** is one skill's work, not a turn limit. `/operator` chooses a path proportional to uncertainty, scope, and risk, and continues within the user's authorized scope. Stop when the requested outcome is verified, a material decision or permission is missing, or a selected skill requires user input. Read selected skills and follow their requirements, subject to the user's instructions.
 
-1. **Understand before you build.** Development work happens inside a work item
-   (`.operator/work/<id>/workitem.md`). Standard- and full-lane items need an approved spec
-   (approval journaled) before any implementation code is written.
-2. **Gates are checked, not asserted.** Run `node .operator/bin/op.mjs gate <id>` to pass a
-   stage. Never claim a gate passed without the checker's output (no Node? apply the checklist
-   in `.operator/gates.json` manually and journal the evidence).
-3. **Only `op-*` procedures move work-item state.** Expertise packs (`operator-*`) advise;
-   they never change stage, lane, or journal. The journal is append-only.
-4. **Load memory before you touch code.** Read `.operator/memory/project.md` at task start,
-   plus every rule in `.operator/memory/conventions.md` whose `paths:` matches files you will
-   touch. If `project.md` is still an empty seed, survey the codebase and fill it first.
-5. **Protected paths never travel the quick lane** (list: `.operator/config.json`).
+## Detector
 
-## Routing — you are the router
+First applicable path for pending work: named skill → clear, localized, low-risk correction (inspect, fix directly, focused verification and diff review) → unclear bug (`diagnosing-bugs`) → unresolved requirements (`grill-with-docs`, or `grill-me` without a repo) → UI/state shape still open (`prototype`) → feature or consequential correction needing a spec (`to-spec`) or decomposition (`to-tickets`) → ready to code (`implement`: `tdd` at agreed seams, then Matt `code-review`) → unresolved seam friction (`codebase-design` / `improve-codebase-architecture`) → verified implementation with delivery requested (overlay below). Reassess remaining work after each step; rerun completed skills only if new evidence or edits invalidate their outcomes. A request only for a skill recommendation ends with the recommendation.
 
-The operator speaks in plain language; classify the request and run the right procedure yourself.
-Never ask "which command?" or make the operator name a skill — dispatch, act, then report.
-Resuming work already in flight? Check `op-status` or the item's `stage:` first; the stage names
-the procedure (`spec`→`op-plan`, `build`→`op-build`, `review`→`op-ship`).
+Simple corrections do not require specs, tickets, an implementation ledger, or formal reviews. Escalate if the cause, scope, or risk changes; small auth, data, contract, or migration changes are not automatically low-risk. Reuse adequate specs and create tickets only when decomposition helps. Do not add production work to a request that ends at a verified change.
 
-| The operator wants… | Run |
-|---|---|
-| a vague or exploratory ask — problem-shaped, unclear, "help me think this through" | `op-discover`, then `op-new` |
-| a big multi-feature effort — "build an app like X", a whole system, a v2 | `op-roadmap`, then `op-new` per item |
-| a confirmed problem too foggy to plan — unknowns to resolve before milestones | `op-explore`, then `op-roadmap` |
-| new work, already precise — a feature, change, refactor, or chore | `op-new` |
-| a bug fixed — "broken", "crashes", "wrong output", a regression | `op-fix` |
-| a spec/plan for an item (or it sits at `stage: spec`) | `op-plan` |
-| implementation to proceed (or it sits at `stage: build`) | `op-build` |
-| to finish and deliver (or it sits at `stage: review`) | `op-ship` |
-| to know where things stand | `op-status` |
-| a rule or correction remembered | `op-memory` |
+## Production overlay
 
-Right-size by scale: too fuzzy to restate? `op-discover`. Confirmed but the path unknowable?
-`op-explore` maps and resolves the decisions first. A whole project? `op-roadmap` slices it into
-milestones. All converge on `op-new` per item; a precise single change goes straight there.
+Select relevant checks, explain omissions briefly, and reuse current evidence for unchanged areas. Run selected skills in this order: `security-and-hardening` (security exposure changes) → `observability-and-instrumentation` (runtime signals needed) → `ci-cd-and-automation` (delivery automation changes or gaps) → `code-review-and-quality` (broader production review warranted or required) → `deprecation-and-migration` (contract, data, or compatibility transitions) → `shipping-and-launch` (deployment or launch needs rollout planning). Repository-required checks still apply. Ordinary merges do not automatically need the launch workflow; continue through checks and authorized delivery without artificial stops.
 
-Some requests want judgement, not a state change — "review this", "is it secure?", "how do I
-test/debug this?". Consult the matching `operator-*` pack (`operator-code-review`,
-`operator-security-review`, `operator-test-strategy`, `operator-debugging`); a pack advises a
-procedure and never moves an item. The constitution's Routing section holds the full decision
-tree. Unsure whether it is a feature or a bug? Route to `op-new`; it reroutes to `op-fix` if so.
+## Arbitration
 
-If your tool supports skills or slash commands, invoke them. Otherwise read
-`.agents/skills/<name>/SKILL.md` and follow it literally.
+- Testing skill: Matt `tdd`. Never Addy `test-driven-development`. Direct corrections use focused checks; features and consequential corrections use `implement`, which drives `tdd`.
+- Reviews: `implement` includes Matt `code-review` (Standards + Spec). Add Addy `code-review-and-quality` (five-axis) when production risk or an explicit requirement warrants it. When both apply, Matt precedes Addy, after applicable CI checks. Direct corrections use focused diff review.
+- Bugs: known, localized, low-risk cause → direct correction; unclear or difficult cause → `diagnosing-bugs`.
+- Changed auth, input handling, secrets, sensitive data, or external integrations already during Build: `security-and-hardening` as an overlay.
+- First use: `/setup-matt-pocock-skills` once per repo.
 
-## System documents
+Overlays on top of the phase: `unslop`, `performance-optimization`. Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
 
-- `.operator/constitution.md` — values, laws, orchestration policy. Read it when starting or
-  resuming a work item.
-- `.operator/work/<id>/workitem.md` — the single source of truth for each work item.
-- `.operator/memory/` — durable project knowledge. Never duplicate what is already there.
+Docs agents will read: `writing-for-agents`. Any prose that still reads like a chatbot: `unslop`.
+
+Checklists: `references/` at the project root (resolves `../../references/` from installed skills).
+
+## Code
+
+YAGNI. A small change, or one that is strictly necessary. Edge cases off the main path stay out.
+
+TypeScript: strict. No `any` without justification. No `@ts-ignore`. If unavoidable, `@ts-expect-error` with a comment.
+
+Tests target live behavior. No blanket smoke. No tests for a feature that was removed.
+
+Comments sit above a function, class, or module and say how to use it. Keep them aligned with the code.
+
+Tokens: color and radius come from theme tokens.
+
+## Files
+
+New files go under `src`, `tests`, `docs`, `config`, `tools`, `examples`, `prototype`, or `temp`. Root only when tooling requires it.
+
+## Docs
+
+Present tense. Current state, not history or the plan.
+
+`docs/architecture.md` is the system view. Update it when structure changes.
+
+A major feature that exists has a file in `docs/features/`.
+
+In-flight specs live in `docs/changes/<change-id>/`. Once implemented: write `docs/features/`, update architecture if structure changed, delete the change folder. No archive.
