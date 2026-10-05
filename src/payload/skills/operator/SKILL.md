@@ -15,9 +15,11 @@ You are the **only router** in this repo. Invoke as `/operator`. Matt Pocock ski
 
 A **phase** is one skill's work, not a turn limit. Choose a path proportional to the request's uncertainty, scope, and risk. Continue through applicable phases within the user's authorized scope. Stop when the requested outcome is verified, a material decision or permission is missing, or a selected skill requires user input. Do not wait merely because a phase ended.
 
-Read every selected skill's `SKILL.md` and follow its requirements. The user's instructions take precedence; otherwise a selected skill's requirements take precedence over this map. Select skills only when their full workflow is warranted. The direct correction path below does not invoke `implement` or waive its requirements.
+Read every selected skill's `SKILL.md` and follow its requirements. The user's instructions take precedence; otherwise a selected skill's requirements take precedence over this map. Select skills only when their full workflow is warranted. The direct correction path below does not invoke `implement` or waive its requirements. The persistent feature loop requires an approved spec and tickets, even for an already understood feature. Reuse decisions recorded there; an unresolved human decision remains a blocker.
 
 When the user runs `/operator`, run the detector. If the request is only to recommend a skill, explain the choice and stop there. Otherwise briefly state the chosen path and why, then execute it; reassess if new evidence changes scope or risk. Clarify loose ideas before building, but do not manufacture specs or tickets for an already clear correction.
+
+When implementation is authorized with an approved spec and tickets, read [references/execution.md](references/execution.md) and start or resume the persistent controller. It runs implementation, fixed checks, Matt review, and sequential production verification without routine relaunches. Findings return to implementation and invalidate earlier verification. Completion requires criterion evidence and successful checks/reviews on the same current repository snapshot. Blocked, stalled, stale, and budget-exhausted runs remain incomplete. The controller implements this router's transitions, not a second lifecycle.
 
 Checklists live in `references/` at the project root (Addy). Skills that say `../../references/…` resolve there.
 
@@ -27,13 +29,13 @@ If setup has not been run in this repo, say so and put `setup-matt-pocock-skills
 
 Take the first true branch for pending work only. After completing it, reassess remaining work against the user's requested outcome. Do not rerun a completed skill unless new evidence or edits invalidate its outcome.
 
-1. The user named a skill (other than `operator`). Follow it without automatically expanding the request to the rest of the pipeline.
+1. The user named a skill (other than `operator`). Follow it without automatically expanding the request to the rest of the pipeline. For feature implementation, require the approved spec/tickets and implementation authorization before entering the loop in branch 7. Prepare missing spec/tickets using branch 6.
 2. A localized, low-risk correction has clear expected behavior and a known cause. Use the direct correction path below. Small diffs involving auth, sensitive data, public contracts, or migrations are not low-risk merely because they are small.
 3. A bug's cause is unclear, behavior is intermittent, or performance needs diagnosis. Use `diagnosing-bugs` before selecting the build path.
 4. A feature, consequential correction, or design has unresolved requirements. Use `grill-with-docs` (it loads `grilling` and `domain-modeling`), or `grill-me` without a repo. Shared understanding for complex work leads to `to-spec`; reuse an adequate existing spec.
 5. UI or state shape is still the open question. Use `prototype`, then return to this detector.
-6. An understood feature or consequential correction needs a spec. Use `to-spec`. A spec needs separate work units or dependency tracking: use `to-tickets`. Tickets are not required for every spec.
-7. A feature or consequential correction has a ticket or spec ready to code. Use `implement`. It uses `tdd` at agreed seams (never Addy `test-driven-development`), then Matt `code-review`.
+6. An understood feature or consequential correction needs a spec. Use `to-spec`. Before a persistent implementation loop, use `to-tickets` and obtain approval of the ticket graph, even when the task fits one ticket. A standalone spec request can end at the spec.
+7. A feature or consequential correction has an approved spec and tickets ready to code, and implementation is authorized. Start the persistent loop with `implement`. It uses `tdd` at agreed seams (never Addy `test-driven-development`), then Matt `code-review` and the production verification below. Correct findings and repeat checks/reviews until current completion or a specific incomplete state.
 8. Remaining module or seam friction warrants design work. Consult `codebase-design`; use `improve-codebase-architecture` for a requested deepening scan.
 9. Implementation is verified and delivery (merge, deploy, ship) is requested. Select the relevant production checks below and run them in order.
 
@@ -49,12 +51,12 @@ Review the diff for unintended changes and report the result and verification li
 
 ### Understand
 
-Matt. Resolve uncertainty and specify complex work. Create tickets when decomposition helps execution.
+Matt. Resolve uncertainty and specify complex work. Keep spec and approved tickets as the preparation and trace for the persistent implementation loop.
 
 | Phase | Done when | Next |
 | --- | --- | --- |
 | `grill-with-docs` | Grilling frontier is empty and the user confirmed shared understanding. Domain terms that actually resolved are written down. | `to-spec` |
-| `to-spec` | Spec exists and is ready for an agent. Seams confirmed with the user. | `to-tickets` if decomposition is needed, `prototype` if shape is unresolved, otherwise `implement` |
+| `to-spec` | Spec exists and is ready for an agent. Seams confirmed with the user. | `prototype` if shape is unresolved, otherwise `to-tickets` before persistent implementation |
 | `to-tickets` | User approved the breakdown. Tickets exist with blocking edges and are ready for an agent. | `prototype` if shape is still in question, otherwise `implement` |
 
 Human entry for a new idea is `/operator` or `/grill-with-docs`. `grilling` is the engine those two load, never the entry.
@@ -68,7 +70,7 @@ Matt. Entry is `implement` for features and consequential corrections ready to c
 | Phase | Done when | Next |
 | --- | --- | --- |
 | `prototype` | Throwaway artifact exists and the user has reacted to the design question. Nothing from it is kept except decisions that feed the spec or tickets. | Detector, usually `implement` |
-| `implement` | Ledger full (`temp/implement-ledger.md`: every row evidenced or abandoned). `tdd` at agreed seams. Typecheck and tests run. Matt `code-review` reported, parent having re-run ledger CHECKs. Work committed on the current branch. | Design work if seams remain unresolved; production if delivery is requested; otherwise report completion |
+| `implement` | Every approved ticket criterion has evidence in the run. `tdd` at agreed seams. Required commands execute in the controller. Matt `code-review` follows; findings return to implementation. Follow the upstream commit step. | Production verification automatically within the persistent loop |
 | `codebase-design` | Reference, not a session. Done when the design uses *module*, *interface*, *depth*, *seam*, *adapter*, *leverage*, *locality* without drifting to component / service / API / boundary. | `improve-codebase-architecture` when scanning for deepening; otherwise finish the requested work |
 | `improve-codebase-architecture` | HTML report opened, user picked a candidate, that candidate grilled. | Finish the requested work; production only if delivery is requested |
 
@@ -76,7 +78,9 @@ Matt. Entry is `implement` for features and consequential corrections ready to c
 
 ### Production
 
-Addy. Select checks from the actual delivery risk and existing evidence. State which checks apply and briefly explain any omitted checks. Reuse current evidence for unchanged areas; rerun checks affected by new edits or failures. Repository-required checks still apply.
+The user-authorized persistent loop assesses every production stage in the order below, records inapplicable concerns, and returns required edits to implementation. Shipping in this loop is readiness review. Merge, push, publish, and deployment follow their separate authorization. Preserve upstream processes and permissions; use decisions already settled by approved spec/tickets. New human decisions remain blockers. Report progress without asking the user to relaunch each phase.
+
+Outside the persistent loop, Addy checks are selected from the actual delivery risk and existing evidence. State which checks apply and briefly explain any omitted checks. Reuse current evidence for unchanged areas; rerun checks affected by new edits or failures. Repository-required checks still apply.
 
 Run selected skills in this order, completing each skill's own process:
 
@@ -99,7 +103,7 @@ Two skills can cover the same English word. The detector picks.
 
 **Grill.** Entry is `grill-with-docs`. Use `grill-me` only when grilling without writing docs. `grilling` is the engine those two load, never the entry. Do not use Addy `interview-me`.
 
-**Spec / tickets.** Use `to-spec` for features or consequential corrections needing a specification, then `to-tickets` when decomposition is needed. Do not use Addy spec/plan skills.
+**Spec / tickets.** Use `to-spec` for features or consequential corrections needing a specification, then `to-tickets` before persistent implementation. Approved tickets retain the work graph and acceptance criteria, including for a single-ticket feature. Do not use Addy spec/plan skills.
 
 **Tests.** When a testing skill is needed, use Matt `tdd`. Never Addy `test-driven-development`. Running focused existing checks on a direct correction does not require invoking a testing skill.
 
