@@ -5,6 +5,7 @@ import { init } from '../lib/init.mjs';
 import { update } from '../lib/update.mjs';
 import { status } from '../lib/status.mjs';
 import { remove } from '../lib/remove.mjs';
+import { executeLoop, loopStatus } from '../lib/loop.mjs';
 
 const HELP = `operator — compose Matt Pocock + Addy Osmani skills into one pipeline
 
@@ -15,6 +16,7 @@ Commands:
   update    Refresh catalog skills, references/, the operator skill, and AGENTS.md
   status    Show installed skills vs catalog, references/, and the AGENTS.md block
   remove    Uninstall catalog skills and the AGENTS.md block
+  loop      Execute approved spec/tickets until checks and reviews pass
 
 Options:
   init:
@@ -30,6 +32,9 @@ Options:
     omit --agent to reuse the agents saved at init
   remove:
     --purge        also delete Operator-managed files in references/
+  loop start --contract <file>  start the approved implementation contract
+  loop resume --id <id>         resume with the remaining iteration budget
+  loop status --id <id>         print state and whether its verification is current
   --version, -v    print the package version
   --help, -h       show this help
 
@@ -40,6 +45,8 @@ Exit codes: 0 ok, 1 failure, 2 usage error.
 
 const VALUE_FLAGS = new Map([
   ['--agent', 'agent'],
+  ['--contract', 'contract'],
+  ['--id', 'id'],
 ]);
 const BOOL_FLAGS = new Map([
   ['--yes', 'yes'],
@@ -75,6 +82,7 @@ export function parseArgs(argv) {
       if (value === undefined) throw new OperatorError(`${name} requires a value`, 2);
       const prev = flags[key];
       const next = String(value);
+      if (prev && key !== 'agent') throw new OperatorError(`${name} cannot be repeated`, 2);
       flags[key] = prev ? `${prev},${next}` : next;
       continue;
     }
@@ -103,6 +111,29 @@ async function main(argv) {
   }
   const command = positional[0];
   if (!command) throw new OperatorError(`missing command\n\n${HELP}`, 2);
+  if (command === 'loop') {
+    const action = positional[1];
+    if (positional.length > 2) throw new OperatorError(`unexpected argument: ${positional[2]}`, 2);
+    for (const key of Object.keys(flags)) {
+      if (!['contract', 'id'].includes(key)) throw new OperatorError(`option ${key} does not apply to loop`, 2);
+    }
+    if (action === 'status') {
+      if (flags.contract) throw new OperatorError('loop status accepts --id only', 2);
+      const result = loopStatus({ id: flags.id });
+      console.log(JSON.stringify(result, null, 2));
+      return result.status === 'complete' ? 0 : 1;
+    }
+    if (!['start', 'resume'].includes(action)) throw new OperatorError('use loop start, resume, or status', 2);
+    if (action === 'start' && (!flags.contract || flags.id)) throw new OperatorError('loop start requires --contract and obtains the id from the contract', 2);
+    if (action === 'resume' && (!flags.id || flags.contract)) throw new OperatorError('loop resume requires --id and reuses the approved contract', 2);
+    const result = await executeLoop({
+      contractPath: flags.contract, id: flags.id, resume: action === 'resume',
+      onProgress: (event) => console.log(JSON.stringify(event)),
+    });
+    console.log(JSON.stringify({ id: result.id, status: result.status, reason: result.reason }));
+    return result.status === 'complete' ? 0 : 1;
+  }
+  if (flags.contract || flags.id) throw new OperatorError('--contract and --id apply to loop only', 2);
   if (positional.length > 1) throw new OperatorError(`unexpected argument: ${positional[1]}\n\n${HELP}`, 2);
 
   const packageRoot = defaultPackageRoot();
