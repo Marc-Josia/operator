@@ -4,6 +4,14 @@ import { pathExists, readText, writeText } from './fsutil.mjs';
 
 export const START_MARKER = '<!-- operator:start -->';
 export const END_MARKER = '<!-- operator:end -->';
+export const PROJECT_SECTIONS = [
+  'Project context',
+  'Commands',
+  'Conventions',
+  'Interface design',
+  'Known pitfalls',
+  'Project skills',
+];
 
 /** @param {string} cwd */
 export function agentsMdPath(cwd) {
@@ -50,6 +58,33 @@ export function upsertAgentsBlock(opts) {
   return { created: false, updated: true };
 }
 
+/**
+ * Append the empty project sections the block tells agents to fill, skipping
+ * any heading already in AGENTS.md. Init only: update never touches text
+ * outside the managed block.
+ * @param {string} cwd
+ */
+export function scaffoldProjectSections(cwd) {
+  const filePath = agentsMdPath(cwd);
+  const existing = pathExists(filePath) ? readText(filePath) : '';
+  const lines = new Set(existing.split(/\r?\n/).map((line) => line.trim()));
+  const missing = PROJECT_SECTIONS.filter((title) => !lines.has(`## ${title}`));
+  if (missing.length === 0) return { added: [] };
+  const sep = existing.length === 0 || existing.endsWith('\n') ? '' : '\n';
+  const sections = missing.map((title) => `## ${title}\n`).join('\n');
+  writeText(filePath, `${existing}${sep}\n${sections}`);
+  return { added: missing };
+}
+
+/** @param {string} contents */
+function isOnlyEmptyScaffold(contents) {
+  const headings = new Set(PROJECT_SECTIONS.map((title) => `## ${title}`));
+  return contents
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .every((line) => line.length === 0 || headings.has(line));
+}
+
 /** @param {string} cwd */
 export function agentsBlockStatus(cwd) {
   const filePath = agentsMdPath(cwd);
@@ -60,7 +95,7 @@ export function agentsBlockStatus(cwd) {
 
 /**
  * Remove the managed block. Leaves the rest of AGENTS.md intact.
- * Deletes the file only if it becomes empty.
+ * Deletes the file only if nothing but untouched project section headings remain.
  * @param {string} cwd
  */
 export function stripAgentsBlock(cwd) {
@@ -74,7 +109,7 @@ export function stripAgentsBlock(cwd) {
   const before = existing.slice(0, start);
   const after = existing.slice(end + END_MARKER.length).replace(/^\n/, '');
   const next = `${before}${after}`.trimStart();
-  if (next.trim().length === 0) {
+  if (isOnlyEmptyScaffold(next)) {
     fs.unlinkSync(filePath);
   } else {
     writeText(filePath, next.endsWith('\n') ? next : `${next}\n`);

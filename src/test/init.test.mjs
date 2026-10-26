@@ -7,7 +7,7 @@ import { init } from '../lib/init.mjs';
 import { update } from '../lib/update.mjs';
 import { remove } from '../lib/remove.mjs';
 import { status } from '../lib/status.mjs';
-import { START_MARKER } from '../lib/agents-md.mjs';
+import { END_MARKER, START_MARKER } from '../lib/agents-md.mjs';
 import { packageRoot, tmpDir, writeSkill } from './helpers.mjs';
 
 function mockFetch() {
@@ -60,6 +60,9 @@ test('init installs via skills CLI, writes references/, and upserts AGENTS.md', 
   assert.ok(agentsMd.includes('YAGNI'));
   assert.ok(agentsMd.includes('docs/architecture.md'));
   assert.ok(agentsMd.includes('docs/changes/<change-id>/'));
+  assert.ok(agentsMd.includes('never inside the markers'));
+  assert.ok(agentsMd.includes('Creating project skills'));
+  assert.ok(agentsMd.indexOf('\n## Known pitfalls\n') > agentsMd.indexOf(END_MARKER));
   assert.ok(fs.existsSync(path.join(cwd, 'references', 'security-checklist.md')));
   assert.ok(fs.existsSync(path.join(cwd, 'references', '.operator-managed.json')));
   const managed = JSON.parse(fs.readFileSync(path.join(cwd, 'references', '.operator-managed.json'), 'utf8'));

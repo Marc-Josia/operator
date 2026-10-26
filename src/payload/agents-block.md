@@ -53,3 +53,25 @@ Present tense. Current state, not history or the plan.
 A major feature that exists has a file in `docs/features/`.
 
 In-flight specs live in `docs/changes/<change-id>/`. Once implemented: write `docs/features/`, update architecture if structure changed, delete the change folder. No archive.
+
+## Keeping AGENTS.md current
+
+Text between the `operator:start` / `operator:end` markers belongs to Operator and `operator update` rewrites it. Everything after the end marker belongs to this project: write there, never inside the markers.
+
+Keep the project part current as you work, so the next session starts with what this one learned.
+
+- Write when you learn something a later session needs: an architecture decision or code convention, a useful command (build, test, lint, run), a pitfall and how to avoid it, a preference or correction from the user.
+- Keep entries short, concrete, and easy to verify. Skip what the code or git history already shows.
+- Edit the matching section (`## Project context`, `## Commands`, `## Conventions`, `## Interface design`, `## Known pitfalls`, `## Project skills`), or add one. Replace what turned stale or wrong instead of adding next to it. Delete what no longer helps.
+- A pitfall a check can catch becomes a check (see Arbitration). Only the rest goes under `## Known pitfalls`.
+- Tell the user in one line each time you change `AGENTS.md`.
+
+## Creating project skills
+
+You may create a project skill without asking when a multi-step task comes back (or clearly will), when a procedure is precise or risky enough that a missed step is expensive (deploy, migration, release, repetitive code generation), when the user corrects how you do the same task more than once, or when specialized knowledge should load only when needed instead of weighing on `AGENTS.md`. Not for a one-off task or a one-line rule: the rule goes in `AGENTS.md`.
+
+- Where: the skills folder where Operator installed `operator` for your agent (`.claude/skills/<name>/SKILL.md` for Claude Code). Frontmatter `name` and a `description` that says when to trigger it. Scripts and reference files go in the same folder. Write it with `writing-for-agents`.
+- A project skill is a procedure, never a second router.
+- It runs end to end without the user: every step explicit, with exact commands and success criteria; the scripts it needs ship in its folder; no manual step; it says how to verify the result and what to do on failure.
+- After creating it, run it once and fix what broke. If full autonomy needs more permissions (shell commands, tools), propose adding them to the agent's permission config (`.claude/settings.json` for Claude Code).
+- List each one under `## Project skills`. Improve a skill as soon as a run shows a gap.

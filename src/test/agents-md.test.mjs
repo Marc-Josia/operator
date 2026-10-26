@@ -2,7 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { END_MARKER, START_MARKER, agentsBlockStatus, stripAgentsBlock, upsertAgentsBlock } from '../lib/agents-md.mjs';
+import {
+  END_MARKER,
+  PROJECT_SECTIONS,
+  START_MARKER,
+  agentsBlockStatus,
+  scaffoldProjectSections,
+  stripAgentsBlock,
+  upsertAgentsBlock,
+} from '../lib/agents-md.mjs';
 import { tmpDir } from './helpers.mjs';
 
 const BLOCK = '# Operator\n\nOnly router.';
@@ -61,4 +69,58 @@ test('stripAgentsBlock deletes AGENTS.md when the file would be empty', () => {
   upsertAgentsBlock({ cwd, block: BLOCK });
   stripAgentsBlock(cwd);
   assert.equal(fs.existsSync(path.join(cwd, 'AGENTS.md')), false);
+});
+
+test('scaffoldProjectSections appends empty sections after the block, once', () => {
+  const cwd = tmpDir();
+  upsertAgentsBlock({ cwd, block: BLOCK });
+  scaffoldProjectSections(cwd);
+  const text = fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8');
+  for (const title of PROJECT_SECTIONS) {
+    assert.ok(text.indexOf(`## ${title}`) > text.indexOf(END_MARKER), `missing ${title}`);
+  }
+  assert.deepEqual(scaffoldProjectSections(cwd).added, []);
+  assert.equal(fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8'), text);
+});
+
+test('scaffoldProjectSections keeps existing sections and their content', () => {
+  const cwd = tmpDir();
+  fs.writeFileSync(path.join(cwd, 'AGENTS.md'), '## Commands\n\nnpm test\n', 'utf8');
+  const { added } = scaffoldProjectSections(cwd);
+  assert.ok(!added.includes('Commands'));
+  const text = fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8');
+  assert.equal(text.split('## Commands').length - 1, 1);
+  assert.ok(text.includes('npm test'));
+});
+
+test('upsertAgentsBlock leaves project sections after the block untouched', () => {
+  const cwd = tmpDir();
+  upsertAgentsBlock({ cwd, block: BLOCK });
+  scaffoldProjectSections(cwd);
+  const file = path.join(cwd, 'AGENTS.md');
+  fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('## Commands\n', '## Commands\n\nnpm test\n'), 'utf8');
+  upsertAgentsBlock({ cwd, block: '# Operator\n\nNew block.' });
+  const text = fs.readFileSync(file, 'utf8');
+  assert.ok(text.includes('New block.'));
+  assert.ok(text.includes('## Commands\n\nnpm test'));
+});
+
+test('stripAgentsBlock deletes AGENTS.md when only the empty scaffold remains', () => {
+  const cwd = tmpDir();
+  upsertAgentsBlock({ cwd, block: BLOCK });
+  scaffoldProjectSections(cwd);
+  stripAgentsBlock(cwd);
+  assert.equal(fs.existsSync(path.join(cwd, 'AGENTS.md')), false);
+});
+
+test('stripAgentsBlock keeps project sections that hold content', () => {
+  const cwd = tmpDir();
+  upsertAgentsBlock({ cwd, block: BLOCK });
+  scaffoldProjectSections(cwd);
+  const file = path.join(cwd, 'AGENTS.md');
+  fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('## Commands\n', '## Commands\n\nnpm test\n'), 'utf8');
+  stripAgentsBlock(cwd);
+  const text = fs.readFileSync(file, 'utf8');
+  assert.ok(!text.includes(START_MARKER));
+  assert.ok(text.includes('npm test'));
 });

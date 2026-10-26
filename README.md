@@ -44,7 +44,8 @@ operator init -g --agent cursor       # user-wide instead of this project
 **Operator** adds:
 
 - the `operator` skill (`/operator`) — the only router
-- a managed block in `AGENTS.md` (markers `<!-- operator:start -->` / `<!-- operator:end -->`) so agents that miss the skill still see the map
+- a managed block in `AGENTS.md` (markers `<!-- operator:start -->` / `<!-- operator:end -->`) so agents that miss the skill still see the map. The block also tells agents to keep project knowledge current below it and to create project skills for repeated procedures
+- on `init`, empty project sections after the block (`Project context`, `Commands`, `Conventions`, `Interface design`, `Known pitfalls`, `Project skills`), skipping any that already exist. They belong to the project: `update` never touches them
 
 Not installed, on purpose: `ask-matt`, `using-agent-skills`, and `poteto-mode`. Two meta-routers fight over the next step.
 
