@@ -13,10 +13,13 @@ const MATT = [
   'to-tickets',
   'tdd',
   'implement',
+  'implement-spec',
   'code-review',
+  'pr',
   'codebase-design',
   'improve-codebase-architecture',
   'diagnosing-bugs',
+  'retro',
   'prototype',
   'wayfinder',
   'triage',
@@ -27,6 +30,7 @@ const MATT = [
 ];
 
 const ADDY = [
+  'constraint-driven-development',
   'security-and-hardening',
   'code-review-and-quality',
   'deprecation-and-migration',

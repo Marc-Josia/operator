@@ -3,11 +3,13 @@ import { agentsBlockPath, loadCatalog, managedSkillNames, payloadDir } from './c
 import { addSkills, updateSkills } from './skills.mjs';
 import { installReferences } from './references.mjs';
 import { upsertAgentsBlock } from './agents-md.mjs';
-import { destRoot } from './scan.mjs';
+import { destRoot, listInstalledSkills } from './scan.mjs';
 import { resolveAgents } from './target-agents.mjs';
+import { legacyGlossaryFiles, legacyGlossaryWarning } from './glossary.mjs';
 
 /**
- * Refresh catalog skills, Operator's own skill, references/, and the AGENTS.md block.
+ * Refresh catalog skills, add catalog skills that are not installed yet, then refresh
+ * Operator's own skill, references/, and the AGENTS.md block.
  * Never touches the rest of the repo.
  *
  * @param {{
@@ -51,6 +53,19 @@ export async function update(opts) {
     ...flags,
   });
 
+  // `skills update` only touches installed skills, so names added to the catalog
+  // since the last init would never arrive without this.
+  const installed = listInstalledSkills(root);
+  for (const source of catalog.sources) {
+    const missing = source.skills.filter((name) => !installed.has(name));
+    if (missing.length === 0) continue;
+    await addSkills({
+      repo: source.repo,
+      skills: missing,
+      ...flags,
+    });
+  }
+
   // Re-add Operator's skill from this package so AGENTS.md routing stays in sync
   // with the installed SKILL.md even if `skills update` cannot see the local payload.
   await addSkills({
@@ -72,4 +87,7 @@ export async function update(opts) {
   });
 
   console.log('Operator updated. Catalog skills, references/, and AGENTS.md are current.');
+
+  const legacy = legacyGlossaryFiles(cwd);
+  if (legacy.length > 0) console.warn(legacyGlossaryWarning(legacy));
 }

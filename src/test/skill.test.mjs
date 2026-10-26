@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { operatorSkillDir } from '../lib/catalog.mjs';
+import { allCatalogSkills, loadCatalog, operatorSkillDir } from '../lib/catalog.mjs';
 import { packageRoot } from './helpers.mjs';
 
 test('operator skill has router frontmatter and arbitration rules', () => {
@@ -28,4 +28,13 @@ test('operator skill has router frontmatter and arbitration rules', () => {
     production.indexOf('observability-and-instrumentation') <
       production.indexOf('code-review-and-quality'),
   );
+});
+
+test('operator skill routes every catalog skill and the GLOSSARY.md rename', () => {
+  const skill = fs.readFileSync(path.join(operatorSkillDir(packageRoot()), 'SKILL.md'), 'utf8');
+  for (const name of allCatalogSkills(loadCatalog(packageRoot()))) {
+    assert.ok(skill.includes(`\`${name}\``), `router does not mention ${name}`);
+  }
+  assert.ok(skill.includes('GLOSSARY.md'));
+  assert.ok(!skill.includes('implement-ledger'));
 });

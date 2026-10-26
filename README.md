@@ -33,9 +33,9 @@ operator init -g --agent cursor       # user-wide instead of this project
 
 ## What gets installed
 
-**Matt Pocock** (Understand → Build): `setup-matt-pocock-skills`, `grill-with-docs`, `grill-me`, `grilling`, `domain-modeling`, `to-spec`, `to-tickets`, `tdd`, `implement`, `code-review`, `codebase-design`, `improve-codebase-architecture`, `diagnosing-bugs`, `prototype`, `wayfinder`, `triage`, `handoff`, `research`, `writing-for-agents`, `wizard`.
+**Matt Pocock** (Understand → Build): `setup-matt-pocock-skills`, `grill-with-docs`, `grill-me`, `grilling`, `domain-modeling`, `to-spec`, `to-tickets`, `tdd`, `implement`, `implement-spec`, `code-review`, `pr`, `codebase-design`, `improve-codebase-architecture`, `diagnosing-bugs`, `retro`, `prototype`, `wayfinder`, `triage`, `handoff`, `research`, `writing-for-agents`, `wizard`.
 
-**Addy Osmani** (Production overlay): `security-and-hardening`, `code-review-and-quality`, `deprecation-and-migration`, `observability-and-instrumentation`, `ci-cd-and-automation`, `shipping-and-launch`, `performance-optimization`.
+**Addy Osmani** (quality bar + Production overlay): `constraint-driven-development`, `security-and-hardening`, `code-review-and-quality`, `deprecation-and-migration`, `observability-and-instrumentation`, `ci-cd-and-automation`, `shipping-and-launch`, `performance-optimization`.
 
 **pstack** (writing pass): `unslop`. Not the rest of pstack. `poteto-mode` is a competing router.
 
@@ -50,7 +50,7 @@ Not installed, on purpose: `ask-matt`, `using-agent-skills`, and `poteto-mode`. 
 
 ## Pipeline
 
-`/operator` runs a phase detector (first true branch). One skill per pass. Build entry is `implement` (it drives `tdd` at agreed seams, then Matt `code-review`). `prototype` only when UI/state shape is still the question.
+`/operator` runs a phase detector (first true branch). One skill per pass. Build entry is `implement` per ticket or `implement-spec` for a whole spec (both drive `tdd` at agreed seams, then Matt `code-review`). `prototype` only when UI/state shape is still the question.
 
 ```
 IDEA
@@ -58,23 +58,26 @@ IDEA
   → to-spec
   → to-tickets
   → prototype?          (throwaway; then detector again)
-  → implement           (tdd at seams, then Matt code-review)
+  → constraint-driven-development   (if no CONSTRAINTS.md yet)
+  → implement | implement-spec      (tdd at seams, then Matt code-review)
   → codebase-design / improve-codebase-architecture if seams still friction
   → security-and-hardening
   → observability-and-instrumentation
   → ci-cd-and-automation
   → code-review-and-quality
-  → deprecation-and-migration   (if old code is leaving)
+  → deprecation-and-migration   (if old code is leaving or a production schema changes)
   → shipping-and-launch
+  → retro
 ```
 
-Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
+Overlays: `unslop`, `performance-optimization`, `constraint-driven-development` (guards the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
 
 Arbitration, in short:
 
 - Tests are always Matt `tdd`
 - Two reviews, in order: Matt after `implement`, Addy during Production (after CI)
-- Bugs go to `diagnosing-bugs`
+- Bugs go to `diagnosing-bugs`, then `retro`
+- The domain glossary is `GLOSSARY.md`; rename an old `CONTEXT.md` with `git mv` (Matt skills no longer read it)
 
 ## Develop
 

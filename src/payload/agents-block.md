@@ -1,26 +1,27 @@
 # Operator
 
-This repo uses **Operator** as the only skill router. Invoke `/operator`. Matt Pocock skills own Understand → Build. Addy Osmani skills own the Production overlay. pstack `unslop` is a writing pass. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`.
+This repo uses **Operator** as the only skill router. Invoke `/operator`. Matt Pocock skills own Understand → Build and Close (`retro`). Addy Osmani skills own the quality bar (`constraint-driven-development`) and the Production overlay. pstack `unslop` is a writing pass. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`.
 
 A **phase** is one skill's work. One phase per pass. `/operator` runs the detector, follows the current skill, then names the next and waits. Jumping from a loose idea to `implement` is the failure this map exists to stop.
 
 ## Detector
 
-First true branch: named skill → loose idea (`grill-with-docs`, or `grill-me` if there is no repo) → shared understanding, no spec (`to-spec`) → spec, no tickets (`to-tickets`) → UI/state shape still open (`prototype`, then detector again) → ready to code (`implement`: `tdd` at agreed seams, then Matt `code-review`) → seam friction (`codebase-design` / `improve-codebase-architecture`) → headed to production (overlay below).
+First true branch: named skill → loose idea (`grill-with-docs`, or `grill-me` if there is no repo) → shared understanding, no spec (`to-spec`) → spec, no tickets (`to-tickets`) → UI/state shape still open (`prototype`, then detector again) → new project or significant feature with no `CONSTRAINTS.md` (`constraint-driven-development`, then detector again) → ready to code (`implement` per ticket, `implement-spec` for a whole spec: `tdd` at agreed seams, then Matt `code-review`) → seam friction (`codebase-design` / `improve-codebase-architecture`) → headed to production (overlay below) → shipped, or a hard bug fixed (`retro`).
 
 ## Production overlay
 
-One skill per pass, in this order: `security-and-hardening` → `observability-and-instrumentation` → `ci-cd-and-automation` → `code-review-and-quality` → `deprecation-and-migration` if old code is leaving → `shipping-and-launch`.
+One skill per pass, in this order: `security-and-hardening` → `observability-and-instrumentation` → `ci-cd-and-automation` → `code-review-and-quality` → `deprecation-and-migration` if old code is leaving or a production schema changes → `shipping-and-launch`.
 
 ## Arbitration
 
-- Tests: always Matt `tdd`. Never Addy `test-driven-development`. Build entry is `implement`, which drives `tdd`.
-- Two reviews, in order: Matt `code-review` (Standards + Spec) after `implement`; Addy `code-review-and-quality` (five-axis) during Production, after CI.
+- Tests: always Matt `tdd`. Never Addy `test-driven-development`. Build entry is `implement` or `implement-spec`, which drive `tdd`.
+- Two reviews, in order: Matt `code-review` (Standards + Spec) after `implement` / `implement-spec`; Addy `code-review-and-quality` (five-axis) during Production, after CI.
 - Bugs: `diagnosing-bugs`.
 - Auth, input, secrets already during Build: `security-and-hardening` as an overlay, not instead of the phase.
 - First use: `/setup-matt-pocock-skills` once per repo.
+- Domain glossary: `GLOSSARY.md` / `GLOSSARY-MAP.md`. An old `CONTEXT.md` / `CONTEXT-MAP.md` gets `git mv`'d to the new name; Matt skills no longer read it.
 
-Overlays on top of the phase: `unslop`, `performance-optimization`. Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
+Overlays on top of the phase: `unslop`, `performance-optimization`, `constraint-driven-development` (an agent weakening the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
 
 Docs agents will read: `writing-for-agents`. Any prose that still reads like a chatbot: `unslop`.
 

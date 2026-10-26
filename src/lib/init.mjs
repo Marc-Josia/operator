@@ -5,6 +5,7 @@ import { installReferences } from './references.mjs';
 import { upsertAgentsBlock } from './agents-md.mjs';
 import { destRoot } from './scan.mjs';
 import { resolveAgents } from './target-agents.mjs';
+import { legacyGlossaryFiles, legacyGlossaryWarning } from './glossary.mjs';
 
 const NEXT_STEPS = `
 Operator is installed.
@@ -82,4 +83,7 @@ export async function init(opts) {
   });
 
   console.log(NEXT_STEPS);
+
+  const legacy = legacyGlossaryFiles(cwd);
+  if (legacy.length > 0) console.warn(`\n${legacyGlossaryWarning(legacy)}`);
 }

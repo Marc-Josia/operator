@@ -123,6 +123,42 @@ test('update re-adds the operator skill and refreshes AGENTS.md', async () => {
   assert.ok(text.includes(START_MARKER));
 });
 
+test('update adds catalog skills that are not installed yet', async () => {
+  const cwd = tmpDir();
+  const root = packageRoot();
+  const catalog = loadCatalog(root);
+  await init({
+    cwd,
+    packageRoot: root,
+    agents: ['cursor'],
+    copy: true,
+    runner: async () => {},
+    fetchFn: mockFetch(),
+  });
+  for (const name of managedSkillNames(catalog)) {
+    if (name === 'retro' || name === 'constraint-driven-development') continue;
+    writeSkill(cwd, path.join('.agents', 'skills'), name);
+  }
+  /** @type {string[][]} */
+  const calls = [];
+  await update({
+    cwd,
+    packageRoot: root,
+    copy: true,
+    runner: async (args) => {
+      calls.push(args);
+    },
+    fetchFn: mockFetch(),
+  });
+  const adds = calls.filter((args) => args.includes('add'));
+  assert.equal(adds.length, 3);
+  assert.equal(adds[0][3], 'mattpocock/skills');
+  assert.deepEqual(adds[0].filter((_, i) => adds[0][i - 1] === '--skill'), ['retro']);
+  assert.equal(adds[1][3], 'addyosmani/agent-skills');
+  assert.deepEqual(adds[1].filter((_, i) => adds[1][i - 1] === '--skill'), ['constraint-driven-development']);
+  assert.equal(adds[2][3], payloadDir(root));
+});
+
 test('init without --agent uses the interactive choice', async () => {
   const cwd = tmpDir();
   const root = packageRoot();
