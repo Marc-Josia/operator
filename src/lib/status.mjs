@@ -2,6 +2,7 @@ import { loadCatalog, managedSkillNames } from './catalog.mjs';
 import { referencesStatus } from './references.mjs';
 import { agentsBlockStatus } from './agents-md.mjs';
 import { destRoot, diffSkills, listInstalledSkills } from './scan.mjs';
+import { legacyGlossaryFiles } from './glossary.mjs';
 
 /**
  * @param {{
@@ -19,6 +20,7 @@ export function status(opts) {
   const skills = diffSkills(expected, installed);
   const refs = referencesStatus(root);
   const agentsMd = agentsBlockStatus(cwd);
+  const legacyGlossary = legacyGlossaryFiles(cwd);
 
   const lines = [];
   lines.push(`Operator status (${opts.global ? 'global' : 'project'})`);
@@ -47,11 +49,15 @@ export function status(opts) {
   } else {
     lines.push('AGENTS.md: Operator block present');
   }
+  if (legacyGlossary.length > 0) {
+    lines.push('');
+    lines.push(`Glossary: rename ${legacyGlossary.map(({ from, to }) => `${from} → ${to}`).join(', ')} (Matt skills no longer read the old name)`);
+  }
 
   const ok = skills.missing.length === 0
     && refs.managed
     && refs.missing.length === 0
     && agentsMd.managed;
   console.log(lines.join('\n'));
-  return { ok, skills, refs, agentsMd };
+  return { ok, skills, refs, agentsMd, legacyGlossary };
 }
