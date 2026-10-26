@@ -40,7 +40,16 @@ const ADDY = [
   'performance-optimization',
 ];
 
-const PSTACK = ['unslop'];
+const PSTACK = [
+  'unslop',
+  'correct',
+  'blast-radius',
+  'benchmark-checklist',
+  'create-verification-skill',
+  'maintain-verification-skill',
+  'principle-prove-it-works',
+  'principle-fix-root-causes',
+];
 
 const REF_FILES = [
   'accessibility-checklist.md',
@@ -75,6 +84,7 @@ test('catalog lists the curated Matt + Addy + pstack skills and skips competing 
   assert.ok(!names.includes('using-agent-skills'));
   assert.ok(!names.includes('poteto-mode'));
   assert.ok(names.includes('unslop'));
+  assert.ok(!pstack.skills.includes('tdd'), 'pstack tdd would clash with Matt tdd');
   assert.deepEqual(catalog.references.files, REF_FILES);
   assert.deepEqual(managedSkillNames(catalog), [...MATT, ...ADDY, ...PSTACK, 'operator']);
   assert.ok(catalog.agents.length > 0);

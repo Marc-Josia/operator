@@ -2,7 +2,7 @@
 name: operator
 description: >
   Route work to the right skill in the Operator pipeline (Matt Pocock understand/build,
-  Addy Osmani production overlay, plus pstack unslop for prose). Use when the user says
+  Addy Osmani production overlay, plus pstack overlays for prose and verification). Use when the user says
   /operator, asks which skill to run, is unsure of the next step, starts a feature or
   idea, or when two skill packs might conflict. Do not use ask-matt, using-agent-skills,
   or poteto-mode; Operator is the only router.
@@ -11,7 +11,7 @@ disable-model-invocation: true
 
 # Operator
 
-You are the **only router** in this repo. Invoke as `/operator`. Matt Pocock skills own Understand → Build and Close (`retro`). Addy Osmani skills own the quality bar before Build (`constraint-driven-development`) and the Production overlay. pstack `unslop` is a writing pass, not a second lifecycle. Do not run a second lifecycle (no Addy `/spec` `/plan` `/build`, no `ask-matt`, no `using-agent-skills`, no `poteto-mode`).
+You are the **only router** in this repo. Invoke as `/operator`. Matt Pocock skills own Understand → Build and Close (`retro`). Addy Osmani skills own the quality bar before Build (`constraint-driven-development`) and the Production overlay. pstack skills are overlays (writing pass, verification, repeated mistakes), not a second lifecycle. Do not run a second lifecycle (no Addy `/spec` `/plan` `/build`, no `ask-matt`, no `using-agent-skills`, no `poteto-mode`).
 
 A **phase** is one skill's work. When that skill's completion criterion holds, go on to the next phase in the same pass. Follow a named skill even if the user invoked it: read its `SKILL.md` and run it. If this map and a `SKILL.md` disagree, the `SKILL.md` is right.
 
@@ -28,6 +28,8 @@ Ceremony scales with the work. Jumping from a loose idea to `implement` is the f
 When the user runs `/operator`, run the detector, then follow the current phase skill to the bound below.
 
 Checklists live in `references/` at the project root (Addy). Skills that say `../../references/…` resolve there.
+
+pstack skills are written for Cursor. Read them with these substitutions. A `.cursor/skills/` path means the skills folder where Operator installed `operator` for your agent. A step that hands off to `arena`, `how`, `why`, or a pstack playbook names something not installed here: do that step yourself (`git`, `gh`, reading the code), or skip it and say so. Its **Opening a PR** playbook is `pr`. In `correct`, "the operator" means the user.
 
 If setup has not been run in this repo, say so and put `setup-matt-pocock-skills` in front.
 
@@ -104,7 +106,7 @@ Matt. Improve the environment for the next run, not the code.
 
 | Phase | Done when | Next |
 | --- | --- | --- |
-| `retro` | Run in the session it looks back on (after a clear, point it at that session's log). Candidates presented most severe first. Mechanical mistakes proposed as checks, judgement calls as coding standards. | The map ends |
+| `retro` | Run in the session it looks back on (after a clear, point it at that session's log). Candidates presented most severe first. Mechanical mistakes proposed as checks, judgement calls as coding standards. | `correct` for the checks the user accepted, otherwise the map ends |
 
 Also run `retro` after `diagnosing-bugs` lands a fix, to ask what would have prevented the bug.
 
@@ -112,19 +114,19 @@ Also run `retro` after `diagnosing-bugs` lands a fix, to ask what would have pre
 
 Two skills can cover the same English word. The detector picks.
 
-**Review.** One review per change. After `implement` or `implement-spec`, `code-review` (Matt: Standards and Spec). Add `code-review-and-quality` (Addy: five axes) only on a high-risk merge (Production phase 4), after CI. A small change gets no review skill: its checks are the gate.
+**Review.** One review per change. After `implement` or `implement-spec`, `code-review` (Matt: Standards and Spec). Add `code-review-and-quality` (Addy: five axes) only on a high-risk merge (Production phase 4), after CI. A small change gets no review skill: its checks are the gate. `blast-radius` is not a review: it proves what the change breaks outside the diff (see Overlays).
 
-**Debug.** User reports a hard bug, slowness, or something broken. Use `diagnosing-bugs` (Matt: build a red loop first). After the fix, `tdd` for the regression test, then `retro`. Do not use Addy debugging skills.
+**Debug.** User reports a hard bug, slowness, or something broken. Use `diagnosing-bugs` (Matt: build a red loop first). The fix lands where the system first went wrong, not where the symptom surfaced: `principle-fix-root-causes`. After the fix, `tdd` for the regression test, then `retro`. Do not use Addy debugging skills.
 
 **Grill.** Entry is `grill-with-docs`. Use `grill-me` only when grilling without writing docs. `grilling` is the engine those two load, never the entry. Do not use Addy `interview-me`.
 
 **Spec / tickets.** `to-spec` then `to-tickets`. Do not use Addy spec/plan skills.
 
-**Tests.** Always Matt `tdd`. Never Addy `test-driven-development`.
+**Tests.** Always Matt `tdd`. Never Addy `test-driven-development` or pstack `tdd` (not installed).
 
 **Implementation.** `implement` per ticket, `implement-spec` for a whole spec in one run. Do not use Addy `incremental-implementation`.
 
-**Quality bar.** `CONSTRAINTS.md` (Addy `constraint-driven-development`) holds the numbers. Its commands gate every change, small ones included. The review enforces the rest. Matt `retro` proposes new checks and standards after the work.
+**Quality bar.** `CONSTRAINTS.md` (Addy `constraint-driven-development`) holds the numbers. Its commands gate every change, small ones included. The review enforces the rest. Matt `retro` proposes new checks and standards after the work. `correct` lands the mechanical ones.
 
 ## Overlays
 
@@ -132,11 +134,14 @@ These fire in addition to the phase, not instead of it.
 
 - Any prose: `unslop`
 - Auth, untrusted input, secrets, or third parties, already during Build: `security-and-hardening`
-- Measured perf, Core Web Vitals, or N+1: `performance-optimization`
+- Measured perf, Core Web Vitals, or N+1: `performance-optimization`, each number it produces vetted with `benchmark-checklist`
 - An agent silences a check, skips or deletes a test, strips assertions, or lowers a threshold to get to green: `constraint-driven-development` (guard the bar)
-- A mistake the agent repeats: make it a check (lint rule, test, hook), not another `AGENTS.md` line. `retro` proposes it.
+- A mistake the agent repeats, or the user corrects the same mistake twice: `correct`. It makes the mistake impossible (architecture, then types, then a lint whose error names the fix, then a test, docs last) and proves each check fails on a real past instance. Its rule table goes in the project part of `AGENTS.md`, after the `operator:end` marker.
+- A small diff you do not trust, or a high-risk merge (Production phase 4 trigger) before `code-review-and-quality`: `blast-radius`. It finds what the change breaks outside the diff and proves the one fact it is safe because of.
+- A medium or larger user-facing change (UI, CLI, API) in a repo with no verification project skill: `create-verification-skill`, once. It leaves a `verify-<app>` project skill behind. List it under `## Project skills` in `AGENTS.md`. Drive every later user-facing change with it before the merge gate.
+- Before declaring any task done: `principle-prove-it-works`. Check the real artifact (run the feature, read the value, inspect the diff), not a proxy or "it compiles".
 - Writing a pull request body: `pr`
-- Any number in a final report: re-measure it at report time, or label it unverified
+- A performance number you measured (benchmark, speedup, regression, before/after): `benchmark-checklist` before you report or act on it. Any other number in a final report: re-measure it at report time, or label it unverified.
 
 ## Side paths
 
@@ -149,3 +154,4 @@ Outside the idea-to-ship map. Still indexed.
 - Editing skills, `AGENTS.md`, or `CLAUDE.md`: `writing-for-agents` then `unslop`
 - Changing skill setup: `setup-matt-pocock-skills`
 - Cited research: `research`
+- The verification skill drifted from the app, or a periodic audit of it: `maintain-verification-skill`

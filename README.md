@@ -1,6 +1,6 @@
 # Operator
 
-Operator installs a curated set of [Matt Pocock](https://github.com/mattpocock/skills) and [Addy Osmani](https://github.com/addyosmani/agent-skills) skills, plus [pstack](https://github.com/cursor/plugins/tree/main/pstack) `unslop`, then puts **one router** on top so those packs work as a single pipeline. On `init`, you pick which coding agents to install for (Cursor, Claude Code, Codex, and so on). Operator does not install a folder for every agent the [Vercel skills CLI](https://github.com/vercel-labs/skills) knows about unless you ask for `*`.
+Operator installs a curated set of [Matt Pocock](https://github.com/mattpocock/skills) and [Addy Osmani](https://github.com/addyosmani/agent-skills) skills, plus a few [pstack](https://github.com/cursor/plugins/tree/main/pstack) overlays (`unslop` and verification), then puts **one router** on top so those packs work as a single pipeline. On `init`, you pick which coding agents to install for (Cursor, Claude Code, Codex, and so on). Operator does not install a folder for every agent the [Vercel skills CLI](https://github.com/vercel-labs/skills) knows about unless you ask for `*`.
 
 Operator does **not** fork those skills. It pulls them current, installs them, and owns only the orchestration layer.
 
@@ -37,7 +37,7 @@ operator init -g --agent cursor       # user-wide instead of this project
 
 **Addy Osmani** (quality bar + Production overlay): `constraint-driven-development`, `security-and-hardening`, `code-review-and-quality`, `deprecation-and-migration`, `observability-and-instrumentation`, `ci-cd-and-automation`, `shipping-and-launch`, `performance-optimization`.
 
-**pstack** (writing pass): `unslop`. Not the rest of pstack. `poteto-mode` is a competing router.
+**pstack** (overlays): `unslop` (writing pass), `correct` (turns a repeated mistake into a check), `blast-radius` (what a change breaks outside the diff), `benchmark-checklist` (vets a measured perf number), `create-verification-skill` and `maintain-verification-skill` (a project skill that drives the real app), `principle-prove-it-works`, `principle-fix-root-causes`. Not the rest of pstack: `poteto-mode` is a competing router, pstack `tdd` clashes with Matt `tdd`, and most other skills need Cursor's multi-model subagents.
 
 **Addy `references/`** is copied to the project root so paths like `../../references/security-checklist.md` resolve from installed skills.
 
@@ -75,14 +75,14 @@ Production, only the phases whose trigger holds:
   → retro                               (medium or larger change shipped, or a hard bug fixed)
 ```
 
-Overlays: `unslop`, `performance-optimization`, `constraint-driven-development` (guards the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
+Overlays: `unslop`, `performance-optimization`, `benchmark-checklist` (measured perf numbers), `blast-radius` (untrusted diff or high-risk merge), `create-verification-skill` (user-facing change, no verification skill yet), `principle-prove-it-works` (before done), `constraint-driven-development` (guards the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`, `maintain-verification-skill`.
 
 Arbitration, in short:
 
 - Tests are always Matt `tdd`
 - One review per change: Matt after `implement`; Addy's five-axis review only on a high-risk merge (after CI)
-- A mistake the agent repeats becomes a check, not another `AGENTS.md` line
-- Bugs go to `diagnosing-bugs`, then `retro`
+- A mistake the agent repeats becomes a check, not another `AGENTS.md` line: `retro` proposes it, `correct` lands it
+- Bugs go to `diagnosing-bugs` (fixed at the root cause, `principle-fix-root-causes`), then `retro`
 - The domain glossary is `GLOSSARY.md`; rename an old `CONTEXT.md` with `git mv` (Matt skills no longer read it)
 
 ## Develop

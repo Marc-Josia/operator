@@ -1,6 +1,6 @@
 # Operator
 
-This repo uses **Operator** as the only skill router. Invoke `/operator`. Matt Pocock skills own Understand → Build and Close (`retro`). Addy Osmani skills own the quality bar (`constraint-driven-development`) and the Production overlay. pstack `unslop` is a writing pass. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`.
+This repo uses **Operator** as the only skill router. Invoke `/operator`. Matt Pocock skills own Understand → Build and Close (`retro`). Addy Osmani skills own the quality bar (`constraint-driven-development`) and the Production overlay. pstack skills are overlays: `unslop` for prose, plus verification and repeated-mistake fixes. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`.
 
 A **phase** is one skill's work. `/operator` runs the detector and chains phases, stopping only at three gates: shared understanding confirmed, ticket breakdown approved, merge. Ceremony scales with the work: jumping from a loose idea to `implement` is one failure, running a one-sentence fix through spec and tickets is the other.
 
@@ -14,15 +14,16 @@ Only the phases whose trigger holds, in this order: `security-and-hardening` (au
 
 ## Arbitration
 
-- Tests: always Matt `tdd`. Never Addy `test-driven-development`. Build entry is `implement` or `implement-spec`, which drive `tdd`.
+- Tests: always Matt `tdd`. Never Addy `test-driven-development` or pstack `tdd`. Build entry is `implement` or `implement-spec`, which drive `tdd`.
 - One review per change: Matt `code-review` (Standards + Spec) after `implement` / `implement-spec`. Addy `code-review-and-quality` (five-axis) only on a high-risk merge, after CI. A small change: its checks are the gate.
-- A mistake the agent repeats becomes a check (lint rule, test, hook), not another `AGENTS.md` line. `retro` proposes it.
-- Bugs: `diagnosing-bugs`.
+- A mistake the agent repeats becomes a check (lint rule, test, hook), not another `AGENTS.md` line. `retro` proposes it, `correct` lands it.
+- Bugs: `diagnosing-bugs`, fixed at the root cause (`principle-fix-root-causes`).
+- Before declaring a task done: `principle-prove-it-works` (the real artifact, not a proxy).
 - Auth, input, secrets already during Build: `security-and-hardening` as an overlay, not instead of the phase.
 - First use: `/setup-matt-pocock-skills` once per repo.
 - Domain glossary: `GLOSSARY.md` / `GLOSSARY-MAP.md`. An old `CONTEXT.md` / `CONTEXT-MAP.md` gets `git mv`'d to the new name; Matt skills no longer read it.
 
-Overlays on top of the phase: `unslop`, `performance-optimization`, `constraint-driven-development` (an agent weakening the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
+Overlays on top of the phase: `unslop`, `performance-optimization`, `benchmark-checklist` (any perf number you measured), `blast-radius` (a diff you do not trust, or a high-risk merge), `create-verification-skill` (user-facing change, no verification project skill yet), `constraint-driven-development` (an agent weakening the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`, `maintain-verification-skill`.
 
 Docs agents will read: `writing-for-agents`. Any prose that still reads like a chatbot: `unslop`.
 

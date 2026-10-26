@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { allCatalogSkills, loadCatalog, operatorSkillDir } from '../lib/catalog.mjs';
+import { agentsBlockPath, allCatalogSkills, loadCatalog, operatorSkillDir } from '../lib/catalog.mjs';
 import { packageRoot } from './helpers.mjs';
 
 test('operator skill has router frontmatter and arbitration rules', () => {
@@ -51,4 +51,21 @@ test('operator skill sizes work before the Understand lane and gates Production 
   const production = skill.slice(skill.indexOf('### Production'), skill.indexOf('### Close'));
   assert.ok(production.includes('| Phase | Trigger |'));
   assert.ok(skill.includes('One review per change'));
+});
+
+test('pstack skills route as overlays with Cursor paths mapped to the agent', () => {
+  const skill = fs.readFileSync(path.join(operatorSkillDir(packageRoot()), 'SKILL.md'), 'utf8');
+  const block = fs.readFileSync(agentsBlockPath(packageRoot()), 'utf8');
+  const pstack = loadCatalog(packageRoot()).sources.find((s) => s.id === 'pstack');
+  assert.ok(pstack);
+  const overlays = skill.slice(skill.indexOf('## Overlays'), skill.indexOf('## Side paths'));
+  const sidePaths = skill.slice(skill.indexOf('## Side paths'));
+  for (const name of pstack.skills) {
+    const where = name === 'maintain-verification-skill' ? sidePaths : skill;
+    assert.ok(where.includes(`\`${name}\``), `router does not place ${name}`);
+    assert.ok(block.includes(`\`${name}\``), `agents block does not mention ${name}`);
+  }
+  assert.ok(overlays.includes('`benchmark-checklist` before you report'));
+  assert.ok(skill.includes('`.cursor/skills/` path means the skills folder'));
+  assert.ok(skill.includes('pstack `tdd`'));
 });

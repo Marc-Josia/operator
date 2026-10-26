@@ -47,7 +47,16 @@
     {
       "id": "pstack",
       "repo": "https://github.com/cursor/plugins/tree/main/pstack",
-      "skills": ["unslop"]
+      "skills": [
+        "unslop",
+        "correct",
+        "blast-radius",
+        "benchmark-checklist",
+        "create-verification-skill",
+        "maintain-verification-skill",
+        "principle-prove-it-works",
+        "principle-fix-root-causes"
+      ]
     }
   ],
   "operatorSkill": "operator",
