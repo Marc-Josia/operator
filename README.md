@@ -50,10 +50,12 @@ Not installed, on purpose: `ask-matt`, `using-agent-skills`, and `poteto-mode`. 
 
 ## Pipeline
 
-`/operator` runs a phase detector (first true branch). One skill per pass. Build entry is `implement` per ticket or `implement-spec` for a whole spec (both drive `tdd` at agreed seams, then Matt `code-review`). `prototype` only when UI/state shape is still the question.
+`/operator` runs a phase detector (first true branch) that sizes the work first, then chains phases and stops only at three gates: shared understanding confirmed, ticket breakdown approved, merge. Build entry is `implement` per ticket or `implement-spec` for a whole spec (both drive `tdd` at agreed seams, then Matt `code-review`). `prototype` only when UI/state shape is still the question.
 
 ```
-IDEA
+SMALL   (diff fits one sentence)  → change, run the checks, commit
+MEDIUM  (clear scope, one session) → short plan in chat → implement
+LARGE / UNCLEAR
   → grill-with-docs
   → to-spec
   → to-tickets
@@ -61,13 +63,15 @@ IDEA
   → constraint-driven-development   (if no CONSTRAINTS.md yet)
   → implement | implement-spec      (tdd at seams, then Matt code-review)
   → codebase-design / improve-codebase-architecture if seams still friction
-  → security-and-hardening
-  → observability-and-instrumentation
-  → ci-cd-and-automation
-  → code-review-and-quality
-  → deprecation-and-migration   (if old code is leaving or a production schema changes)
-  → shipping-and-launch
-  → retro
+
+Production, only the phases whose trigger holds:
+  → security-and-hardening              (auth, input, secrets, third parties)
+  → observability-and-instrumentation   (no baseline yet, or a new service/endpoint/job/external call)
+  → ci-cd-and-automation                (no CI running the checks yet, or the pipeline changes)
+  → code-review-and-quality             (high-risk merge)
+  → deprecation-and-migration           (old code leaving or a production schema change)
+  → shipping-and-launch                 (the change reaches users)
+  → retro                               (medium or larger change shipped, or a hard bug fixed)
 ```
 
 Overlays: `unslop`, `performance-optimization`, `constraint-driven-development` (guards the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`.
@@ -75,7 +79,8 @@ Overlays: `unslop`, `performance-optimization`, `constraint-driven-development` 
 Arbitration, in short:
 
 - Tests are always Matt `tdd`
-- Two reviews, in order: Matt after `implement`, Addy during Production (after CI)
+- One review per change: Matt after `implement`; Addy's five-axis review only on a high-risk merge (after CI)
+- A mistake the agent repeats becomes a check, not another `AGENTS.md` line
 - Bugs go to `diagnosing-bugs`, then `retro`
 - The domain glossary is `GLOSSARY.md`; rename an old `CONTEXT.md` with `git mv` (Matt skills no longer read it)
 

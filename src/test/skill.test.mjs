@@ -38,3 +38,17 @@ test('operator skill routes every catalog skill and the GLOSSARY.md rename', () 
   assert.ok(skill.includes('GLOSSARY.md'));
   assert.ok(!skill.includes('implement-ledger'));
 });
+
+test('operator skill sizes work before the Understand lane and gates Production by trigger', () => {
+  const skill = fs.readFileSync(path.join(operatorSkillDir(packageRoot()), 'SKILL.md'), 'utf8');
+  const detector = skill.slice(skill.indexOf('## Detector'), skill.indexOf('## Lanes'));
+  assert.ok(detector.indexOf('**Small change.**') < detector.indexOf('**Medium change.**'));
+  assert.ok(detector.indexOf('**Medium change.**') < detector.indexOf('`grill-with-docs`'));
+  for (const gate of ['**Understanding.**', '**Breakdown.**', '**Merge.**']) {
+    assert.ok(skill.includes(gate), `missing gate ${gate}`);
+  }
+  assert.ok(!skill.includes('One phase per pass'));
+  const production = skill.slice(skill.indexOf('### Production'), skill.indexOf('### Close'));
+  assert.ok(production.includes('| Phase | Trigger |'));
+  assert.ok(skill.includes('One review per change'));
+});
