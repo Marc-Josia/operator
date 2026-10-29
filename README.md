@@ -85,6 +85,20 @@ Arbitration, in short:
 - Bugs go to `diagnosing-bugs` (fixed at the root cause, `principle-fix-root-causes`), then `retro`
 - The domain glossary is `GLOSSARY.md`; rename an old `CONTEXT.md` with `git mv` (Matt skills no longer read it)
 
+## Optional: TokenEconomizer
+
+[TokenEconomizer](https://github.com/microsoft/TokenEconomizer) (Microsoft Research) cuts what an agent costs in a repository you work in often. It remembers how the repo works (micro-skills), stops loading tools that go unused (tool pruning), and redirects a turn that loops on the same failures (loop guard). It is a plugin with hooks and needs Python ≥ 3.10. It is installed once per machine, not per project, so Operator does not install it. It supports Claude Code, Codex, the Copilot CLI, Pi, and opencode (experimental), but not Cursor.
+
+Install it yourself if you want it (Claude Code shown; the [TokenEconomizer README](https://github.com/microsoft/TokenEconomizer#install) covers the other agents):
+
+```bash
+git clone https://github.com/microsoft/TokenEconomizer.git   # keep the clone: the plugin runs from it
+claude plugin marketplace add "$PWD/TokenEconomizer"
+claude plugin install tokeneconomizer@tokeneconomizer
+```
+
+Operator composes with it once it is present. `operator status` reports whether it is there. The router tells agents to treat a loop-guard redirect as a cue to change approach (or to run `diagnosing-bugs`), never to weaken the checks to escape the loop. Injected facts that hold for the whole project are copied into `AGENTS.md`, because TokenEconomizer keeps them on one machine. When a skill needs a tool that was pruned, the agent asks you to run `toolprune restore` instead of working around it.
+
 ## Develop
 
 ```bash

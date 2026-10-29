@@ -226,3 +226,36 @@ test('remove strips the AGENTS.md block and optionally purges references', async
   assert.equal(fs.existsSync(path.join(cwd, 'AGENTS.md')), false);
   assert.equal(fs.existsSync(path.join(cwd, 'references', 'security-checklist.md')), false);
 });
+
+test('status reports TokenEconomizer when its launcher exists, without affecting ok', async () => {
+  const cwd = tmpDir();
+  const root = packageRoot();
+  await init({
+    cwd,
+    packageRoot: root,
+    agents: ['cursor'],
+    copy: true,
+    runner: async () => {},
+    fetchFn: mockFetch(),
+  });
+  for (const name of managedSkillNames(loadCatalog(root))) {
+    writeSkill(cwd, path.join('.agents', 'skills'), name);
+  }
+
+  const homedir = tmpDir();
+  const absent = status({ cwd, packageRoot: root, env: {}, homedir });
+  assert.equal(absent.tokenEconomizer.present, false);
+  assert.equal(absent.ok, true);
+
+  const launcher = path.join(homedir, '.tokeneconomizer', 'bin', 'te');
+  fs.mkdirSync(path.dirname(launcher), { recursive: true });
+  fs.writeFileSync(launcher, '#!/bin/sh\n', 'utf8');
+  const present = status({ cwd, packageRoot: root, env: {}, homedir });
+  assert.equal(present.tokenEconomizer.present, true);
+  assert.equal(present.tokenEconomizer.launcher, launcher);
+
+  const custom = tmpDir();
+  const overridden = status({ cwd, packageRoot: root, env: { TOKENECONOMIZER_HOME: custom }, homedir });
+  assert.equal(overridden.tokenEconomizer.home, custom);
+  assert.equal(overridden.tokenEconomizer.present, false);
+});

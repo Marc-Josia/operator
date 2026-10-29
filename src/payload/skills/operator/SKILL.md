@@ -143,6 +143,15 @@ These fire in addition to the phase, not instead of it.
 - Writing a pull request body: `pr`
 - A performance number you measured (benchmark, speedup, regression, before/after): `benchmark-checklist` before you report or act on it. Any other number in a final report: re-measure it at report time, or label it unverified.
 
+## TokenEconomizer
+
+[TokenEconomizer](https://github.com/microsoft/TokenEconomizer) is an optional cost plugin for Claude Code, Codex, the Copilot CLI, Pi, and opencode. Operator does not install it, and it is not a skill or a lifecycle. You know it is active when a context line starts with `TokenEconomizer:`, or when `~/.tokeneconomizer/bin/te` exists. When it is absent, ignore this section.
+
+- **Loop guard.** A `TokenEconomizer:` redirect means the current approach is looping. Drop it and do not retry the same command. If the failure is a bug whose cause you do not know, switch to `diagnosing-bugs`. Never get past the loop by weakening the bar (see Overlays: `constraint-driven-development`). If a notice says the turn is still stuck, repeat it to the user word for word and wait.
+- **Micro-skills.** Facts injected at session start (how to run tests here, a build step that must run first) are hints from this machine only. Run a fact before relying on it. When a fact is true for the whole project, write it under `## Commands` or `## Known pitfalls` in `AGENTS.md` so every agent and teammate gets it. When a fact and `AGENTS.md` disagree, run the command and fix whichever one is wrong.
+- **Tool pruning.** The plugin writes its own deny entries to `.claude/settings.local.json`, `.codex/config.toml`, or `.github/copilot/settings.local.json`. Do not edit or commit those entries. When a phase needs a tool it left out (web fetch for `research`, a browser for `create-verification-skill`), name the tool and give the user `toolprune restore`. Do not work around a missing tool.
+- **Cost questions.** "What did this cost" or "what did TokenEconomizer learn": its `status` command (`/tokeneconomizer:status` on Claude Code and Copilot, `$tokeneconomizer:status` on Codex, `/te status` on Pi, `~/.tokeneconomizer/bin/te status` from a terminal).
+
 ## Side paths
 
 Outside the idea-to-ship map. Still indexed.

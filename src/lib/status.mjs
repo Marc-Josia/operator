@@ -3,12 +3,15 @@ import { referencesStatus } from './references.mjs';
 import { agentsBlockStatus } from './agents-md.mjs';
 import { destRoot, diffSkills, listInstalledSkills } from './scan.mjs';
 import { legacyGlossaryFiles } from './glossary.mjs';
+import { tokenEconomizerStatus } from './token-economizer.mjs';
 
 /**
  * @param {{
  *   cwd?: string,
  *   packageRoot: string,
  *   global?: boolean,
+ *   env?: NodeJS.ProcessEnv,
+ *   homedir?: string,
  * }} opts
  */
 export function status(opts) {
@@ -21,6 +24,7 @@ export function status(opts) {
   const refs = referencesStatus(root);
   const agentsMd = agentsBlockStatus(cwd);
   const legacyGlossary = legacyGlossaryFiles(cwd);
+  const tokenEconomizer = tokenEconomizerStatus({ env: opts.env, homedir: opts.homedir });
 
   const lines = [];
   lines.push(`Operator status (${opts.global ? 'global' : 'project'})`);
@@ -49,6 +53,10 @@ export function status(opts) {
   } else {
     lines.push('AGENTS.md: Operator block present');
   }
+  lines.push('');
+  lines.push(tokenEconomizer.present
+    ? `TokenEconomizer: detected (${tokenEconomizer.launcher} status)`
+    : 'TokenEconomizer: not detected (optional, installed per machine, see README)');
   if (legacyGlossary.length > 0) {
     lines.push('');
     lines.push(`Glossary: rename ${legacyGlossary.map(({ from, to }) => `${from} → ${to}`).join(', ')} (Matt skills no longer read the old name)`);
@@ -59,5 +67,5 @@ export function status(opts) {
     && refs.missing.length === 0
     && agentsMd.managed;
   console.log(lines.join('\n'));
-  return { ok, skills, refs, agentsMd, legacyGlossary };
+  return { ok, skills, refs, agentsMd, legacyGlossary, tokenEconomizer };
 }

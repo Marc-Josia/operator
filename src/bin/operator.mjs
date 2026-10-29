@@ -13,7 +13,8 @@ Usage: operator <command> [options]
 Commands:
   init      Install the catalog, references/, the operator skill, and the AGENTS.md block
   update    Refresh catalog skills, references/, the operator skill, and AGENTS.md
-  status    Show installed skills vs catalog, references/, and the AGENTS.md block
+  status    Show installed skills vs catalog, references/, the AGENTS.md block,
+            and whether TokenEconomizer is present
   remove    Uninstall catalog skills and the AGENTS.md block
 
 Options:

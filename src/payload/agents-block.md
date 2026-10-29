@@ -22,6 +22,7 @@ Only the phases whose trigger holds, in this order: `security-and-hardening` (au
 - Auth, input, secrets already during Build: `security-and-hardening` as an overlay, not instead of the phase.
 - First use: `/setup-matt-pocock-skills` once per repo.
 - Domain glossary: `GLOSSARY.md` / `GLOSSARY-MAP.md`. An old `CONTEXT.md` / `CONTEXT-MAP.md` gets `git mv`'d to the new name; Matt skills no longer read it.
+- TokenEconomizer (optional cost plugin, lines start with `TokenEconomizer:`): a loop-guard redirect means change approach (unknown cause: `diagnosing-bugs`), never weaken the bar; an injected fact true for the whole project goes under `## Commands` here; a phase blocked by a pruned tool: tell the user `toolprune restore`, do not work around it.
 
 Overlays on top of the phase: `unslop`, `performance-optimization`, `benchmark-checklist` (any perf number you measured), `blast-radius` (a diff you do not trust, or a high-risk merge), `create-verification-skill` (user-facing change, no verification project skill yet), `constraint-driven-development` (an agent weakening the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`, `maintain-verification-skill`.
 

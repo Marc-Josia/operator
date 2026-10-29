@@ -69,3 +69,19 @@ test('pstack skills route as overlays with Cursor paths mapped to the agent', ()
   assert.ok(skill.includes('`.cursor/skills/` path means the skills folder'));
   assert.ok(skill.includes('pstack `tdd`'));
 });
+
+test('router and agents block compose with TokenEconomizer without installing it', () => {
+  const skill = fs.readFileSync(path.join(operatorSkillDir(packageRoot()), 'SKILL.md'), 'utf8');
+  const block = fs.readFileSync(agentsBlockPath(packageRoot()), 'utf8');
+  const section = skill.slice(skill.indexOf('## TokenEconomizer'), skill.indexOf('## Side paths'));
+  for (const mechanism of ['**Loop guard.**', '**Micro-skills.**', '**Tool pruning.**']) {
+    assert.ok(section.includes(mechanism), `router does not cover ${mechanism}`);
+  }
+  assert.ok(section.includes('Operator does not install it'));
+  assert.ok(section.includes('`diagnosing-bugs`'));
+  assert.ok(section.includes('`toolprune restore`'));
+  assert.ok(block.includes('TokenEconomizer'));
+  assert.ok(block.includes('`toolprune restore`'));
+  const catalog = loadCatalog(packageRoot());
+  assert.ok(!catalog.sources.some((source) => /tokeneconomizer/i.test(source.repo)));
+});
