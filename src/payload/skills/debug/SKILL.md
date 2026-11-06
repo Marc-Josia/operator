@@ -33,5 +33,6 @@ Fix the bug where the system first went wrong, not where the symptom surfaced, a
 ## Hand-off
 
 - No good seam for the regression test: `architecture`.
-- Fix landed: `review` if the change is medium or larger, then `retro` in this session to ask what would have prevented the bug.
+- Blind in production (no telemetry to locate it): `observability`, then back here.
+- Fix landed, medium or larger: `review` (high-risk fix: the Production skills whose trigger holds, `review` in high-risk mode among them); then `retro` in this session to ask what would have prevented the bug.
 - The same mistake keeps recurring: `correct`.

@@ -37,4 +37,4 @@ The slowness users feel goes away by a measured amount, and nothing is kept that
 
 - Slow for a reason nobody can find yet: `debug`.
 - Called as an overlay from another skill: back to it (`implement`, `ship`).
-- Otherwise the first whose trigger holds: `ci` (the regression budget needs the pipeline), `review` in high-risk mode, `ship` (the change reaches users). None: the merge gate, then `retro`.
+- Otherwise the first whose trigger holds: `ci` (the regression budget needs the pipeline), `review` in high-risk mode (high-risk change, not yet reviewed), `ship` (the change reaches users). None: the merge gate, then `retro`.

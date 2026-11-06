@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { pathExists } from './fsutil.mjs';
 
-/** Matt renamed the domain-doc convention; his skills only read the new names. */
+/** Old domain-doc names and their v3 names: the `grill` skill maintains `GLOSSARY.md`, never `CONTEXT.md`. */
 export const GLOSSARY_RENAMES = [
   ['CONTEXT.md', 'GLOSSARY.md'],
   ['CONTEXT-MAP.md', 'GLOSSARY-MAP.md'],
@@ -22,5 +22,5 @@ export function legacyGlossaryFiles(cwd) {
 /** @param {{ from: string, to: string }[]} legacy */
 export function legacyGlossaryWarning(legacy) {
   const moves = legacy.map(({ from, to }) => `  git mv ${from} ${to}`).join('\n');
-  return `Matt skills now read GLOSSARY.md, not CONTEXT.md. Rename (per-context CONTEXT.md files too):\n${moves}`;
+  return `The grill skill maintains GLOSSARY.md, not CONTEXT.md. Rename (per-context CONTEXT.md files too):\n${moves}`;
 }

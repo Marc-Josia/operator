@@ -10,15 +10,15 @@ test('normalizeAgents does not default to all agents', () => {
 
 test('buildAddArgs is non-interactive and selects named skills', () => {
   const args = buildAddArgs({
-    repo: 'mattpocock/skills',
-    skills: ['tdd', 'implement'],
+    repo: 'cursor/plugins',
+    skills: ['unslop', 'correct'],
     agents: ['cursor'],
     copy: true,
   });
   assert.deepEqual(args, [
-    '--yes', 'skills@latest', 'add', 'mattpocock/skills',
-    '--skill', 'tdd',
-    '--skill', 'implement',
+    '--yes', 'skills@latest', 'add', 'cursor/plugins',
+    '--skill', 'unslop',
+    '--skill', 'correct',
     '--agent', 'cursor',
     '-y',
     '--copy',
@@ -27,8 +27,8 @@ test('buildAddArgs is non-interactive and selects named skills', () => {
 
 test('buildAddArgs supports all-agents and global', () => {
   const args = buildAddArgs({
-    repo: 'addyosmani/agent-skills',
-    skills: ['security-and-hardening'],
+    repo: 'cursor/plugins',
+    skills: ['blast-radius'],
     agents: ['*'],
     global: true,
     copy: true,
@@ -38,19 +38,19 @@ test('buildAddArgs supports all-agents and global', () => {
 });
 
 test('buildUpdateArgs pins project scope by default', () => {
-  const args = buildUpdateArgs({ skills: ['tdd', 'operator'] });
-  assert.deepEqual(args, ['--yes', 'skills@latest', 'update', 'tdd', 'operator', '-p', '-y']);
+  const args = buildUpdateArgs({ skills: ['unslop', 'correct'] });
+  assert.deepEqual(args, ['--yes', 'skills@latest', 'update', 'unslop', 'correct', '-p', '-y']);
 });
 
 test('buildRemoveArgs passes catalog names through without --copy', () => {
   const args = buildRemoveArgs({
-    skills: ['tdd', 'operator'],
+    skills: ['grill', 'unslop'],
     agents: ['*'],
     copy: true,
   });
-  assert.deepEqual(args.slice(0, 5), ['--yes', 'skills@latest', 'remove', 'tdd', 'operator']);
-  assert.ok(args.includes('tdd'));
-  assert.ok(args.includes('operator'));
+  assert.deepEqual(args.slice(0, 5), ['--yes', 'skills@latest', 'remove', 'grill', 'unslop']);
+  assert.ok(args.includes('grill'));
+  assert.ok(args.includes('unslop'));
   assert.ok(args.includes('-y'));
   assert.ok(!args.includes('--copy'));
 });

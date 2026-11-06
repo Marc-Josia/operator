@@ -1,89 +1,90 @@
 # Operator
 
-Operator installs a curated set of [Matt Pocock](https://github.com/mattpocock/skills) and [Addy Osmani](https://github.com/addyosmani/agent-skills) skills, plus a few [pstack](https://github.com/cursor/plugins/tree/main/pstack) overlays (`unslop` and verification), then puts **one router** on top so those packs work as a single pipeline. On `init`, you pick which coding agents to install for (Cursor, Claude Code, Codex, and so on). Operator does not install a folder for every agent the [Vercel skills CLI](https://github.com/vercel-labs/skills) knows about unless you ask for `*`.
+Operator gives any coding agent (Claude Code, Cursor, Codex, and others) one working process built for a **Product Manager**. You say what you want, for whom, and why. The agent asks only product questions, decides the technical side and lists its choices so you can veto, builds in slices you can try, and stops only where you have to decide.
 
-Operator does **not** fork those skills. It pulls them current, installs them, and owns only the orchestration layer.
+There is no command to invoke. Once installed, the process is how the agent handles every request.
 
 ```bash
 npx --yes github:Marc-Josia/operator init
 ```
 
-Then, in your agent, run `/setup-matt-pocock-skills` once, and start work with `/operator`.
+Then open your agent in the repo and describe your idea in plain words.
+
+## What gets installed
+
+**Operator's own skills**, written as missions (what done looks like, what never to do, where you decide), not step-by-step procedure:
+
+| Lane | Skills |
+| --- | --- |
+| Understand | `grill`, `spec`, `tickets`, `prototype`, `wayfinder` |
+| Build | `constraints`, `implement`, `review`, `architecture`, `debug` |
+| Production | `security`, `observability`, `ci`, `migration`, `ship`, `performance` |
+| Close | `retro` |
+| Utilities | `pr`, `handoff`, `writing-for-agents` |
+
+Each skill ends with a `## Hand-off` that names the next one, so the lanes chain without a central map.
+
+**[pstack](https://github.com/cursor/plugins/tree/main/pstack) overlays**, unchanged: `unslop` (writing pass), `correct` (turns a repeated mistake into a check), `blast-radius` (what a change breaks outside the diff), `benchmark-checklist` (vets a measured perf number), `create-verification-skill` and `maintain-verification-skill` (a project skill that drives the real app), `principle-prove-it-works`, `principle-fix-root-causes`.
+
+**A managed block in `AGENTS.md`** (between `<!-- operator:start -->` and `<!-- operator:end -->`). It is the always-on router: the detector, the three gates, the PM rules, orchestration, and the overlays. `init` also adds empty project sections after it (`Project context`, `Commands`, `Conventions`, `Interface design`, `Known pitfalls`, `Project skills`); those belong to your project and `update` never touches them.
+
+**For Claude Code**, which does not read `AGENTS.md` by itself: an `@AGENTS.md` import line in `CLAUDE.md` (the file is created if missing; the line is never duplicated).
+
+## How it works
+
+The agent sizes the work first. A one-sentence fix: make it, run the checks, commit. A clear, one-session change: a short plan, then build. A loose idea: `grill` (shared understanding), `spec`, `tickets`, then `implement`. A vision too big for one session: `wayfinder` cuts it into milestones first. Production skills (`security`, `observability`, `ci`, `migration`, `ship`, `performance`) run only when their trigger holds. `retro` closes medium or larger work.
+
+The agent stops and waits only at three gates:
+
+- **Understanding.** You confirm the agent's summary of what ships, for whom, and how you will know it works.
+- **Breakdown.** You approve the tickets: each one a slice you can see and try.
+- **Merge.** You run the test kit and it works. Merging, deploying, and shipping are your call.
+
+**Test kit.** Every cycle ends with one: where to go (a preview URL or a command), the journey step by step, and what you should see. The agent runs that journey itself on the real thing first.
+
+**One review per change.** A medium change gets one `review` after the build. A high-risk change (auth, input, secrets, personal data, or a third party; a data or schema migration; a public interface; a release to users) skips that and gets one `review` in high-risk mode after the Production checks.
+
+**Orchestration.** The agent you talk to orchestrates. Each ticket goes to a subagent in its own git worktree, tickets with no blocking edge run in parallel, and the main agent integrates and verifies. An agent without subagents or worktrees runs the same tickets one after another.
+
+**Where specs and tickets live.** `init` asks: local markdown (`docs/changes/<id>/`), GitHub issues, Linear, or anything else you type. The answer is written as one line under `## Project context` in `AGENTS.md` (`Specs and tickets live in: …`). When the platform's tool is missing (no `gh`, no Linear MCP), the agent says so and falls back to local markdown.
 
 ## Commands
 
 ```bash
-npx --yes github:Marc-Josia/operator init
-npx --yes github:Marc-Josia/operator update
-npx --yes github:Marc-Josia/operator status
-npx --yes github:Marc-Josia/operator remove
-npx --yes github:Marc-Josia/operator remove --purge
+npx --yes github:Marc-Josia/operator init      # install, ask agents and tracker
+npx --yes github:Marc-Josia/operator update    # refresh skills and the managed block
+npx --yes github:Marc-Josia/operator status    # what is installed, what is left over
+npx --yes github:Marc-Josia/operator remove    # uninstall what Operator added
 ```
 
-If the package is linked locally:
+With the package linked locally:
 
 ```bash
-operator init                         # checkboxes: ↑/↓, space to select, enter
-operator init --agent cursor,claude-code,codex,opencode -y
-operator init --agent "*"             # every agent the skills CLI supports
-operator init -g --agent cursor       # user-wide instead of this project
+operator init                                   # checkboxes: ↑/↓, space to select, enter
+operator init --agent cursor,claude-code -y     # non-interactive, tracker defaults to local
+operator init --agent claude-code --tracker github -y
+operator init --tracker "Jira project WEB"      # any text works
+operator init --agent "*"                       # every agent the skills CLI supports
+operator init -g --agent cursor                 # user-wide instead of this project
 ```
 
-`--copy` is on by default on Windows (symlinks are unreliable there). `-y` is always passed through to `npx skills`. Without `--agent`, `-y` is an error: Operator will not guess `*` and scatter skill folders.
+| Flag | Commands | Meaning |
+| --- | --- | --- |
+| `--agent a,b` | init, update, remove | Target agents. With `-y`, `init` requires it: Operator never guesses `*`. |
+| `--tracker x` | init, update | `local`, `github`, `linear`, or free text. |
+| `-g`, `--global` | init, update, remove | Install to the user directory instead of the project. |
+| `--copy` | init, update | Copy files instead of symlinking. On by default on Windows. |
+| `-y`, `--yes` | all | Non-interactive; always passed through to `npx skills`. |
 
-## What gets installed
+Agents and tracker are saved in `.operator/state.json` (`~/.operator/state.json` with `-g`). `update` and `remove` reuse them; pass `--agent` or `--tracker` to change them.
 
-**Matt Pocock** (Understand → Build): `setup-matt-pocock-skills`, `grill-with-docs`, `grill-me`, `grilling`, `domain-modeling`, `to-spec`, `to-tickets`, `tdd`, `implement`, `implement-spec`, `code-review`, `pr`, `codebase-design`, `improve-codebase-architecture`, `diagnosing-bugs`, `retro`, `prototype`, `wayfinder`, `triage`, `handoff`, `research`, `writing-for-agents`, `wizard`.
+`status` lists own and pstack skills, leftover v2 skills, the `AGENTS.md` block, the `CLAUDE.md` import, the tracker line, and whether TokenEconomizer is present.
 
-**Addy Osmani** (quality bar + Production overlay): `constraint-driven-development`, `security-and-hardening`, `code-review-and-quality`, `deprecation-and-migration`, `observability-and-instrumentation`, `ci-cd-and-automation`, `shipping-and-launch`, `performance-optimization`.
+`remove` uninstalls own and pstack skills, strips the managed block, the tracker line, and the `CLAUDE.md` import line (deleting `CLAUDE.md` only if Operator created it), and deletes the state file.
 
-**pstack** (overlays): `unslop` (writing pass), `correct` (turns a repeated mistake into a check), `blast-radius` (what a change breaks outside the diff), `benchmark-checklist` (vets a measured perf number), `create-verification-skill` and `maintain-verification-skill` (a project skill that drives the real app), `principle-prove-it-works`, `principle-fix-root-causes`. Not the rest of pstack: `poteto-mode` is a competing router, pstack `tdd` clashes with Matt `tdd`, and most other skills need Cursor's multi-model subagents.
+## Upgrading from v2
 
-**Addy `references/`** is copied to the project root so paths like `../../references/security-checklist.md` resolve from installed skills.
-
-**Operator** adds:
-
-- the `operator` skill (`/operator`) — the only router
-- a managed block in `AGENTS.md` (markers `<!-- operator:start -->` / `<!-- operator:end -->`) so agents that miss the skill still see the map. The block also tells agents to keep project knowledge current below it and to create project skills for repeated procedures
-- on `init`, empty project sections after the block (`Project context`, `Commands`, `Conventions`, `Interface design`, `Known pitfalls`, `Project skills`), skipping any that already exist. They belong to the project: `update` never touches them
-
-Not installed, on purpose: `ask-matt`, `using-agent-skills`, and `poteto-mode`. Two meta-routers fight over the next step.
-
-## Pipeline
-
-`/operator` runs a phase detector (first true branch) that sizes the work first, then chains phases and stops only at three gates: shared understanding confirmed, ticket breakdown approved, merge. Build entry is `implement` per ticket or `implement-spec` for a whole spec (both drive `tdd` at agreed seams, then Matt `code-review`). `prototype` only when UI/state shape is still the question.
-
-```
-SMALL   (diff fits one sentence)  → change, run the checks, commit
-MEDIUM  (clear scope, one session) → short plan in chat → implement
-LARGE / UNCLEAR
-  → grill-with-docs
-  → to-spec
-  → to-tickets
-  → prototype?          (throwaway; then detector again)
-  → constraint-driven-development   (if no CONSTRAINTS.md yet)
-  → implement | implement-spec      (tdd at seams, then Matt code-review)
-  → codebase-design / improve-codebase-architecture if seams still friction
-
-Production, only the phases whose trigger holds:
-  → security-and-hardening              (auth, input, secrets, third parties)
-  → observability-and-instrumentation   (no baseline yet, or a new service/endpoint/job/external call)
-  → ci-cd-and-automation                (no CI running the checks yet, or the pipeline changes)
-  → code-review-and-quality             (high-risk merge)
-  → deprecation-and-migration           (old code leaving or a production schema change)
-  → shipping-and-launch                 (the change reaches users)
-  → retro                               (medium or larger change shipped, or a hard bug fixed)
-```
-
-Overlays: `unslop`, `performance-optimization`, `benchmark-checklist` (measured perf numbers), `blast-radius` (untrusted diff or high-risk merge), `create-verification-skill` (user-facing change, no verification skill yet), `principle-prove-it-works` (before done), `constraint-driven-development` (guards the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`, `maintain-verification-skill`.
-
-Arbitration, in short:
-
-- Tests are always Matt `tdd`
-- One review per change: Matt after `implement`; Addy's five-axis review only on a high-risk merge (after CI)
-- A mistake the agent repeats becomes a check, not another `AGENTS.md` line: `retro` proposes it, `correct` lands it
-- Bugs go to `diagnosing-bugs` (fixed at the root cause, `principle-fix-root-causes`), then `retro`
-- The domain glossary is `GLOSSARY.md`; rename an old `CONTEXT.md` with `git mv` (Matt skills no longer read it)
+Run `operator update`. It removes the v2 skills still installed (the Matt Pocock and Addy Osmani packs and the v2 `operator` router), installs the own skills in their place, deletes the old managed `references/` folder (only the files its manifest lists), moves the saved agents into `.operator/state.json`, and rewrites the `AGENTS.md` block. There is no `/operator` command any more. If the repo still has a `CONTEXT.md` glossary, Operator tells you to rename it to `GLOSSARY.md` with `git mv`.
 
 ## Optional: TokenEconomizer
 
@@ -97,7 +98,7 @@ claude plugin marketplace add "$PWD/TokenEconomizer"
 claude plugin install tokeneconomizer@tokeneconomizer
 ```
 
-Operator composes with it once it is present. `operator status` reports whether it is there. The router tells agents to treat a loop-guard redirect as a cue to change approach (or to run `diagnosing-bugs`), never to weaken the checks to escape the loop. Injected facts that hold for the whole project are copied into `AGENTS.md`, because TokenEconomizer keeps them on one machine. When a skill needs a tool that was pruned, the agent asks you to run `toolprune restore` instead of working around it.
+Operator composes with it once it is present. `operator status` reports whether it is there. The router tells agents to treat a loop-guard redirect as a cue to change approach (or to run `debug` when the cause is unknown), never to weaken the checks to escape the loop (`constraints`). Injected facts that hold for the whole project are copied into `AGENTS.md`, because TokenEconomizer keeps them on one machine. When a step needs a tool that was pruned, the agent asks you to run `toolprune restore` instead of working around it.
 
 ## Develop
 

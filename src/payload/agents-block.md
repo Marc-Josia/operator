@@ -43,7 +43,7 @@ You are the orchestrator. Each ticket goes to a subagent in its own git worktree
 
 ## Rules
 
-- One review per change: `review`. A small change: its checks are its gate.
+- One review per change: `review`. High-risk change (auth, input, secrets, personal data, or a third party touched; data or schema migrates; a public interface changes; the release reaches users): `implement` skips the default review, and the one review is `review` in high-risk mode in step 11. A small change: its checks are its gate.
 - Bugs: `debug`, fixed at the root cause (`principle-fix-root-causes`), then `retro`.
 - A mistake the agent repeats becomes a check (lint rule, test, hook), not another line here: `retro` proposes it, `correct` lands it.
 - Specs and tickets go where the `Specs and tickets live in: …` line under `## Project context` says.

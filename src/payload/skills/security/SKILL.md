@@ -42,4 +42,4 @@ Nobody can reach data or actions that are not theirs, and no secret or personal 
 ## Hand-off
 
 - Running as an overlay during Build: back to the skill that was building (`implement`, `debug`).
-- Otherwise the first whose trigger holds: `observability` (no error tracking baseline, or a new endpoint, job, or external call), `ci` (no pipeline running the checks, or the pipeline changed), else `review` in high-risk mode, which this skill firing always requires.
+- Otherwise the first whose trigger holds: `observability` (no error tracking baseline, or a new endpoint, job, or external call), `ci` (no pipeline running the checks, or the pipeline changed), else `review` in high-risk mode: this skill firing makes the change high-risk, so that is its one review.

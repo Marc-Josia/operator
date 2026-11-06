@@ -84,14 +84,6 @@ export function payloadDir(packageRoot) {
   return path.join(packageRoot, 'src', 'payload');
 }
 
-/**
- * v2 router folder. Kept only until T7 deletes it with its test; never installed by v3.
- * @param {string} packageRoot
- */
-export function operatorSkillDir(packageRoot) {
-  return path.join(payloadDir(packageRoot), 'skills', 'operator');
-}
-
 /** @param {string} packageRoot */
 export function agentsBlockPath(packageRoot) {
   return path.join(packageRoot, 'src', 'payload', 'agents-block.md');

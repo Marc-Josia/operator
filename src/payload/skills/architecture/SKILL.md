@@ -31,4 +31,4 @@ Find where the code makes the next change harder than it should be, and propose 
 ## Hand-off
 
 - A candidate was accepted: `implement` with its ticket or plan.
-- Otherwise: Production skills whose trigger holds, in order `security`, `observability`, `ci`, `review` in high-risk mode, `migration`, `ship`; none holds: merge gate, then `retro`.
+- Otherwise: the Production skills whose trigger holds and that have not run on this change, in order `security`, `observability`, `ci`, `review` in high-risk mode, `migration`, `ship`; none: merge gate, then `retro`.
