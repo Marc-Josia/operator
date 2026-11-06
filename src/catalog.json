@@ -72,8 +72,6 @@
     "performance-optimization",
     "operator"
   ],
-  "operatorSkill": "operator",
-  "skip": ["ask-matt", "using-agent-skills", "poteto-mode"],
   "agents": [
     { "id": "cursor", "label": "Cursor" },
     { "id": "claude-code", "label": "Claude Code" },
@@ -87,19 +85,5 @@
     { "id": "cline", "label": "Cline" },
     { "id": "continue", "label": "Continue" },
     { "id": "goose", "label": "Goose" }
-  ],
-  "references": {
-    "repo": "addyosmani/agent-skills",
-    "branch": "main",
-    "dir": "references",
-    "files": [
-      "accessibility-checklist.md",
-      "definition-of-done.md",
-      "observability-checklist.md",
-      "orchestration-patterns.md",
-      "performance-checklist.md",
-      "security-checklist.md",
-      "testing-patterns.md"
-    ]
-  }
+  ]
 }

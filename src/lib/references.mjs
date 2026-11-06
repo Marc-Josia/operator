@@ -1,11 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { OperatorError, pathExists, readJson, writeJson, writeText } from './fsutil.mjs';
+import { pathExists, readJson } from './fsutil.mjs';
 
+/**
+ * Operator v2 fetched Addy's checklists into `references/` and listed them in this manifest
+ * (which also held the saved agents). v3 installs no references: this module only reads the
+ * old manifest once (see `state.mjs`) and purges the files it lists.
+ */
 export const MANAGED_MARKER = '.operator-managed.json';
-
-const RAW_BASE = 'https://raw.githubusercontent.com';
-const USER_AGENT = 'operator-cli (@marcjosia/operator)';
 
 /** @param {string} destRoot */
 export function referencesDir(destRoot) {
@@ -18,90 +20,39 @@ export function markerPath(destRoot) {
 }
 
 /**
- * @param {string} repo
- * @param {string} branch
- * @param {string} dir
- * @param {string} file
+ * @param {string} destRoot
+ * @returns {{ agents?: unknown, files?: unknown, source?: unknown } | undefined}
  */
-export function rawUrl(repo, branch, dir, file) {
-  return `${RAW_BASE}/${repo}/${branch}/${dir}/${file}`;
-}
-
-/**
- * @param {string} url
- * @param {{ fetchFn?: typeof fetch }} [opts]
- */
-export async function fetchText(url, opts = {}) {
-  const fetchFn = opts.fetchFn ?? fetch;
-  const res = await fetchFn(url, { headers: { 'User-Agent': USER_AGENT } });
-  if (!res.ok) {
-    throw new OperatorError(`failed to fetch ${url} (${res.status} ${res.statusText})`, 1);
-  }
-  return res.text();
-}
-
-/** @param {string} destRoot */
-export function readSavedAgents(destRoot) {
+export function readLegacyManifest(destRoot) {
   const marker = markerPath(destRoot);
   if (!pathExists(marker)) return undefined;
-  const managed = readJson(marker);
-  if (!Array.isArray(managed.agents) || managed.agents.length === 0) return undefined;
-  return managed.agents.map(String);
-}
-
-/**
- * @param {{
- *   catalog: { references: { repo: string, branch: string, dir: string, files: string[] } },
- *   destRoot: string,
- *   agents?: string[],
- *   fetchFn?: typeof fetch,
- * }} opts
- */
-export async function installReferences(opts) {
-  const { repo, branch, dir, files } = opts.catalog.references;
-  const dest = referencesDir(opts.destRoot);
-  const existingAgents = readSavedAgents(opts.destRoot);
-  for (const file of files) {
-    const url = rawUrl(repo, branch, dir, file);
-    const body = await fetchText(url, { fetchFn: opts.fetchFn });
-    writeText(path.join(dest, file), body);
+  try {
+    return readJson(marker);
+  } catch {
+    return undefined;
   }
-  const agents = opts.agents && opts.agents.length > 0 ? opts.agents : existingAgents;
-  writeJson(markerPath(opts.destRoot), {
-    source: `${repo}/${dir}`,
-    branch,
-    files: [...files],
-    ...(agents && agents.length > 0 ? { agents } : {}),
-  });
 }
 
 /** @param {string} destRoot */
-export function referencesStatus(destRoot) {
-  const dest = referencesDir(destRoot);
-  const marker = markerPath(destRoot);
-  if (!pathExists(dest)) {
-    return { present: false, managed: false, files: [], missing: [] };
-  }
-  if (!pathExists(marker)) {
-    return { present: true, managed: false, files: [], missing: [] };
-  }
-  const managed = readJson(marker);
-  const files = Array.isArray(managed.files) ? managed.files : [];
-  const missing = files.filter((file) => !pathExists(path.join(dest, file)));
-  return { present: true, managed: true, files, missing, source: managed.source };
+export function legacyReferencesStatus(destRoot) {
+  const manifest = readLegacyManifest(destRoot);
+  if (!manifest) return { managed: false, files: [] };
+  const files = Array.isArray(manifest.files) ? manifest.files.map(String) : [];
+  return { managed: true, files };
 }
 
 /**
+ * Delete the v2 managed `references/` files: only those listed in the manifest, then the
+ * manifest, then the folder if nothing else is left. Other files stay.
  * @param {string} destRoot
- * @param {{ purge?: boolean }} [opts]
  */
-export function removeReferences(destRoot, opts = {}) {
-  if (!opts.purge) return { removed: false };
-  const status = referencesStatus(destRoot);
+export function purgeLegacyReferences(destRoot) {
+  const status = legacyReferencesStatus(destRoot);
   if (!status.managed) return { removed: false };
   const dest = referencesDir(destRoot);
   for (const file of status.files) {
     const filePath = path.join(dest, file);
+    if (path.dirname(path.resolve(filePath)) !== path.resolve(dest)) continue;
     if (pathExists(filePath)) fs.unlinkSync(filePath);
   }
   const marker = markerPath(destRoot);

@@ -1,7 +1,7 @@
 import readline from 'node:readline';
 import { OperatorError } from './fsutil.mjs';
 import { normalizeAgents } from './skills.mjs';
-import { readSavedAgents } from './references.mjs';
+import { readSavedAgents } from './state.mjs';
 
 export const MISSING_AGENT_MESSAGE = 'missing --agent. Pass --agent cursor (or --agent "*" for every agent), or run without -y to pick interactively.';
 export const ALL_AGENTS_ID = '*';
