@@ -1,6 +1,6 @@
 ---
 name: review
-description: Use once per medium or larger change, to check it against its spec or ticket and the project standards: after the build by default, or in high-risk mode before a high-risk merge.
+description: Use once per medium or larger change, to check it against its spec or ticket and the project standards; after the build by default, or in high-risk mode before a high-risk merge.
 ---
 
 ## Mission

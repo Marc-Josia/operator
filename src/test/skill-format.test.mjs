@@ -62,6 +62,11 @@ for (const name of own) {
     assert.ok(fields, `${name}: missing frontmatter`);
     assert.equal(fields.name, name, `${name}: frontmatter name must equal the folder name`);
     assert.ok(fields.description, `${name}: empty description`);
+    // An unquoted YAML value with ": " or " #" breaks the frontmatter, and `npx skills add` then skips the skill silently.
+    for (const [key, value] of Object.entries(fields)) {
+      if (/^["']/.test(value)) continue;
+      assert.ok(!/: | #/.test(value), `${name}: frontmatter ${key} has ": " or " #" unquoted, which is invalid YAML`);
+    }
     assert.deepEqual(sectionHeadings(text), SECTIONS, `${name}: sections must be exactly ${SECTIONS.join(', ')}`);
     assert.ok(lineCount(text) <= MAX_SKILL_LINES, `${name}: ${lineCount(text)} lines, max ${MAX_SKILL_LINES}`);
     assert.deepEqual(legacyMentions(text, legacyOnly), [], `${name}: names legacy skills`);
