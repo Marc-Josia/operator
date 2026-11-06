@@ -1,6 +1,4 @@
-# Operator
-
-This repo runs on **Operator**. There is nothing to invoke: every request goes through the process below by default. Each skill's `## Hand-off` names the next step; follow it. If this block and a `SKILL.md` disagree, the `SKILL.md` is right. Ceremony scales with the work: jumping from a loose idea to code is one failure, running a one-sentence fix through spec and tickets is the other.
+# AGENTS.md
 
 ## The user is a Product Manager
 
@@ -12,7 +10,7 @@ This repo runs on **Operator**. There is nothing to invoke: every request goes t
 
 ## Detector
 
-Take the first true branch. Size unclear: take the larger. A bug whose cause is unknown is not small.
+Every request goes through it. Ceremony scales with the work: a loose idea jumping to code is one failure, a one-sentence fix run through spec and tickets is the other. Take the first true branch. Size unclear: take the larger. A bug whose cause is unknown is not small.
 
 1. The user named a skill: follow it.
 2. Small change, the diff fits one sentence: make it, run the checks (`CONSTRAINTS.md` commands, otherwise typecheck and the affected tests), commit, then the merge gate.
@@ -23,9 +21,10 @@ Take the first true branch. Size unclear: take the larger. A bug whose cause is 
 7. UI or state shape still open: `prototype`, then this detector again.
 8. New project or significant feature, no `CONSTRAINTS.md`: `constraints`, then this detector again.
 9. Ready to code, one ticket or a whole spec: `implement`.
-10. Seam or module friction: `architecture`.
-11. Headed to merge or ship: only the skills whose trigger holds, in this order: `security` → `observability` → `ci` → `review` (high-risk mode) → `migration` → `ship`. None holds: merge gate.
-12. Medium or larger change shipped, or a hard bug fixed: `retro`.
+10. Medium or larger change built, not simplified yet: `simplify-pass`, by a fresh subagent.
+11. Seam or module friction: `architecture`.
+12. Headed to merge or ship: only the skills whose trigger holds, in this order: `security` → `observability` → `ci` → `review` (high-risk mode) → `migration` → `ship`. None holds: merge gate.
+13. Medium or larger change shipped, or a hard bug fixed: `retro`.
 
 ## Gates
 
@@ -43,7 +42,9 @@ You are the orchestrator. Each ticket goes to a subagent in its own git worktree
 
 ## Rules
 
-- One review per change: `review`. High-risk change (auth, input, secrets, personal data, or a third party touched; data or schema migrates; a public interface changes; the release reaches users): `implement` skips the default review, and the one review is `review` in high-risk mode in step 11. A small change: its checks are its gate.
+- Each skill's `## Hand-off` names the next step: follow it. If this block and a `SKILL.md` disagree, the `SKILL.md` wins.
+- One simplify pass per medium or larger change: `simplify-pass`, by a fresh subagent that did not build it, right after the build and before any review. A small change skips it.
+- One review per change: `review`. High-risk change (auth, input, secrets, personal data, or a third party touched; data or schema migrates; a public interface changes; the release reaches users): the default review is skipped, and the one review is `review` in high-risk mode in step 12. A small change: its checks are its gate.
 - Bugs: `debug`, fixed at the root cause (`principle-fix-root-causes`), then `retro`.
 - A mistake the agent repeats becomes a check (lint rule, test, hook), not another line here: `retro` proposes it, `correct` lands it.
 - Specs and tickets go where the `Specs and tickets live in: …` line under `## Project context` says.

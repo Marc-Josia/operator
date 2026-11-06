@@ -55,6 +55,7 @@ const OWN = [
   'wayfinder',
   'constraints',
   'implement',
+  'simplify-pass',
   'review',
   'architecture',
   'debug',

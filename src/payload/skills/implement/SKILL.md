@@ -14,15 +14,15 @@ Turn agreed tickets into working, tested, committed code the PM can try, without
 - Tests were written first, failing, at the seams the spec or plan agreed, one behaviour at a time, through the public interface, with expected values from the spec or a worked example. A seam the spec did not agree is raised, not tested silently.
 - Typecheck and the touched test files ran along the way; the full suite ran once at the end and passes.
 - Every `CONSTRAINTS.md` command passes, with the bar untouched.
-- Not high-risk: one `review` ran over the whole change and its findings are fixed or explicitly accepted. High-risk (the change touches what `security` covers, migrates data or schema, changes a public interface, or its release reaches users): no review here; its one review is `review` in high-risk mode after the Production skills.
+- No review or simplification here: medium or larger work goes to `simplify-pass`, then its one review (`review`, or `review` in high-risk mode after the Production skills when the change touches what `security` covers, migrates data or schema, changes a public interface, or its release reaches users).
 - Work is committed on the current branch (integration branch for a spec); tickets are closed the way the tracker closes work.
-- User-visible change: the agent ran the PM journey itself on the real artifact (`principle-prove-it-works`), then handed the PM a test kit: where to go (preview URL or command), the journey step by step, what they should see at each step.
+- User-visible change: the agent ran the PM journey itself on the real artifact (`principle-prove-it-works`), then wrote the PM test kit: where to go (preview URL or command), the journey step by step, what they should see at each step.
 
 ## Never
 
 - Start building a ticket whose blockers have not merged, or let two implementers edit the same files in parallel.
 - Write all tests up front, test private internals, or write an assertion that recomputes the answer the way the code does.
-- Refactor or add anything the ticket did not ask for; note it for `review` or `architecture`.
+- Refactor or add anything the ticket did not ask for; note it for `simplify-pass` or `architecture`.
 - Weaken a check, test, or threshold to get to green (`constraints` guards the bar).
 - Report done from "it compiles" or green tests alone when the change is user-visible.
 - Merge to main, deploy, or ship: that is the PM's call after testing the journey.
@@ -40,5 +40,4 @@ Turn agreed tickets into working, tested, committed code the PM can try, without
 - A failure whose cause is unknown: `debug`.
 - Auth, untrusted input, secrets, or a third party touched mid-build: `security` alongside.
 - User-facing change and no project verification skill yet: `create-verification-skill`, once.
-- Build done, not high-risk: `review`.
-- Build done, high-risk: the Production skills whose trigger holds, in order `security`, `observability`, `ci`, `review` in high-risk mode, `migration`, `ship`.
+- Build done, medium or larger: `simplify-pass` (it hands on to `review` or the Production skills).

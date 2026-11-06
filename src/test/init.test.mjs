@@ -415,7 +415,7 @@ test('status reports leftover v2 skills, the CLAUDE.md import, and the tracker; 
   assert.equal(complete.claudeMd.expected, true);
   assert.equal(complete.claudeMd.imports, true);
   assert.equal(complete.tracker.saved, 'github');
-  assert.ok(out[0].includes('Skills: 28/28 installed'));
+  assert.ok(out[0].includes('Skills: 29/29 installed'));
   assert.ok(out[0].includes('CLAUDE.md: imports AGENTS.md'));
   assert.ok(out[0].includes('Tracker: Specs and tickets live in: GitHub issues'));
   assert.ok(!out[0].includes('References'));

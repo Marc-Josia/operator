@@ -17,7 +17,7 @@ Then open your agent in the repo and describe your idea in plain words.
 | Lane | Skills |
 | --- | --- |
 | Understand | `grill`, `spec`, `tickets`, `prototype`, `wayfinder` |
-| Build | `constraints`, `implement`, `review`, `architecture`, `debug` |
+| Build | `constraints`, `implement`, `simplify-pass`, `review`, `architecture`, `debug` |
 | Production | `security`, `observability`, `ci`, `migration`, `ship`, `performance` |
 | Close | `retro` |
 | Utilities | `pr`, `handoff`, `writing-for-agents` |
@@ -42,7 +42,9 @@ The agent stops and waits only at three gates:
 
 **Test kit.** Every cycle ends with one: where to go (a preview URL or a command), the journey step by step, and what you should see. The agent runs that journey itself on the real thing first.
 
-**One review per change.** A medium change gets one `review` after the build. A high-risk change (auth, input, secrets, personal data, or a third party; a data or schema migration; a public interface; a release to users) skips that and gets one `review` in high-risk mode after the Production checks.
+**One simplify pass per change.** After a medium or larger build, a fresh agent that did not write the code rereads the diff and makes it simpler without changing what it does, in its own commit, before any review. A one-sentence fix skips it.
+
+**One review per change.** A medium change gets one `review` after the simplify pass. A high-risk change (auth, input, secrets, personal data, or a third party; a data or schema migration; a public interface; a release to users) skips that and gets one `review` in high-risk mode after the Production checks.
 
 **Orchestration.** The agent you talk to orchestrates. Each ticket goes to a subagent in its own git worktree, tickets with no blocking edge run in parallel, and the main agent integrates and verifies. An agent without subagents or worktrees runs the same tickets one after another.
 

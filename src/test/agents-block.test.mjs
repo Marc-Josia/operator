@@ -69,7 +69,7 @@ function backticked(text) {
 
 /** @param {string} text @param {string} heading */
 function section(text, heading) {
-  const start = text.indexOf(`\n## ${heading}\n`);
+  const start = `\n${text}`.indexOf(`\n## ${heading}\n`);
   assert.ok(start >= 0, `missing section ## ${heading}`);
   const end = text.indexOf('\n## ', start + 1);
   return text.slice(start, end < 0 ? undefined : end);
@@ -109,7 +109,7 @@ test('detector sizes work first, then the Understand lane, then Production in tr
   const detector = section(block(), 'Detector');
   assert.ok(detector.includes('take the larger'));
   assert.ok(detector.includes('cause is unknown is not small'));
-  const order = ['Small change', 'Medium change', '`grill`', '`spec`', '`tickets`', '`prototype`', '`constraints`', '`implement`', '`architecture`', '`security`', '`observability`', '`ci`', '`review`', '`migration`', '`ship`', '`retro`'];
+  const order = ['Small change', 'Medium change', '`grill`', '`spec`', '`tickets`', '`prototype`', '`constraints`', '`implement`', '`simplify-pass`', '`architecture`', '`security`', '`observability`', '`ci`', '`review`', '`migration`', '`ship`', '`retro`'];
   let from = 0;
   for (const needle of order) {
     const at = detector.indexOf(needle, from);
@@ -147,6 +147,7 @@ test('block keeps pstack substitutions, the tracker line, and composes with Toke
   assert.ok(text.includes('Opening-a-PR playbook is `pr`'));
   assert.ok(text.includes('`Specs and tickets live in: …`'));
   assert.ok(text.includes('One review per change: `review`'));
+  assert.ok(text.includes('One simplify pass per medium or larger change: `simplify-pass`, by a fresh subagent'));
   assert.ok(text.includes('`toolprune restore`'));
   assert.ok(text.includes('unknown cause: `debug`'));
   assert.ok(!catalog.sources.some((source) => /tokeneconomizer/i.test(source.repo)));
