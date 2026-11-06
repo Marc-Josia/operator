@@ -9,13 +9,6 @@ import { readJson } from './fsutil.mjs';
  * }} CatalogSource
  *
  * @typedef {{
- *   repo: string,
- *   branch: string,
- *   dir: string,
- *   files: string[],
- * }} CatalogReferences
- *
- * @typedef {{
  *   id: string,
  *   label: string,
  * }} CatalogAgent
@@ -25,10 +18,7 @@ import { readJson } from './fsutil.mjs';
  *   ownSkills: string[],
  *   sources: CatalogSource[],
  *   legacySkills: string[],
- *   operatorSkill: string,
- *   skip: string[],
  *   agents: CatalogAgent[],
- *   references: CatalogReferences,
  * }} Catalog
  */
 
@@ -55,9 +45,12 @@ export function allCatalogSkills(catalog) {
   return catalog.sources.flatMap((source) => source.skills);
 }
 
-/** @param {Catalog} catalog */
+/**
+ * Every skill Operator installs: its own skills, then pstack.
+ * @param {Catalog} catalog
+ */
 export function managedSkillNames(catalog) {
-  return [...allCatalogSkills(catalog), catalog.operatorSkill];
+  return [...ownSkillNames(catalog), ...allCatalogSkills(catalog)];
 }
 
 /**
@@ -76,12 +69,25 @@ export function legacySkillNames(catalog) {
   return [...(catalog.legacySkills ?? [])];
 }
 
+/**
+ * Legacy names that are not also own skills: installed copies are leftovers to remove.
+ * Same-named ones (`implement`, `retro`, …) are overwritten by the own skill instead.
+ * @param {Catalog} catalog
+ */
+export function legacyOnlySkillNames(catalog) {
+  const own = new Set(ownSkillNames(catalog));
+  return legacySkillNames(catalog).filter((name) => !own.has(name));
+}
+
 /** @param {string} packageRoot */
 export function payloadDir(packageRoot) {
   return path.join(packageRoot, 'src', 'payload');
 }
 
-/** @param {string} packageRoot */
+/**
+ * v2 router folder. Kept only until T7 deletes it with its test; never installed by v3.
+ * @param {string} packageRoot
+ */
 export function operatorSkillDir(packageRoot) {
   return path.join(payloadDir(packageRoot), 'skills', 'operator');
 }

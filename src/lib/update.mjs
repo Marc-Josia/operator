@@ -1,37 +1,44 @@
-import { readText } from './fsutil.mjs';
-import { agentsBlockPath, loadCatalog, managedSkillNames, payloadDir } from './catalog.mjs';
-import { addSkills, updateSkills } from './skills.mjs';
-import { installReferences } from './references.mjs';
-import { upsertAgentsBlock } from './agents-md.mjs';
+import { allCatalogSkills, legacyOnlySkillNames, loadCatalog, ownSkillNames, payloadDir } from './catalog.mjs';
+import { addSkills, removeSkills, updateSkills } from './skills.mjs';
+import { purgeLegacyReferences } from './references.mjs';
 import { destRoot, listInstalledSkills } from './scan.mjs';
 import { resolveAgents } from './target-agents.mjs';
+import { normalizeTracker } from './tracker.mjs';
+import { readState } from './state.mjs';
+import { writeProjectFiles } from './init.mjs';
 import { legacyGlossaryFiles, legacyGlossaryWarning } from './glossary.mjs';
 
+export const NO_TRACKER_HINT = 'No tracker saved yet. Run: operator update --tracker local|github|linear|"<where>"';
+
 /**
- * Refresh catalog skills, add catalog skills that are not installed yet, then refresh
- * Operator's own skill, references/, and the AGENTS.md block.
- * Never touches the rest of the repo.
+ * Bring an install to the current catalog: refresh pstack, drop v2 Matt/Addy skills and the v2
+ * `operator` router, re-add own skills from the payload, purge v2 managed `references/`, and
+ * replace the AGENTS.md block. Never touches the rest of the repo.
  *
  * @param {{
  *   cwd?: string,
  *   packageRoot: string,
  *   agents?: string[],
+ *   tracker?: string,
  *   yes?: boolean,
  *   global?: boolean,
  *   copy?: boolean,
  *   runner?: (args: string[], opts: { cwd?: string }) => Promise<void>,
- *   fetchFn?: typeof fetch,
  *   promptFn?: (knownAgents: { id: string, label: string }[]) => Promise<string[]>,
  *   stdin?: NodeJS.ReadableStream,
  *   stdout?: NodeJS.WritableStream,
+ *   log?: (message: string) => void,
  * }} opts
  */
 export async function update(opts) {
   const cwd = opts.cwd ?? process.cwd();
+  const log = opts.log ?? console.log;
   const catalog = loadCatalog(opts.packageRoot);
   const root = destRoot(cwd, opts.global);
+  // Read before anything is purged: on a v2 install the saved agents live in references/.
+  const { state } = readState(root);
   const agents = await resolveAgents({
-    agents: opts.agents,
+    agents: opts.agents ?? state.agents,
     yes: opts.yes,
     command: 'update',
     destRoot: root,
@@ -40,6 +47,7 @@ export async function update(opts) {
     stdin: opts.stdin,
     stdout: opts.stdout,
   });
+  const tracker = normalizeTracker(opts.tracker) ?? state.tracker;
   const flags = {
     agents,
     global: opts.global,
@@ -48,14 +56,25 @@ export async function update(opts) {
     runner: opts.runner,
   };
 
+  // Only pstack: own skills come from the payload, and `skills update` would re-pull a
+  // same-named Matt skill (implement, retro, …) from its locked source.
   await updateSkills({
-    skills: managedSkillNames(catalog),
+    skills: allCatalogSkills(catalog),
     ...flags,
   });
 
+  const installed = listInstalledSkills(root);
+
+  const leftovers = legacyOnlySkillNames(catalog).filter((name) => installed.has(name));
+  if (leftovers.length > 0) {
+    await removeSkills({
+      skills: leftovers,
+      ...flags,
+    });
+  }
+
   // `skills update` only touches installed skills, so names added to the catalog
   // since the last init would never arrive without this.
-  const installed = listInstalledSkills(root);
   for (const source of catalog.sources) {
     const missing = source.skills.filter((name) => !installed.has(name));
     if (missing.length === 0) continue;
@@ -66,27 +85,29 @@ export async function update(opts) {
     });
   }
 
-  // Re-add Operator's skill from this package so AGENTS.md routing stays in sync
-  // with the installed SKILL.md even if `skills update` cannot see the local payload.
+  // Always from this package: overwrites same-named v2 Matt copies.
   await addSkills({
     repo: payloadDir(opts.packageRoot),
-    skills: [catalog.operatorSkill],
+    skills: ownSkillNames(catalog),
     ...flags,
   });
 
-  await installReferences({
-    catalog,
-    destRoot: root,
-    agents,
-    fetchFn: opts.fetchFn,
-  });
+  const refs = purgeLegacyReferences(root);
 
-  upsertAgentsBlock({
+  writeProjectFiles({
     cwd,
-    block: readText(agentsBlockPath(opts.packageRoot)),
+    root,
+    packageRoot: opts.packageRoot,
+    agents,
+    tracker,
+    state,
   });
 
-  console.log('Operator updated. Catalog skills, references/, and AGENTS.md are current.');
+  const notes = [];
+  if (leftovers.length > 0) notes.push(`Removed v2 skills: ${leftovers.join(', ')}.`);
+  if (refs.removed) notes.push('Removed v2 managed references/.');
+  log(['Operator updated. Skills and the AGENTS.md block are current.', ...notes].join('\n'));
+  if (!tracker) log(NO_TRACKER_HINT);
 
   const legacy = legacyGlossaryFiles(cwd);
   if (legacy.length > 0) console.warn(legacyGlossaryWarning(legacy));

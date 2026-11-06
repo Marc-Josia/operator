@@ -6,6 +6,7 @@ import {
   managedSkillNames,
   ownSkillNames,
   legacySkillNames,
+  legacyOnlySkillNames,
 } from '../lib/catalog.mjs';
 import { packageRoot } from './helpers.mjs';
 
@@ -80,15 +81,6 @@ const PSTACK = [
   'principle-fix-root-causes',
 ];
 
-const REF_FILES = [
-  'accessibility-checklist.md',
-  'definition-of-done.md',
-  'observability-checklist.md',
-  'orchestration-patterns.md',
-  'performance-checklist.md',
-  'security-checklist.md',
-  'testing-patterns.md',
-];
 
 test('catalog lists own skills, pstack as the only source, and legacy names for removal', () => {
   const catalog = loadCatalog(packageRoot());
@@ -105,14 +97,18 @@ test('catalog lists own skills, pstack as the only source, and legacy names for 
     assert.ok(!OWN.includes(name), `${name} is both own and pstack`);
     assert.ok(!legacySkillNames(catalog).includes(name), `${name} is both pstack and legacy`);
   }
-  assert.equal(catalog.operatorSkill, 'operator');
-  assert.ok(catalog.skip.includes('ask-matt'));
-  assert.ok(catalog.skip.includes('using-agent-skills'));
-  assert.ok(catalog.skip.includes('poteto-mode'));
+  assert.equal(catalog.operatorSkill, undefined);
+  assert.equal(catalog.skip, undefined);
+  assert.equal(catalog.references, undefined);
   const names = allCatalogSkills(catalog);
   assert.deepEqual(names, PSTACK);
-  assert.deepEqual(catalog.references.files, REF_FILES);
-  assert.deepEqual(managedSkillNames(catalog), [...PSTACK, 'operator']);
+  assert.deepEqual(managedSkillNames(catalog), [...OWN, ...PSTACK]);
+  const legacyOnly = legacyOnlySkillNames(catalog);
+  assert.ok(legacyOnly.includes('operator'));
+  assert.ok(legacyOnly.includes('tdd'));
+  for (const name of ['handoff', 'implement', 'pr', 'prototype', 'retro', 'wayfinder', 'writing-for-agents']) {
+    assert.ok(!legacyOnly.includes(name), `${name} is an own skill, overwritten rather than removed`);
+  }
   assert.ok(catalog.agents.length > 0);
   assert.equal(catalog.agents[0].id, 'cursor');
   assert.ok(catalog.agents.some((agent) => agent.id === 'claude-code'));

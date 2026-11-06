@@ -6,21 +6,28 @@ import { update } from '../lib/update.mjs';
 import { status } from '../lib/status.mjs';
 import { remove } from '../lib/remove.mjs';
 
-const HELP = `operator — compose Matt Pocock + Addy Osmani skills into one pipeline
+const HELP = `operator — a PM-first process for any coding agent: own mission skills + pstack overlays
 
 Usage: operator <command> [options]
 
 Commands:
-  init      Install the catalog, references/, the operator skill, and the AGENTS.md block
-  update    Refresh catalog skills, references/, the operator skill, and AGENTS.md
-  status    Show installed skills vs catalog, references/, the AGENTS.md block,
-            and whether TokenEconomizer is present
-  remove    Uninstall catalog skills and the AGENTS.md block
+  init      Install pstack and Operator's own skills, write the AGENTS.md block,
+            the tracker line, and (Claude Code) the @AGENTS.md import in CLAUDE.md
+  update    Refresh pstack, re-add own skills, remove v2 Matt/Addy skills and the
+            v2 operator skill, purge v2 managed references/, replace the AGENTS.md block
+  status    Show installed skills, leftover v2 skills, the AGENTS.md block, the
+            CLAUDE.md import, the tracker, and whether TokenEconomizer is present
+  remove    Uninstall Operator's skills and what it wrote in AGENTS.md / CLAUDE.md
 
 Options:
   init:
     With no --agent, Operator shows a checkbox list (TTY only):
     ↑/↓ move, space check, enter confirm. -y skips it and requires --agent.
+    With no --tracker, Operator asks where specs and tickets live (TTY only);
+    -y keeps the saved choice, or local.
+  init / update:
+    --tracker x    where specs and tickets live: local (docs/changes/<id>/),
+                   github, linear, or any text ("Jira project WEB")
   init / update / remove:
     --agent a,b    target agents (cursor, claude-code, codex, opencode, …)
                    or "*" for every agent the skills CLI supports
@@ -28,19 +35,18 @@ Options:
     --copy         copy files instead of symlinking (on by default on Windows)
     -y, --yes      non-interactive (always passed through to the skills CLI)
   update / remove:
-    omit --agent to reuse the agents saved at init
-  remove:
-    --purge        also delete Operator-managed files in references/
+    omit --agent / --tracker to reuse the choices saved in .operator/state.json
   --version, -v    print the package version
   --help, -h       show this help
 
-After init, run /setup-matt-pocock-skills once in your agent, then /operator.
+After init, describe your idea to your agent in plain words. Nothing to invoke.
 
 Exit codes: 0 ok, 1 failure, 2 usage error.
 `;
 
 const VALUE_FLAGS = new Map([
   ['--agent', 'agent'],
+  ['--tracker', 'tracker'],
 ]);
 const BOOL_FLAGS = new Map([
   ['--yes', 'yes'],
@@ -48,7 +54,6 @@ const BOOL_FLAGS = new Map([
   ['--global', 'global'],
   ['-g', 'global'],
   ['--copy', 'copy'],
-  ['--purge', 'purge'],
   ['--help', 'help'],
   ['-h', 'help'],
   ['--version', 'version'],
@@ -76,7 +81,8 @@ export function parseArgs(argv) {
       if (value === undefined) throw new OperatorError(`${name} requires a value`, 2);
       const prev = flags[key];
       const next = String(value);
-      flags[key] = prev ? `${prev},${next}` : next;
+      // --agent repeats by joining; --tracker is one value, the last one wins.
+      flags[key] = prev && key === 'agent' ? `${prev},${next}` : next;
       continue;
     }
     if (arg.startsWith('-')) throw new OperatorError(`unknown option: ${arg}\n\n${HELP}`, 2);
@@ -89,6 +95,13 @@ export function parseArgs(argv) {
 function agentsFromFlag(value) {
   if (typeof value !== 'string' || value.length === 0) return undefined;
   return value.split(',').map((part) => part.trim()).filter(Boolean);
+}
+
+/** @param {unknown} value */
+function trackerFromFlag(value) {
+  if (typeof value !== 'string') return undefined;
+  if (!value.trim()) throw new OperatorError('--tracker requires a value', 2);
+  return value;
 }
 
 async function main(argv) {
@@ -118,17 +131,17 @@ async function main(argv) {
 
   switch (command) {
     case 'init':
-      await init(shared);
+      await init({ ...shared, tracker: trackerFromFlag(flags.tracker) });
       return 0;
     case 'update':
-      await update(shared);
+      await update({ ...shared, tracker: trackerFromFlag(flags.tracker) });
       return 0;
     case 'status': {
       const result = status(shared);
       return result.ok ? 0 : 1;
     }
     case 'remove':
-      await remove({ ...shared, purge: Boolean(flags.purge) });
+      await remove(shared);
       return 0;
     default:
       throw new OperatorError(`unknown command: ${command}\n\n${HELP}`, 2);
