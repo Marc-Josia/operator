@@ -51,7 +51,7 @@ test('init installs via skills CLI, writes references/, and upserts AGENTS.md', 
 
   const agentsMd = fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8');
   assert.ok(agentsMd.includes(START_MARKER));
-  assert.ok(agentsMd.includes('only skill router'));
+  assert.ok(agentsMd.includes('nothing to invoke'));
   assert.ok(agentsMd.includes('unslop'));
   assert.ok(agentsMd.includes('YAGNI'));
   assert.ok(agentsMd.includes('docs/architecture.md'));
