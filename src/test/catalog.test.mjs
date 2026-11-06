@@ -1,6 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { loadCatalog, allCatalogSkills, managedSkillNames } from '../lib/catalog.mjs';
+import {
+  loadCatalog,
+  allCatalogSkills,
+  managedSkillNames,
+  ownSkillNames,
+  legacySkillNames,
+} from '../lib/catalog.mjs';
 import { packageRoot } from './helpers.mjs';
 
 const MATT = [
@@ -40,6 +46,29 @@ const ADDY = [
   'performance-optimization',
 ];
 
+const OWN = [
+  'grill',
+  'spec',
+  'tickets',
+  'prototype',
+  'wayfinder',
+  'constraints',
+  'implement',
+  'review',
+  'architecture',
+  'debug',
+  'security',
+  'observability',
+  'ci',
+  'migration',
+  'ship',
+  'performance',
+  'retro',
+  'pr',
+  'handoff',
+  'writing-for-agents',
+];
+
 const PSTACK = [
   'unslop',
   'correct',
@@ -61,32 +90,29 @@ const REF_FILES = [
   'testing-patterns.md',
 ];
 
-test('catalog lists the curated Matt + Addy + pstack skills and skips competing routers', () => {
+test('catalog lists own skills, pstack as the only source, and legacy names for removal', () => {
   const catalog = loadCatalog(packageRoot());
-  const matt = catalog.sources.find((s) => s.id === 'mattpocock');
-  const addy = catalog.sources.find((s) => s.id === 'addyosmani');
-  const pstack = catalog.sources.find((s) => s.id === 'pstack');
-  assert.ok(matt);
-  assert.ok(addy);
-  assert.ok(pstack);
-  assert.equal(matt.repo, 'mattpocock/skills');
-  assert.equal(addy.repo, 'addyosmani/agent-skills');
+  assert.deepEqual(ownSkillNames(catalog), OWN);
+  assert.equal(catalog.sources.length, 1);
+  const [pstack] = catalog.sources;
+  assert.equal(pstack.id, 'pstack');
   assert.equal(pstack.repo, 'https://github.com/cursor/plugins/tree/main/pstack');
-  assert.deepEqual(matt.skills, MATT);
-  assert.deepEqual(addy.skills, ADDY);
   assert.deepEqual(pstack.skills, PSTACK);
+  assert.ok(!pstack.skills.includes('tdd'), 'pstack tdd would clash with implement');
+  assert.deepEqual(legacySkillNames(catalog), [...MATT, ...ADDY, 'operator']);
+  assert.equal(new Set(OWN).size, OWN.length);
+  for (const name of PSTACK) {
+    assert.ok(!OWN.includes(name), `${name} is both own and pstack`);
+    assert.ok(!legacySkillNames(catalog).includes(name), `${name} is both pstack and legacy`);
+  }
   assert.equal(catalog.operatorSkill, 'operator');
   assert.ok(catalog.skip.includes('ask-matt'));
   assert.ok(catalog.skip.includes('using-agent-skills'));
   assert.ok(catalog.skip.includes('poteto-mode'));
   const names = allCatalogSkills(catalog);
-  assert.ok(!names.includes('ask-matt'));
-  assert.ok(!names.includes('using-agent-skills'));
-  assert.ok(!names.includes('poteto-mode'));
-  assert.ok(names.includes('unslop'));
-  assert.ok(!pstack.skills.includes('tdd'), 'pstack tdd would clash with Matt tdd');
+  assert.deepEqual(names, PSTACK);
   assert.deepEqual(catalog.references.files, REF_FILES);
-  assert.deepEqual(managedSkillNames(catalog), [...MATT, ...ADDY, ...PSTACK, 'operator']);
+  assert.deepEqual(managedSkillNames(catalog), [...PSTACK, 'operator']);
   assert.ok(catalog.agents.length > 0);
   assert.equal(catalog.agents[0].id, 'cursor');
   assert.ok(catalog.agents.some((agent) => agent.id === 'claude-code'));

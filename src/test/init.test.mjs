@@ -39,15 +39,11 @@ test('init installs via skills CLI, writes references/, and upserts AGENTS.md', 
   });
 
   assert.equal(calls.length, catalog.sources.length + 1);
-  assert.equal(calls[0][3], 'mattpocock/skills');
+  assert.equal(calls[0][3], 'https://github.com/cursor/plugins/tree/main/pstack');
   assert.ok(calls[0].includes('--skill'));
-  assert.ok(calls[0].includes('grill-with-docs'));
-  assert.equal(calls[1][3], 'addyosmani/agent-skills');
-  assert.ok(calls[1].includes('security-and-hardening'));
-  assert.equal(calls[2][3], 'https://github.com/cursor/plugins/tree/main/pstack');
-  assert.ok(calls[2].includes('unslop'));
-  assert.equal(calls[3][3], payloadDir(root));
-  assert.ok(calls[3].includes('operator'));
+  assert.ok(calls[0].includes('unslop'));
+  assert.equal(calls[1][3], payloadDir(root));
+  assert.ok(calls[1].includes('operator'));
   for (const args of calls) {
     assert.ok(args.includes('-y'));
     assert.deepEqual(args.slice(args.indexOf('--agent'), args.indexOf('--agent') + 2), ['--agent', 'cursor']);
@@ -139,7 +135,7 @@ test('update adds catalog skills that are not installed yet', async () => {
     fetchFn: mockFetch(),
   });
   for (const name of managedSkillNames(catalog)) {
-    if (name === 'retro' || name === 'constraint-driven-development') continue;
+    if (name === 'unslop' || name === 'correct') continue;
     writeSkill(cwd, path.join('.agents', 'skills'), name);
   }
   /** @type {string[][]} */
@@ -154,12 +150,10 @@ test('update adds catalog skills that are not installed yet', async () => {
     fetchFn: mockFetch(),
   });
   const adds = calls.filter((args) => args.includes('add'));
-  assert.equal(adds.length, 3);
-  assert.equal(adds[0][3], 'mattpocock/skills');
-  assert.deepEqual(adds[0].filter((_, i) => adds[0][i - 1] === '--skill'), ['retro']);
-  assert.equal(adds[1][3], 'addyosmani/agent-skills');
-  assert.deepEqual(adds[1].filter((_, i) => adds[1][i - 1] === '--skill'), ['constraint-driven-development']);
-  assert.equal(adds[2][3], payloadDir(root));
+  assert.equal(adds.length, 2);
+  assert.equal(adds[0][3], 'https://github.com/cursor/plugins/tree/main/pstack');
+  assert.deepEqual(adds[0].filter((_, i) => adds[0][i - 1] === '--skill'), ['unslop', 'correct']);
+  assert.equal(adds[1][3], payloadDir(root));
 });
 
 test('init without --agent uses the interactive choice', async () => {

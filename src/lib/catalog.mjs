@@ -22,7 +22,9 @@ import { readJson } from './fsutil.mjs';
  *
  * @typedef {{
  *   version: number,
+ *   ownSkills: string[],
  *   sources: CatalogSource[],
+ *   legacySkills: string[],
  *   operatorSkill: string,
  *   skip: string[],
  *   agents: CatalogAgent[],
@@ -56,6 +58,22 @@ export function allCatalogSkills(catalog) {
 /** @param {Catalog} catalog */
 export function managedSkillNames(catalog) {
   return [...allCatalogSkills(catalog), catalog.operatorSkill];
+}
+
+/**
+ * Skills Operator writes itself, shipped from `src/payload/skills/<name>/`.
+ * @param {Catalog} catalog
+ */
+export function ownSkillNames(catalog) {
+  return [...(catalog.ownSkills ?? [])];
+}
+
+/**
+ * v2 skill names (Matt Pocock, Addy Osmani, the v2 `operator` router) to remove on update.
+ * @param {Catalog} catalog
+ */
+export function legacySkillNames(catalog) {
+  return [...(catalog.legacySkills ?? [])];
 }
 
 /** @param {string} packageRoot */
