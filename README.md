@@ -86,6 +86,16 @@ Agents and tracker are saved in `.operator/state.json` (`~/.operator/state.json`
 
 ## Upgrading from v2
 
+What changes in v3:
+
+- **Own skills instead of Matt Pocock and Addy Osmani packs.** 21 mission-style skills replace them; pstack is the only upstream source left.
+- **No `/operator` command.** The `AGENTS.md` block is the router and is always on.
+- **PM-first process.** Product-level questions only, three gates (understanding, breakdown, merge), a test kit at the end of every cycle.
+- **One simplify pass and one review per change**, with a high-risk review mode for sensitive changes.
+- **Tracker choice** on `init` (local markdown, GitHub, Linear, or free text), saved in `.operator/state.json` with the agents.
+- **Claude Code support** through an `@AGENTS.md` import in `CLAUDE.md`.
+- **No `references/` folder** copied into your repo any more.
+
 Run `operator update`. It removes the v2 skills still installed (the Matt Pocock and Addy Osmani packs and the v2 `operator` router), installs the own skills in their place, deletes the old managed `references/` folder (only the files its manifest lists), moves the saved agents into `.operator/state.json`, and rewrites the `AGENTS.md` block. There is no `/operator` command any more. If the repo still has a `CONTEXT.md` glossary, Operator tells you to rename it to `GLOSSARY.md` with `git mv`.
 
 ## Optional: TokenEconomizer
