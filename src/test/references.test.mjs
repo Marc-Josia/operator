@@ -2,69 +2,48 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { loadCatalog } from '../lib/catalog.mjs';
-import { installReferences, markerPath, rawUrl, referencesStatus, removeReferences } from '../lib/references.mjs';
-import { packageRoot, tmpDir } from './helpers.mjs';
+import { legacyReferencesStatus, markerPath, purgeLegacyReferences } from '../lib/references.mjs';
+import { V2_REF_FILES, tmpDir, writeV2References } from './helpers.mjs';
 
-function mockFetch(body = 'checklist') {
-  /** @type {string[]} */
-  const urls = [];
-  const fetchFn = async (url) => {
-    urls.push(String(url));
-    return {
-      ok: true,
-      status: 200,
-      statusText: 'OK',
-      text: async () => body,
-    };
-  };
-  return { fetchFn, urls };
-}
-
-test('rawUrl points at GitHub raw for Addy references', () => {
-  assert.equal(
-    rawUrl('addyosmani/agent-skills', 'main', 'references', 'security-checklist.md'),
-    'https://raw.githubusercontent.com/addyosmani/agent-skills/main/references/security-checklist.md',
-  );
+test('legacyReferencesStatus reads the v2 manifest', () => {
+  const destRoot = tmpDir();
+  assert.deepEqual(legacyReferencesStatus(destRoot), { managed: false, files: [] });
+  writeV2References(destRoot);
+  assert.deepEqual(legacyReferencesStatus(destRoot), { managed: true, files: V2_REF_FILES });
 });
 
-test('installReferences writes files and a managed marker', async () => {
+test('purgeLegacyReferences deletes only manifest files and keeps user files', () => {
   const destRoot = tmpDir();
-  const catalog = loadCatalog(packageRoot());
-  const { fetchFn, urls } = mockFetch('# security');
-  await installReferences({ catalog, destRoot, fetchFn, agents: ['cursor'] });
-  assert.equal(urls.length, catalog.references.files.length);
-  for (const file of catalog.references.files) {
-    const text = fs.readFileSync(path.join(destRoot, 'references', file), 'utf8');
-    assert.equal(text, '# security');
-  }
-  const status = referencesStatus(destRoot);
-  assert.equal(status.managed, true);
-  assert.equal(status.missing.length, 0);
-  assert.equal(status.files.length, catalog.references.files.length);
-  assert.ok(fs.existsSync(markerPath(destRoot)));
-  const marker = JSON.parse(fs.readFileSync(markerPath(destRoot), 'utf8'));
-  assert.deepEqual(marker.agents, ['cursor']);
-});
-
-test('removeReferences --purge deletes only Operator-managed files', async () => {
-  const destRoot = tmpDir();
-  const catalog = loadCatalog(packageRoot());
-  const { fetchFn } = mockFetch('x');
-  await installReferences({ catalog, destRoot, fetchFn });
+  writeV2References(destRoot);
   fs.writeFileSync(path.join(destRoot, 'references', 'keep-me.md'), 'mine', 'utf8');
-  const result = removeReferences(destRoot, { purge: true });
+  const result = purgeLegacyReferences(destRoot);
   assert.equal(result.removed, true);
   assert.equal(fs.existsSync(path.join(destRoot, 'references', 'keep-me.md')), true);
   assert.equal(fs.existsSync(markerPath(destRoot)), false);
-  assert.equal(fs.existsSync(path.join(destRoot, 'references', 'security-checklist.md')), false);
+  for (const file of V2_REF_FILES) {
+    assert.equal(fs.existsSync(path.join(destRoot, 'references', file)), false);
+  }
 });
 
-test('removeReferences without purge leaves references in place', async () => {
+test('purgeLegacyReferences removes the folder when nothing else is left', () => {
   const destRoot = tmpDir();
-  const catalog = loadCatalog(packageRoot());
-  await installReferences({ catalog, destRoot, fetchFn: mockFetch('x').fetchFn });
-  const result = removeReferences(destRoot, { purge: false });
-  assert.equal(result.removed, false);
-  assert.equal(fs.existsSync(markerPath(destRoot)), true);
+  writeV2References(destRoot);
+  purgeLegacyReferences(destRoot);
+  assert.equal(fs.existsSync(path.join(destRoot, 'references')), false);
+});
+
+test('purgeLegacyReferences leaves an unmanaged references/ alone', () => {
+  const destRoot = tmpDir();
+  fs.mkdirSync(path.join(destRoot, 'references'));
+  fs.writeFileSync(path.join(destRoot, 'references', 'security-checklist.md'), 'mine', 'utf8');
+  assert.equal(purgeLegacyReferences(destRoot).removed, false);
+  assert.equal(fs.existsSync(path.join(destRoot, 'references', 'security-checklist.md')), true);
+});
+
+test('purgeLegacyReferences never follows a manifest path out of references/', () => {
+  const destRoot = tmpDir();
+  fs.writeFileSync(path.join(destRoot, 'outside.md'), 'mine', 'utf8');
+  writeV2References(destRoot, { files: ['../outside.md'] });
+  purgeLegacyReferences(destRoot);
+  assert.equal(fs.existsSync(path.join(destRoot, 'outside.md')), true);
 });

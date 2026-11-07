@@ -1,39 +1,43 @@
 # Operator
 
-This repository is **Operator**: a zero-dependency Node CLI that installs a curated Matt Pocock + Addy Osmani skill catalog (via `npx skills@latest`), plus a few pstack overlays (`unslop`, verification, repeated-mistake fixes), and owns the **only** router that makes those packs compose.
+This repository is **Operator**: a zero-dependency Node CLI that installs its own mission-style skills plus pstack overlays (via `npx skills@latest`) and writes an always-on router block into a consumer's `AGENTS.md`. The process serves a Product Manager; there is no command to invoke.
 
 This file is for people and agents working **on Operator**. It is not the block shipped to consumer repos. That lives in `src/payload/agents-block.md` and is wrapped with `<!-- operator:start -->` / `<!-- operator:end -->` on `init`/`update`. Do not put those markers in this file.
 
 ## Layout
 
 - `src/bin/operator.mjs` — CLI (`init`, `update`, `status`, `remove`)
-- `src/catalog.json` — source of truth for skill names, skip list, and Addy reference files
-- `src/lib/` — install/update/remove, `npx skills` argv, references fetch, AGENTS.md upsert, disk scan
-- `src/payload/skills/operator/SKILL.md` — `/operator` router (user-invoked)
-- `src/payload/agents-block.md` — short always-on map written into consumer `AGENTS.md`
+- `src/catalog.json` — `ownSkills`, pstack `sources`, `legacySkills` (v2 names to remove), agent picker list
+- `src/lib/` — install/update/remove, `npx skills` argv, state file, tracker line, `AGENTS.md` / `CLAUDE.md` upsert, v2 `references/` purge, disk scan
+- `src/payload/skills/<name>/SKILL.md` — own skills, installed from the payload
+- `src/payload/SKILL-TEMPLATE.md` — the mission format (not installed)
+- `src/payload/agents-block.md` — always-on router written into consumer `AGENTS.md`
 - `src/test/` — `node:test`
 
-Shipped surface is `src/` plus root `package.json`. English in everything an agent will read (payload, catalog comments, this file, README).
+Shipped surface is `src/` plus root `package.json`. English in everything an agent will read (payload, catalog, this file, README).
 
 ## Invariants
 
-- Do not fork or patch Matt/Addy/pstack `SKILL.md`. Operator orchestrates; upstream stays upstream.
-- One router: `operator`. Never add `ask-matt`, `using-agent-skills`, or `poteto-mode` to the catalog (`catalog.skip`).
-- Matt owns Understand → Build (`implement` per ticket or `implement-spec` per spec drives `tdd` then `code-review`) and Close (`retro`). Addy `constraint-driven-development` is the one Addy gate before Build (no `CONSTRAINTS.md` yet). Addy owns the Production overlay (`security-and-hardening` → observability → CI → `code-review-and-quality` → deprecation → shipping), each phase run only when its trigger holds. One review per change (Matt `code-review`); Addy `code-review-and-quality` is added only on a high-risk merge. Ceremony scales with the work: the detector sizes it first (small → checks and commit, medium → short plan then `implement`, large → Understand lane). `/operator` stops only at three gates: understanding, breakdown, merge. pstack skills are overlays only (`unslop`, `correct`, `blast-radius`, `benchmark-checklist`, the verification-skill pair, two `principle-*`), never a lifecycle; pstack `tdd` is never added (it clashes with Matt `tdd`). The router maps pstack's Cursor paths and missing hand-offs (`arena`, `how`, `why`, playbooks) for other agents. `/operator` is the only router.
-- TokenEconomizer (microsoft/TokenEconomizer) is a per-machine agent plugin, never a catalog source and never installed by Operator. The router and agents-block compose with it when it is present (loop guard, micro-skills, tool pruning); `status` only reports it (`src/lib/token-economizer.mjs`) and never counts it toward `ok`.
+- Own skills follow the template: frontmatter `name` = folder, a `description` that says when to trigger, exactly `Mission`, `Done when`, `Never`, `Stop and ask`, `Hand-off`, target under 60 lines, no step-by-step how. Every `## Hand-off` names existing skills; it carries the lane order.
+- pstack is the only upstream source. Never fork or patch its `SKILL.md`; the block maps its Cursor paths and missing hand-offs (`arena`, `how`, `why`, playbooks). pstack `tdd` and `poteto-mode` are never added.
+- No router skill and no command: the block is the router. Never add `operator`, `ask-matt`, `using-agent-skills`, or `poteto-mode` back. Matt/Addy names appear only in `legacySkills` and v2-migration code and tests.
+- The process: the detector sizes work first; three gates (understanding, breakdown, merge); one simplify pass by a fresh agent after a medium or larger build (`simplify-pass`), then one review per change (`review`, high-risk mode instead of the default on a high-risk change); every cycle ends with a PM test kit. Change it in the skill that owns it and keep the block in sync.
+- The block stays under 100 lines; it loads every session.
+- TokenEconomizer (microsoft/TokenEconomizer) is a per-machine plugin, never a catalog source and never installed. The block composes with it; `status` only reports it (`src/lib/token-economizer.mjs`) and never counts it toward `ok`.
 - Zero runtime dependencies. Shell out to `npx skills@latest`. Node ≥ 18, ESM.
-- `--copy` is implied on Windows. `remove` must not pass `--copy`.
-- Never default `--agent` to `*`. Init prompts (TTY) or requires `--agent` with `-y`. `update`/`remove` reuse agents saved in `references/.operator-managed.json`.
-- `update` refreshes catalog skills, re-adds the local operator skill, re-fetches `references/`, and replaces only the managed AGENTS.md block. It does not touch the rest of a consumer repo.
-- `references/` in a consumer project is Addy’s checklists so `../../references/` resolves. Purge only files listed in `references/.operator-managed.json`.
-
-
+- `--copy` is implied on Windows. `remove` never passes `--copy`.
+- Never default `--agent` to `*`. `init` prompts (TTY) or requires `--agent` with `-y`.
+- State lives in `.operator/state.json` (`~/.operator/state.json` with `-g`): agents, tracker, whether Operator created `CLAUDE.md`. `update`/`remove` read the v2 manifest `references/.operator-managed.json` once when it is missing.
+- The tracker is one line under `## Project context`, after the managed block: `Specs and tickets live in: …`.
+- Claude Code target: `CLAUDE.md` holds one `@AGENTS.md` line, never duplicated; `remove` deletes only that line, and the file only if Operator created it.
+- No `references/` install. Only the v2 purge, limited to files its manifest lists.
+- `update` touches only managed parts: pstack via `npx skills update`, own skills re-added from the payload, legacy-only v2 skills removed, the v2 `references/` purged, the managed block replaced. The rest of a consumer repo stays as it is.
 
 ## How to change things
 
-- Add/drop a curated skill → `src/catalog.json` and the tests in `src/test/catalog.test.mjs`. Keep payload router + agents-block in sync with the same names.
-- Change routing/arbitration → both `src/payload/skills/operator/SKILL.md` and `src/payload/agents-block.md` (skill is detailed; block stays short).
-- Change CLI flags or `npx skills` argv → `src/lib/skills.mjs` and `src/test/skills.test.mjs`. Agent picker → `src/lib/target-agents.mjs`. Prefer injecting `runner` / `fetchFn` / `promptFn` over hitting the network or stdin in tests.
+- Add/drop an own skill → `src/payload/skills/<name>/`, `ownSkills` in `src/catalog.json`, the block, and the Hand-offs that should reach it. `src/test/consistency.test.mjs` and `src/test/skill-format.test.mjs` enforce the set and the format.
+- Change routing → the owning skill's `## Hand-off` and `src/payload/agents-block.md` (skill is detailed; block stays short).
+- Change CLI flags or `npx skills` argv → `src/lib/skills.mjs` and `src/test/skills.test.mjs`. Agent picker → `src/lib/target-agents.mjs`. Tracker → `src/lib/tracker.mjs`. Prefer injecting `runner` / `promptFn` over hitting the network or stdin in tests.
 
 ```bash
 npm test

@@ -1,46 +1,61 @@
-# Operator
+# AGENTS.md
 
-This repo uses **Operator** as the only skill router. Invoke `/operator`. Matt Pocock skills own Understand → Build and Close (`retro`). Addy Osmani skills own the quality bar (`constraint-driven-development`) and the Production overlay. pstack skills are overlays: `unslop` for prose, plus verification and repeated-mistake fixes. Do not use `ask-matt`, `using-agent-skills`, or `poteto-mode`.
+## The user is a Product Manager
 
-A **phase** is one skill's work. `/operator` runs the detector and chains phases, stopping only at three gates: shared understanding confirmed, ticket breakdown approved, merge. Ceremony scales with the work: jumping from a loose idea to `implement` is one failure, running a one-sentence fix through spec and tickets is the other.
+- They own the vision: who, what problem, what outcome. You own every technical decision.
+- Ask product questions in plain words, one or two at a time, each with your recommended answer.
+- Decide technical choices yourself and list them one line each so the PM can veto.
+- Every increment and every ticket is a vertical slice the PM can see and try. Invisible work (infra, refactor, migration) never ships alone: it rides with the slice that needs it.
+- A cycle ends with a **test kit**: where to go (preview URL or command), the journey step by step, what the PM should see. Run that journey yourself on the real artifact first (`principle-prove-it-works`).
 
 ## Detector
 
-First true branch (size unclear: take the larger): named skill → small change, diff fits one sentence (make it, run the checks, commit) → medium change, clear scope, one session (short plan in chat, then `implement`) → loose idea (`grill-with-docs`, or `grill-me` if there is no repo) → shared understanding, no spec (`to-spec`) → spec, no tickets (`to-tickets`) → UI/state shape still open (`prototype`, then detector again) → new project or significant feature with no `CONSTRAINTS.md` (`constraint-driven-development`, then detector again) → ready to code (`implement` per ticket, `implement-spec` for a whole spec: `tdd` at agreed seams, then Matt `code-review`) → seam friction (`codebase-design` / `improve-codebase-architecture`) → headed to merge or ship (overlay below) → medium or larger change shipped, or a hard bug fixed (`retro`).
+Every request goes through it. Ceremony scales with the work: a loose idea jumping to code is one failure, a one-sentence fix run through spec and tickets is the other. Take the first true branch. Size unclear: take the larger. A bug whose cause is unknown is not small.
 
-## Production overlay
+1. The user named a skill: follow it.
+2. Small change, the diff fits one sentence: make it, run the checks (`CONSTRAINTS.md` commands, otherwise typecheck and the affected tests), commit, then the merge gate.
+3. Medium change, clear scope, one session, no open design question: short plan in chat (what changes, the check that proves it), then `implement`.
+4. Loose idea, no shared understanding yet: `grill`. Too big for one session: `wayfinder`.
+5. Shared understanding, no spec: `spec`.
+6. Spec, no tickets: `tickets`.
+7. UI or state shape still open: `prototype`, then this detector again.
+8. New project or significant feature, no `CONSTRAINTS.md`: `constraints`, then this detector again.
+9. Ready to code, one ticket or a whole spec: `implement`.
+10. Medium or larger change built, not simplified yet: `simplify-pass`, by a fresh subagent.
+11. Seam or module friction: `architecture`.
+12. Headed to merge or ship: only the skills whose trigger holds, in this order: `security` → `observability` → `ci` → `review` (high-risk mode) → `migration` → `ship`. None holds: merge gate.
+13. Medium or larger change shipped, or a hard bug fixed: `retro`.
 
-Only the phases whose trigger holds, in this order: `security-and-hardening` (auth, input, secrets, third parties) → `observability-and-instrumentation` (no baseline yet, or a new service, endpoint, job, or external call) → `ci-cd-and-automation` (no CI running the checks yet, or the pipeline changes) → `code-review-and-quality` (high-risk merge) → `deprecation-and-migration` (old code leaving or a production schema change) → `shipping-and-launch` (the change reaches users). None holds: merge gate.
+## Gates
 
-## Arbitration
+Stop and wait only at these three:
 
-- Tests: always Matt `tdd`. Never Addy `test-driven-development` or pstack `tdd`. Build entry is `implement` or `implement-spec`, which drive `tdd`.
-- One review per change: Matt `code-review` (Standards + Spec) after `implement` / `implement-spec`. Addy `code-review-and-quality` (five-axis) only on a high-risk merge, after CI. A small change: its checks are the gate.
-- A mistake the agent repeats becomes a check (lint rule, test, hook), not another `AGENTS.md` line. `retro` proposes it, `correct` lands it.
-- Bugs: `diagnosing-bugs`, fixed at the root cause (`principle-fix-root-causes`).
-- Before declaring a task done: `principle-prove-it-works` (the real artifact, not a proxy).
-- Auth, input, secrets already during Build: `security-and-hardening` as an overlay, not instead of the phase.
-- First use: `/setup-matt-pocock-skills` once per repo.
-- Domain glossary: `GLOSSARY.md` / `GLOSSARY-MAP.md`. An old `CONTEXT.md` / `CONTEXT-MAP.md` gets `git mv`'d to the new name; Matt skills no longer read it.
-- TokenEconomizer (optional cost plugin, lines start with `TokenEconomizer:`): a loop-guard redirect means change approach (unknown cause: `diagnosing-bugs`), never weaken the bar; an injected fact true for the whole project goes under `## Commands` here; a phase blocked by a pruned tool: tell the user `toolprune restore`, do not work around it.
+- **Understanding.** `grill` ended and the PM confirmed shared understanding.
+- **Breakdown.** `tickets` ended and the PM approved the breakdown.
+- **Merge.** The PM ran the test kit journey and it works. Merging, deploying, and shipping are the PM's call.
 
-Overlays on top of the phase: `unslop`, `performance-optimization`, `benchmark-checklist` (any perf number you measured), `blast-radius` (a diff you do not trust, or a high-risk merge), `create-verification-skill` (user-facing change, no verification project skill yet), `constraint-driven-development` (an agent weakening the bar), `pr` (PR bodies). Side paths: `wayfinder`, `triage`, `handoff`, `wizard`, `research`, `writing-for-agents`, `maintain-verification-skill`.
+A skill that asks a question still waits for the answer. Between gates, do not stop to ask whether to continue.
 
-Docs agents will read: `writing-for-agents`. Any prose that still reads like a chatbot: `unslop`.
+## Orchestration
 
-Checklists: `references/` at the project root (resolves `../../references/` from installed skills).
+You are the orchestrator. Each ticket goes to a subagent in its own git worktree. Tickets without a blocking edge run in parallel. You integrate their work and verify it. No subagents or worktrees: the same tickets, one after another in this session.
+
+## Rules
+
+- Each skill's `## Hand-off` names the next step: follow it. If this block and a `SKILL.md` disagree, the `SKILL.md` wins.
+- One simplify pass per medium or larger change: `simplify-pass`, by a fresh subagent that did not build it, right after the build and before any review. A small change skips it.
+- One review per change: `review`. High-risk change (auth, input, secrets, personal data, or a third party touched; data or schema migrates; a public interface changes; the release reaches users): the default review is skipped, and the one review is `review` in high-risk mode in step 12. A small change: its checks are its gate.
+- Bugs: `debug`, fixed at the root cause (`principle-fix-root-causes`), then `retro`.
+- A mistake the agent repeats becomes a check (lint rule, test, hook), not another line here: `retro` proposes it, `correct` lands it.
+- Specs and tickets go where the `Specs and tickets live in: …` line under `## Project context` says.
+- Overlays fire on top of the current step: `unslop` (any prose), `security` (auth, input, secrets, third parties, already during Build), `performance` with `benchmark-checklist` (any perf number you measured), `constraints` (an agent weakening the bar to get green), `correct` (a repeated mistake), `blast-radius` (a diff you do not trust, or a high-risk merge), `create-verification-skill` (user-facing change, no verification project skill yet), `principle-prove-it-works` (before calling anything done), `pr` (PR bodies).
+- Side paths: `handoff` (compact the session for the next agent), `writing-for-agents` (docs agents read), `maintain-verification-skill` (the verification skill drifted from the app).
+- pstack skills are written for Cursor. A `.cursor/skills/` path means your agent's skills folder. A hand-off to `arena`, `how`, `why`, or a pstack playbook names something not installed: do it yourself or skip it and say so. Its Opening-a-PR playbook is `pr`. In `correct`, "the operator" means the user.
+- TokenEconomizer (optional plugin, lines start with `TokenEconomizer:`; Operator never installs it): a loop-guard redirect means change approach (unknown cause: `debug`), never weaken the bar (`constraints`); an injected fact true for the whole project goes under `## Commands`; a step blocked by a pruned tool (web fetch, a browser): give the user `toolprune restore`, do not work around it.
 
 ## Code
 
-YAGNI. A small change, or one that is strictly necessary. Edge cases off the main path stay out.
-
-TypeScript: strict. No `any` without justification. No `@ts-ignore`. If unavoidable, `@ts-expect-error` with a comment.
-
-Tests target live behavior. No blanket smoke. No tests for a feature that was removed.
-
-Comments sit above a function, class, or module and say how to use it. Keep them aligned with the code.
-
-Tokens: color and radius come from theme tokens.
+YAGNI. A small change, or one that is strictly necessary. Edge cases off the main path stay out. TypeScript: strict, no `any` without justification, no `@ts-ignore` (if unavoidable, `@ts-expect-error` with a comment). Tests target live behavior: no blanket smoke, no tests for removed features. Comments sit above a function, class, or module, say how to use it, and stay aligned with the code. Color and radius come from theme tokens.
 
 ## Files
 
@@ -48,32 +63,20 @@ New files go under `src`, `tests`, `docs`, `config`, `tools`, `examples`, `proto
 
 ## Docs
 
-Present tense. Current state, not history or the plan.
-
-`docs/architecture.md` is the system view. Update it when structure changes.
-
-A major feature that exists has a file in `docs/features/`.
-
-In-flight specs live in `docs/changes/<change-id>/`. Once implemented: write `docs/features/`, update architecture if structure changed, delete the change folder. No archive.
+Present tense, current state, not history. `docs/architecture.md` is the system view: update it when structure changes. A major feature that exists has a file in `docs/features/`. Local specs live in `docs/changes/<change-id>/`; once implemented, write `docs/features/`, update architecture if needed, delete the change folder. Domain glossary: `GLOSSARY.md`.
 
 ## Keeping AGENTS.md current
 
 Text between the `operator:start` / `operator:end` markers belongs to Operator and `operator update` rewrites it. Everything after the end marker belongs to this project: write there, never inside the markers.
 
-Keep the project part current as you work, so the next session starts with what this one learned.
-
-- Write when you learn something a later session needs: an architecture decision or code convention, a useful command (build, test, lint, run), a pitfall and how to avoid it, a preference or correction from the user.
-- Keep entries short, concrete, and easy to verify. Skip what the code or git history already shows.
-- Edit the matching section (`## Project context`, `## Commands`, `## Conventions`, `## Interface design`, `## Known pitfalls`, `## Project skills`), or add one. Replace what turned stale or wrong instead of adding next to it. Delete what no longer helps.
-- A pitfall a check can catch becomes a check (see Arbitration). Only the rest goes under `## Known pitfalls`.
+- Write when you learn something a later session needs: a decision or convention, a useful command, a pitfall and how to avoid it, a preference or correction from the user. Short, concrete, easy to verify; skip what the code or git history shows.
+- Edit the matching section (`## Project context`, `## Commands`, `## Conventions`, `## Interface design`, `## Known pitfalls`, `## Project skills`) or add one. Replace what turned stale; delete what no longer helps. A pitfall a check can catch becomes a check.
 - Tell the user in one line each time you change `AGENTS.md`.
 
 ## Creating project skills
 
-You may create a project skill without asking when a multi-step task comes back (or clearly will), when a procedure is precise or risky enough that a missed step is expensive (deploy, migration, release, repetitive code generation), when the user corrects how you do the same task more than once, or when specialized knowledge should load only when needed instead of weighing on `AGENTS.md`. Not for a one-off task or a one-line rule: the rule goes in `AGENTS.md`.
+Create one without asking when a multi-step task comes back, when a missed step is expensive (deploy, migration, release, code generation), when the user corrects the same task twice, or when knowledge should load only when needed. Not for a one-off or a one-line rule (that goes here).
 
-- Where: the skills folder where Operator installed `operator` for your agent (`.claude/skills/<name>/SKILL.md` for Claude Code). Frontmatter `name` and a `description` that says when to trigger it. Scripts and reference files go in the same folder. Write it with `writing-for-agents`.
-- A project skill is a procedure, never a second router.
-- It runs end to end without the user: every step explicit, with exact commands and success criteria; the scripts it needs ship in its folder; no manual step; it says how to verify the result and what to do on failure.
-- After creating it, run it once and fix what broke. If full autonomy needs more permissions (shell commands, tools), propose adding them to the agent's permission config (`.claude/settings.json` for Claude Code).
-- List each one under `## Project skills`. Improve a skill as soon as a run shows a gap.
+- Where: your agent's skills folder (`.claude/skills/<name>/SKILL.md` for Claude Code). Frontmatter `name` and a `description` that says when to trigger it. Write it with `writing-for-agents`.
+- A project skill is a procedure, never a second router. It runs end to end without the user: exact commands, its scripts in its folder, how to verify the result and what to do on failure.
+- Run it once after creating it and fix what broke. If it needs more permissions, propose them (`.claude/settings.json` for Claude Code). List it under `## Project skills`.

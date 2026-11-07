@@ -9,24 +9,16 @@ import { readJson } from './fsutil.mjs';
  * }} CatalogSource
  *
  * @typedef {{
- *   repo: string,
- *   branch: string,
- *   dir: string,
- *   files: string[],
- * }} CatalogReferences
- *
- * @typedef {{
  *   id: string,
  *   label: string,
  * }} CatalogAgent
  *
  * @typedef {{
  *   version: number,
+ *   ownSkills: string[],
  *   sources: CatalogSource[],
- *   operatorSkill: string,
- *   skip: string[],
+ *   legacySkills: string[],
  *   agents: CatalogAgent[],
- *   references: CatalogReferences,
  * }} Catalog
  */
 
@@ -53,19 +45,43 @@ export function allCatalogSkills(catalog) {
   return catalog.sources.flatMap((source) => source.skills);
 }
 
-/** @param {Catalog} catalog */
+/**
+ * Every skill Operator installs: its own skills, then pstack.
+ * @param {Catalog} catalog
+ */
 export function managedSkillNames(catalog) {
-  return [...allCatalogSkills(catalog), catalog.operatorSkill];
+  return [...ownSkillNames(catalog), ...allCatalogSkills(catalog)];
+}
+
+/**
+ * Skills Operator writes itself, shipped from `src/payload/skills/<name>/`.
+ * @param {Catalog} catalog
+ */
+export function ownSkillNames(catalog) {
+  return [...(catalog.ownSkills ?? [])];
+}
+
+/**
+ * v2 skill names (Matt Pocock, Addy Osmani, the v2 `operator` router) to remove on update.
+ * @param {Catalog} catalog
+ */
+export function legacySkillNames(catalog) {
+  return [...(catalog.legacySkills ?? [])];
+}
+
+/**
+ * Legacy names that are not also own skills: installed copies are leftovers to remove.
+ * Same-named ones (`implement`, `retro`, …) are overwritten by the own skill instead.
+ * @param {Catalog} catalog
+ */
+export function legacyOnlySkillNames(catalog) {
+  const own = new Set(ownSkillNames(catalog));
+  return legacySkillNames(catalog).filter((name) => !own.has(name));
 }
 
 /** @param {string} packageRoot */
 export function payloadDir(packageRoot) {
   return path.join(packageRoot, 'src', 'payload');
-}
-
-/** @param {string} packageRoot */
-export function operatorSkillDir(packageRoot) {
-  return path.join(payloadDir(packageRoot), 'skills', 'operator');
 }
 
 /** @param {string} packageRoot */

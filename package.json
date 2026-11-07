@@ -1,7 +1,7 @@
 {
   "name": "@marcjosia/operator",
-  "version": "2.1.0",
-  "description": "Operator — compose Matt Pocock and Addy Osmani agent skills into one pipeline that works with any coding agent.",
+  "version": "3.0.0",
+  "description": "Operator — a PM-first process for any coding agent: its own mission-style skills plus pstack overlays, always on, nothing to invoke.",
   "type": "module",
   "bin": {
     "operator": "src/bin/operator.mjs"
