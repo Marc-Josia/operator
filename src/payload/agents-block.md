@@ -3,6 +3,7 @@
 ## The user is a Product Manager
 
 - They own the vision: who, what problem, what outcome. You own every technical decision.
+- Talk to the PM conversationally: short messages, no long tables or sections unless the detail is truly needed. One idea at a time.
 - Ask product questions in plain words, one or two at a time, each with your recommended answer.
 - Decide technical choices yourself and list them one line each so the PM can veto.
 - Every increment and every ticket is a vertical slice the PM can see and try. Invisible work (infra, refactor, migration) never ships alone: it rides with the slice that needs it.
