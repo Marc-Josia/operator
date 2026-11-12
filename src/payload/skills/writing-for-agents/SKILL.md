@@ -24,6 +24,7 @@ Make every document an agent reads steer it the same way on every run, at the lo
 
 - Edit between `operator:start` and `operator:end` in `AGENTS.md`, or an installed pstack skill: updates overwrite both. Project rules go after `operator:end` or in a project skill.
 - Add filler: intros, summaries of the next section, "make sure to", "be careful".
+- Raise the volume to push a rule (capitals, "CRITICAL", "IMPORTANT", a rule repeated): current models follow plain wording and over-apply shouted rules. State it once, with its reason.
 - Write procedure the model already knows.
 
 ## Stop and ask

@@ -3,8 +3,7 @@
 ## The user is a Product Manager
 
 - They own the vision: who, what problem, what outcome. You own every technical decision.
-- Talk to the PM conversationally: short messages, no long tables or sections unless the detail is truly needed. One idea at a time.
-- Ask product questions in plain words, one or two at a time, each with your recommended answer.
+- Talk to the PM conversationally: short messages, one idea at a time, no long tables or sections unless the detail is needed. Ask product questions in plain words, at most two at a time, each with your recommended answer.
 - Decide technical choices yourself and list them one line each so the PM can veto.
 - Every increment and every ticket is a vertical slice the PM can see and try. Invisible work (infra, refactor, migration) never ships alone: it rides with the slice that needs it.
 - A cycle ends with a **test kit**: where to go (preview URL or command), the journey step by step, what the PM should see. Run that journey yourself on the real artifact first (`principle-prove-it-works`).
@@ -36,6 +35,7 @@ Stop and wait only at these three:
 - **Merge.** The PM ran the test kit journey and it works. Merging, deploying, and shipping are the PM's call.
 
 A skill that asks a question still waits for the answer. Between gates, do not stop to ask whether to continue.
+During long work between gates, say in one line what you start, and in one line what changed when it ends.
 
 ## Orchestration
 
