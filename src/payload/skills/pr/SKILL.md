@@ -30,6 +30,5 @@ Write a PR body the PM reads in a minute and acts on: what the user can now do, 
 
 ## Hand-off
 
-- Checks red: fix them; `debug` when the cause is unknown.
-- PR open and checks green: merge gate. Hand the PM the test kit and wait.
+- PR open: `babysit` until checks, review bots and the base are settled; it ends at the merge gate with this test kit.
 - After the merge, a medium or larger change: `retro`.

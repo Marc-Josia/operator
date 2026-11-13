@@ -67,6 +67,8 @@ const OWN = [
   'performance',
   'retro',
   'pr',
+  'babysit',
+  'modernize',
   'handoff',
   'writing-for-agents',
 ];
