@@ -32,7 +32,7 @@ Stop and wait only at these three:
 
 - **Understanding.** `grill` ended and the PM confirmed shared understanding.
 - **Breakdown.** `tickets` ended and the PM approved the breakdown.
-- **Merge.** The PM ran the test kit journey and it works. Merging, deploying, and shipping are the PM's call.
+- **Merge.** The PM ran the test kit journey and it works. An open PR reaches this gate through `babysit` (checks green, review bots answered, branch up to date). Merging, deploying, and shipping are the PM's call.
 
 A skill that asks a question still waits for the answer. Between gates, do not stop to ask whether to continue.
 During long work between gates, say in one line what you start, and in one line what changed when it ends.
@@ -50,7 +50,7 @@ You are the orchestrator. Each ticket goes to a subagent in its own git worktree
 - A mistake the agent repeats becomes a check (lint rule, test, hook), not another line here: `retro` proposes it, `correct` lands it.
 - Specs and tickets go where the `Specs and tickets live in: …` line under `## Project context` says.
 - Overlays fire on top of the current step: `unslop` (any prose), `security` (auth, input, secrets, third parties, already during Build), `performance` with `benchmark-checklist` (any perf number you measured), `constraints` (an agent weakening the bar to get green), `correct` (a repeated mistake), `blast-radius` (a diff you do not trust, or a high-risk merge), `create-verification-skill` (user-facing change, no verification project skill yet), `principle-prove-it-works` (before calling anything done), `pr` (PR bodies).
-- Side paths: `handoff` (compact the session for the next agent), `writing-for-agents` (docs agents read), `maintain-verification-skill` (the verification skill drifted from the app).
+- Side paths: `modernize` (an old PR or branch to revive, rework, or close), `handoff` (compact the session for the next agent), `writing-for-agents` (docs agents read), `maintain-verification-skill` (the verification skill drifted from the app).
 - pstack skills are written for Cursor. A `.cursor/skills/` path means your agent's skills folder. A hand-off to `arena`, `how`, `why`, or a pstack playbook names something not installed: do it yourself or skip it and say so. Its Opening-a-PR playbook is `pr`. In `correct`, "the operator" means the user.
 - TokenEconomizer (optional plugin, lines start with `TokenEconomizer:`; Operator never installs it): a loop-guard redirect means change approach (unknown cause: `debug`), never weaken the bar (`constraints`); an injected fact true for the whole project goes under `## Commands`; a step blocked by a pruned tool (web fetch, a browser): give the user `toolprune restore`, do not work around it.
 

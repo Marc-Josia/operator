@@ -20,7 +20,7 @@ Then open your agent in the repo and describe your idea in plain words.
 | Build | `constraints`, `implement`, `simplify-pass`, `review`, `architecture`, `debug` |
 | Production | `security`, `observability`, `ci`, `migration`, `ship`, `performance` |
 | Close | `retro` |
-| Utilities | `pr`, `handoff`, `writing-for-agents` |
+| Utilities | `pr`, `babysit`, `modernize`, `handoff`, `writing-for-agents` |
 
 Each skill ends with a `## Hand-off` that names the next one, so the lanes chain without a central map.
 
@@ -38,13 +38,17 @@ The agent stops and waits only at three gates:
 
 - **Understanding.** You confirm the agent's summary of what ships, for whom, and how you will know it works.
 - **Breakdown.** You approve the tickets: each one a slice you can see and try.
-- **Merge.** You run the test kit and it works. Merging, deploying, and shipping are your call.
+- **Merge.** You run the test kit and it works. Merging, deploying, and shipping are your call. Before you get it, `babysit` brings the PR to green: CI fixed, review bots answered or declined with a reason, branch up to date.
 
 **Test kit.** Every cycle ends with one: where to go (a preview URL or a command), the journey step by step, and what you should see. The agent runs that journey itself on the real thing first.
 
 **One simplify pass per change.** After a medium or larger build, a fresh agent that did not write the code rereads the diff and makes it simpler without changing what it does, in its own commit, before any review. A one-sentence fix skips it.
 
-**One review per change.** A medium change gets one `review` after the simplify pass. A high-risk change (auth, input, secrets, personal data, or a third party; a data or schema migration; a public interface; a release to users) skips that and gets one `review` in high-risk mode after the Production checks.
+**One review per change.** A medium change gets one `review` after the simplify pass. A high-risk change (auth, input, secrets, personal data, or a third party; a data or schema migration; a public interface; a release to users) skips that and gets one `review` in high-risk mode after the Production checks. That high-risk review runs on a model from another provider when your agent can reach one, in at most three rounds.
+
+**Old PRs.** `modernize` decides whether a stale PR still belongs (modernize, rework, or close) before rebasing it.
+
+The PR lifecycle skills (`babysit`, `modernize`, the cross-model review) are adapted from [tstack](https://github.com/t3dotgg/tstack) (MIT).
 
 **Orchestration.** The agent you talk to orchestrates. Each ticket goes to a subagent in its own git worktree, tickets with no blocking edge run in parallel, and the main agent integrates and verifies. An agent without subagents or worktrees runs the same tickets one after another.
 
