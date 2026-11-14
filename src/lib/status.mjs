@@ -1,4 +1,6 @@
-import { legacyOnlySkillNames, loadCatalog, managedSkillNames } from './catalog.mjs';
+import { legacyOnlySkillNames, loadCatalog, managedSkillNames, operatorMdPayloadPath } from './catalog.mjs';
+import { readText } from './fsutil.mjs';
+import { operatorMdStatus } from './operator-md.mjs';
 import { legacyReferencesStatus } from './references.mjs';
 import { agentsBlockStatus } from './agents-md.mjs';
 import { readTrackerLine, trackerLine } from './tracker.mjs';
@@ -30,6 +32,7 @@ export function status(opts) {
   const legacySkills = legacyOnlySkillNames(catalog).filter((name) => installed.has(name));
   const legacyRefs = legacyReferencesStatus(root);
   const agentsMd = agentsBlockStatus(cwd);
+  const operatorMd = operatorMdStatus(cwd, readText(operatorMdPayloadPath(opts.packageRoot)));
   const claudeMd = { expected: targetsClaudeCode(state.agents), imports: hasClaudeImport(cwd) };
   const tracker = { saved: state.tracker, line: readTrackerLine(cwd) };
   const legacyGlossary = legacyGlossaryFiles(cwd);
@@ -57,6 +60,11 @@ export function status(opts) {
     lines.push('AGENTS.md: present, Operator block missing');
   } else {
     lines.push('AGENTS.md: Operator block present');
+  }
+  if (!operatorMd.present) {
+    lines.push('OPERATOR.md: missing, agents will not see the process (run operator update)');
+  } else {
+    lines.push(operatorMd.current ? 'OPERATOR.md: current' : 'OPERATOR.md: differs from this version (run operator update)');
   }
   if (claudeMd.expected) {
     lines.push(claudeMd.imports
@@ -87,7 +95,8 @@ export function status(opts) {
   const ok = skills.missing.length === 0
     && legacySkills.length === 0
     && agentsMd.managed
+    && operatorMd.present
     && (!claudeMd.expected || claudeMd.imports);
   log(lines.join('\n'));
-  return { ok, skills, legacySkills, legacyRefs, agentsMd, claudeMd, tracker, legacyGlossary, tokenEconomizer };
+  return { ok, skills, legacySkills, legacyRefs, agentsMd, operatorMd, claudeMd, tracker, legacyGlossary, tokenEconomizer };
 }

@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { agentsBlockPath, legacySkillNames, loadCatalog, ownSkillNames } from '../lib/catalog.mjs';
+import { agentsBlockPath, legacySkillNames, loadCatalog, operatorMdPayloadPath, ownSkillNames } from '../lib/catalog.mjs';
 import { packageRoot } from './helpers.mjs';
 
 const MAX_BLOCK_LINES = 100;
+const MAX_POINTER_LINES = 15;
 
 /**
  * Backticked tokens the block may use that are not installed skills: files, folders,
@@ -15,6 +16,7 @@ const NON_SKILL_TOKENS = new Set([
   'SKILL.md',
   'CONSTRAINTS.md',
   'AGENTS.md',
+  'OPERATOR.md',
   'GLOSSARY.md',
   'Specs and tickets live in: …',
   '## Project context',
@@ -43,6 +45,13 @@ const NON_SKILL_TOKENS = new Set([
   'docs/architecture.md',
   'docs/features/',
   'docs/changes/<change-id>/',
+  'main',
+  'master',
+  'develop',
+  'staging',
+  'feat/…',
+  'fix/…',
+  'chore/…',
   'operator:start',
   'operator:end',
   'operator update',
@@ -58,7 +67,13 @@ const pstack = catalog.sources.find((source) => source.id === 'pstack')?.skills 
 const installed = new Set([...own, ...pstack]);
 const legacyOnly = legacySkillNames(catalog).filter((name) => !own.includes(name));
 
+/** The full process, shipped as the consumer's OPERATOR.md. */
 function block() {
+  return fs.readFileSync(operatorMdPayloadPath(packageRoot()), 'utf8').replace(/\r\n/g, '\n');
+}
+
+/** The short block written into AGENTS.md: a pointer to OPERATOR.md. */
+function pointer() {
   return fs.readFileSync(agentsBlockPath(packageRoot()), 'utf8').replace(/\r\n/g, '\n');
 }
 
@@ -75,7 +90,7 @@ function section(text, heading) {
   return text.slice(start, end < 0 ? undefined : end);
 }
 
-test('agents block stays under 100 lines because it loads every session', () => {
+test('OPERATOR.md stays under 100 lines because it loads every session', () => {
   const lines = block().replace(/\n$/, '').split('\n').length;
   assert.ok(lines < MAX_BLOCK_LINES, `agents block is ${lines} lines`);
 });
@@ -151,4 +166,26 @@ test('block keeps pstack substitutions, the tracker line, and composes with Toke
   assert.ok(text.includes('`toolprune restore`'));
   assert.ok(text.includes('unknown cause: `debug`'));
   assert.ok(!catalog.sources.some((source) => /tokeneconomizer/i.test(source.repo)));
+});
+
+test('the AGENTS.md block is a short pointer that makes OPERATOR.md hard to skip', () => {
+  const text = pointer();
+  const lines = text.replace(/\n$/, '').split('\n');
+  assert.ok(lines.length <= MAX_POINTER_LINES, `pointer is ${lines.length} lines`);
+  // Claude Code expands a bare `@path` line through the CLAUDE.md `@AGENTS.md` import.
+  assert.ok(lines.includes('@OPERATOR.md'), 'pointer imports OPERATOR.md for Claude Code');
+  for (const needle of ['read `OPERATOR.md` in full', 'Before your first reply or action', 'compacted', 'every request', 'never edit it', '`operator update`']) {
+    assert.ok(text.includes(needle), `pointer misses "${needle}"`);
+  }
+  for (const heading of ['Detector', 'Gates', 'Rules']) assert.ok(!text.includes(`## ${heading}`), `pointer holds ## ${heading}`);
+  const unknown = backticked(text).filter((token) => !installed.has(token) && !NON_SKILL_TOKENS.has(token));
+  assert.deepEqual([...new Set(unknown)], []);
+});
+
+test('OPERATOR.md protects main, develop, and staging and commits finished work', () => {
+  const git = section(block(), 'Git');
+  for (const name of ['main', 'master', 'develop', 'staging']) assert.ok(git.includes(`\`${name}\``), `${name} is not protected`);
+  for (const needle of ['Never commit on one', 'create a branch from it', 'before the first edit', "without the PM's explicit go", 'Commit without being asked', 'before handing back to the PM']) {
+    assert.ok(git.includes(needle), `Git rules miss "${needle}"`);
+  }
 });

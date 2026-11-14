@@ -88,3 +88,8 @@ export function payloadDir(packageRoot) {
 export function agentsBlockPath(packageRoot) {
   return path.join(packageRoot, 'src', 'payload', 'agents-block.md');
 }
+
+/** The full process, written to the consumer's `OPERATOR.md`; the AGENTS.md block points to it. */
+export function operatorMdPayloadPath(packageRoot) {
+  return path.join(packageRoot, 'src', 'payload', 'operator.md');
+}

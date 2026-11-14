@@ -2,17 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { agentsBlockPath, loadCatalog, ownSkillNames, payloadDir } from '../lib/catalog.mjs';
+import { operatorMdPayloadPath, loadCatalog, ownSkillNames, payloadDir } from '../lib/catalog.mjs';
 import { packageRoot } from './helpers.mjs';
 
 /**
  * Skill-shaped backticked tokens (lowercase kebab) that are not skills: folders, code,
- * frontmatter keys, CLIs, and pstack hand-offs the block says are not installed.
+ * frontmatter keys, CLIs, git branches, and pstack hand-offs the block says are not installed.
  */
 const NOT_SKILLS = new Set([
   'any', 'eval', 'gh', 'name', 'description',
   'src', 'tests', 'docs', 'config', 'tools', 'examples', 'temp',
   'arena', 'how', 'why',
+  'main', 'master', 'develop', 'staging',
 ]);
 
 const catalog = loadCatalog(packageRoot());
@@ -40,15 +41,15 @@ function section(text, heading) {
 }
 
 const skillText = new Map(own.map((name) => [name, read(path.join(skillsDir, name, 'SKILL.md'))]));
-const block = read(agentsBlockPath(packageRoot()));
+const block = read(operatorMdPayloadPath(packageRoot()));
 
 test('catalog ownSkills equals the skill folders in the payload', () => {
   const folders = fs.readdirSync(skillsDir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
   assert.deepEqual([...folders].sort(), [...own].sort());
 });
 
-test('every skill name used in an own skill or the agents block is an own or pstack skill', () => {
-  for (const [name, text] of [...skillText, ['agents-block', block]]) {
+test('every skill name used in an own skill or OPERATOR.md is an own or pstack skill', () => {
+  for (const [name, text] of [...skillText, ['operator.md', block]]) {
     const unknown = skillTokens(text).filter((token) => !installed.has(token));
     assert.deepEqual([...new Set(unknown)], [], `${name} names skills that are not installed`);
   }
@@ -61,7 +62,7 @@ test('every own skill hands off only to existing skills', () => {
   }
 });
 
-test('every own skill is reachable from the agents block, directly or through Hand-offs', () => {
+test('every own skill is reachable from OPERATOR.md, directly or through Hand-offs', () => {
   const reached = new Set(skillTokens(block).filter((token) => skillText.has(token)));
   const queue = [...reached];
   while (queue.length > 0) {

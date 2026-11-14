@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   agentsBlockPath,
+  operatorMdPayloadPath,
   allCatalogSkills,
   legacyOnlySkillNames,
   loadCatalog,
@@ -114,6 +115,11 @@ test('init writes the AGENTS.md block, project sections, the tracker line, and t
   assert.ok(project.includes('\n## Known pitfalls\n'));
   assert.deepEqual(readState(cwd), { version: 3, agents: ['cursor'], tracker: 'local' });
   assert.equal(fs.existsSync(path.join(cwd, 'CLAUDE.md')), false, 'no CLAUDE.md without claude-code');
+  assert.equal(
+    fs.readFileSync(path.join(cwd, 'OPERATOR.md'), 'utf8'),
+    `${fs.readFileSync(operatorMdPayloadPath(root), 'utf8').trimEnd()}\n`,
+    'OPERATOR.md holds the full process',
+  );
 });
 
 test('init next steps say to describe the idea in plain words, nothing to invoke', async () => {
@@ -191,7 +197,7 @@ test('the tracker line reuses an existing Project context heading outside the bl
   );
   await init({ cwd, packageRoot: packageRoot(), agents: ['cursor'], yes: true, tracker: 'LINEAR', runner: async () => {}, log: quiet });
   const text = readAgentsMd(cwd);
-  assert.ok(text.indexOf('# My app') < text.indexOf(START_MARKER));
+  assert.ok(text.indexOf(END_MARKER) < text.indexOf('# My app'), 'the pointer goes on top');
   const project = outsideBlock(text);
   assert.ok(project.includes('## Project context\n\nSpecs and tickets live in: Linear\n\nA shop for bikes.\n'));
   assert.equal(count(project, '## Project context'), 1, 'the user heading before the block is reused, not duplicated');
@@ -260,6 +266,7 @@ test('remove uninstalls own + pstack without --copy and cleans every file Operat
   assert.deepEqual(agentArgs(calls[0]), ['claude-code'], 'agents come from the state file');
   assert.ok(!calls[0].includes('--copy'));
   assert.equal(fs.existsSync(path.join(cwd, 'AGENTS.md')), false);
+  assert.equal(fs.existsSync(path.join(cwd, 'OPERATOR.md')), false);
   assert.equal(fs.existsSync(path.join(cwd, 'CLAUDE.md')), false);
   assert.equal(fs.existsSync(statePath(cwd)), false);
   assert.equal(fs.existsSync(path.join(cwd, '.operator')), false);
@@ -417,6 +424,7 @@ test('status reports leftover v2 skills, the CLAUDE.md import, and the tracker; 
   assert.equal(complete.tracker.saved, 'github');
   assert.ok(out[0].includes('Skills: 31/31 installed'));
   assert.ok(out[0].includes('CLAUDE.md: imports AGENTS.md'));
+  assert.ok(out[0].includes('OPERATOR.md: current'));
   assert.ok(out[0].includes('Tracker: Specs and tickets live in: GitHub issues'));
   assert.ok(!out[0].includes('References'));
 
@@ -433,6 +441,16 @@ test('status reports leftover v2 skills, the CLAUDE.md import, and the tracker; 
   fs.rmSync(path.join(cwd, SKILLS_DIR, 'operator'), { recursive: true });
   fs.rmSync(path.join(cwd, SKILLS_DIR, 'tdd'), { recursive: true });
   assert.equal(status({ cwd, packageRoot: root, env: {}, homedir, log: quiet }).ok, true, 'v2 references alone do not fail ok');
+
+  fs.writeFileSync(path.join(cwd, 'OPERATOR.md'), 'edited\n', 'utf8');
+  out = [];
+  assert.equal(status({ cwd, packageRoot: root, env: {}, homedir, log }).ok, true, 'a stale OPERATOR.md is reported, not failed');
+  assert.ok(out[0].includes('OPERATOR.md: differs from this version'));
+  fs.rmSync(path.join(cwd, 'OPERATOR.md'));
+  out = [];
+  assert.equal(status({ cwd, packageRoot: root, env: {}, homedir, log }).ok, false, 'a missing OPERATOR.md fails ok');
+  assert.ok(out[0].includes('OPERATOR.md: missing'));
+  fs.writeFileSync(path.join(cwd, 'OPERATOR.md'), fs.readFileSync(operatorMdPayloadPath(root), 'utf8'), 'utf8');
 
   fs.writeFileSync(path.join(cwd, 'CLAUDE.md'), '# no import\n', 'utf8');
   out = [];

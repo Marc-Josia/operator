@@ -1,6 +1,6 @@
 {
   "name": "@marcjosia/operator",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "Operator — a PM-first process for any coding agent: its own mission-style skills plus pstack overlays, always on, nothing to invoke.",
   "type": "module",
   "bin": {

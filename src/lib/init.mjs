@@ -1,7 +1,8 @@
 import { readText } from './fsutil.mjs';
-import { agentsBlockPath, loadCatalog, ownSkillNames, payloadDir } from './catalog.mjs';
+import { agentsBlockPath, loadCatalog, operatorMdPayloadPath, ownSkillNames, payloadDir } from './catalog.mjs';
 import { addSkills } from './skills.mjs';
 import { scaffoldProjectSections, upsertAgentsBlock } from './agents-md.mjs';
+import { writeOperatorMd } from './operator-md.mjs';
 import { destRoot } from './scan.mjs';
 import { resolveAgents } from './target-agents.mjs';
 import { resolveTracker, upsertTrackerLine } from './tracker.mjs';
@@ -20,7 +21,7 @@ only when you need to decide.
 
 /**
  * Write everything Operator owns in the project, after the skills are installed:
- * the AGENTS.md block, the tracker line, the CLAUDE.md import (Claude Code), and the state file.
+ * OPERATOR.md, the AGENTS.md block that points to it, the tracker line, the CLAUDE.md import (Claude Code), and the state file.
  * Shared by `init` and `update`.
  *
  * @param {{
@@ -34,6 +35,7 @@ only when you need to decide.
  * }} opts
  */
 export function writeProjectFiles(opts) {
+  writeOperatorMd(opts.cwd, readText(operatorMdPayloadPath(opts.packageRoot)));
   upsertAgentsBlock({
     cwd: opts.cwd,
     block: readText(agentsBlockPath(opts.packageRoot)),

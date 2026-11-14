@@ -26,13 +26,17 @@ Each skill ends with a `## Hand-off` that names the next one, so the lanes chain
 
 **[pstack](https://github.com/cursor/plugins/tree/main/pstack) overlays**, unchanged: `unslop` (writing pass), `correct` (turns a repeated mistake into a check), `blast-radius` (what a change breaks outside the diff), `benchmark-checklist` (vets a measured perf number), `create-verification-skill` and `maintain-verification-skill` (a project skill that drives the real app), `principle-prove-it-works`, `principle-fix-root-causes`.
 
-**A managed block in `AGENTS.md`** (between `<!-- operator:start -->` and `<!-- operator:end -->`). It is the always-on router: the detector, the three gates, the PM rules, orchestration, and the overlays. `init` also adds empty project sections after it (`Project context`, `Commands`, `Conventions`, `Interface design`, `Known pitfalls`, `Project skills`); those belong to your project and `update` never touches them.
+**`OPERATOR.md`** at the repo root: the always-on router (the detector, the three gates, the PM rules, orchestration, and the overlays). Operator owns the whole file and `update` rewrites it.
+
+**A short managed block at the top of `AGENTS.md`** (between `<!-- operator:start -->` and `<!-- operator:end -->`) that points to `OPERATOR.md`: agents must read it in full before their first reply, and again after the context is compacted. Claude Code loads it on its own through an `@OPERATOR.md` import in that block. `init` also adds empty project sections after the block (`Project context`, `Commands`, `Conventions`, `Interface design`, `Known pitfalls`, `Project skills`); those belong to your project and `update` never touches them.
 
 **For Claude Code**, which does not read `AGENTS.md` by itself: an `@AGENTS.md` import line in `CLAUDE.md` (the file is created if missing; the line is never duplicated).
 
 ## How it works
 
 The agent sizes the work first. A one-sentence fix: make it, run the checks, commit. A clear, one-session change: a short plan, then build. A loose idea: `grill` (shared understanding), `spec`, `tickets`, then `implement`. A vision too big for one session: `wayfinder` cuts it into milestones first. Production skills (`security`, `observability`, `ci`, `migration`, `ship`, `performance`) run only when their trigger holds. `retro` closes medium or larger work.
+
+The agent never works on `main`, `master`, `develop`, or `staging`: it branches off first, commits its work without being asked when it is done, and never merges into those branches without your go.
 
 The agent stops and waits only at three gates:
 
@@ -84,16 +88,16 @@ operator init -g --agent cursor                 # user-wide instead of this proj
 
 Agents and tracker are saved in `.operator/state.json` (`~/.operator/state.json` with `-g`). `update` and `remove` reuse them; pass `--agent` or `--tracker` to change them.
 
-`status` lists own and pstack skills, leftover v2 skills, the `AGENTS.md` block, the `CLAUDE.md` import, the tracker line, and whether TokenEconomizer is present.
+`status` lists own and pstack skills, leftover v2 skills, `OPERATOR.md` (missing fails the check), the `AGENTS.md` block, the `CLAUDE.md` import, the tracker line, and whether TokenEconomizer is present.
 
-`remove` uninstalls own and pstack skills, strips the managed block, the tracker line, and the `CLAUDE.md` import line (deleting `CLAUDE.md` only if Operator created it), and deletes the state file.
+`remove` uninstalls own and pstack skills, deletes `OPERATOR.md`, strips the managed block, the tracker line, and the `CLAUDE.md` import line (deleting `CLAUDE.md` only if Operator created it), and deletes the state file.
 
 ## Upgrading from v2
 
 What changes in v3:
 
 - **Own skills instead of Matt Pocock and Addy Osmani packs.** 21 mission-style skills replace them; pstack is the only upstream source left.
-- **No `/operator` command.** The `AGENTS.md` block is the router and is always on.
+- **No `/operator` command.** `OPERATOR.md`, which the `AGENTS.md` block points to, is the router and is always on.
 - **PM-first process.** Product-level questions only, three gates (understanding, breakdown, merge), a test kit at the end of every cycle.
 - **One simplify pass and one review per change**, with a high-risk review mode for sensitive changes.
 - **Tracker choice** on `init` (local markdown, GitHub, Linear, or free text), saved in `.operator/state.json` with the agents.
