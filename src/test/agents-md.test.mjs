@@ -26,14 +26,13 @@ test('upsertAgentsBlock creates AGENTS.md when missing', () => {
   assert.deepEqual(agentsBlockStatus(cwd), { present: true, managed: true });
 });
 
-test('upsertAgentsBlock appends to existing AGENTS.md without a block', () => {
+test('upsertAgentsBlock puts the block on top of an existing AGENTS.md without one', () => {
   const cwd = tmpDir();
   fs.writeFileSync(path.join(cwd, 'AGENTS.md'), '# Project\n\nHello.\n', 'utf8');
   upsertAgentsBlock({ cwd, block: BLOCK });
   const text = fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8');
-  assert.ok(text.startsWith('# Project'));
-  assert.ok(text.includes(START_MARKER));
-  assert.ok(text.includes('Hello.'));
+  assert.ok(text.startsWith(START_MARKER));
+  assert.ok(text.endsWith(`${END_MARKER}\n\n# Project\n\nHello.\n`));
 });
 
 test('upsertAgentsBlock replaces an existing managed block', () => {

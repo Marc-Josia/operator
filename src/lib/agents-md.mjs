@@ -30,7 +30,8 @@ export function hasManagedBlock(contents) {
 }
 
 /**
- * Replace or append the managed Operator block in AGENTS.md.
+ * Replace the managed Operator block in AGENTS.md, or put it at the top of the file so
+ * agents read the pointer to OPERATOR.md before anything else.
  * @param {{ cwd: string, block: string }} opts
  */
 export function upsertAgentsBlock(opts) {
@@ -42,8 +43,7 @@ export function upsertAgentsBlock(opts) {
   }
   const existing = readText(filePath);
   if (!hasManagedBlock(existing)) {
-    const sep = existing.endsWith('\n') || existing.length === 0 ? '' : '\n';
-    writeText(filePath, `${existing}${sep}\n${wrapped}`);
+    writeText(filePath, existing.trim().length === 0 ? wrapped : `${wrapped}\n${existing.replace(/^\uFEFF/, '')}`);
     return { created: false, updated: true };
   }
   const start = existing.indexOf(START_MARKER);

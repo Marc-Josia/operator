@@ -11,13 +11,14 @@ const HELP = `operator — a PM-first process for any coding agent: own mission 
 Usage: operator <command> [options]
 
 Commands:
-  init      Install pstack and Operator's own skills, write the AGENTS.md block,
-            the tracker line, and (Claude Code) the @AGENTS.md import in CLAUDE.md
+  init      Install pstack and Operator's own skills, write OPERATOR.md and the
+            AGENTS.md block that points to it, the tracker line, and (Claude Code)
+            the @AGENTS.md import in CLAUDE.md
   update    Refresh pstack, re-add own skills, remove v2 Matt/Addy skills and the
-            v2 operator skill, purge v2 managed references/, replace the AGENTS.md block
-  status    Show installed skills, leftover v2 skills, the AGENTS.md block, the
+            v2 operator skill, purge v2 managed references/, rewrite OPERATOR.md and the AGENTS.md block
+  status    Show installed skills, leftover v2 skills, OPERATOR.md, the AGENTS.md block, the
             CLAUDE.md import, the tracker, and whether TokenEconomizer is present
-  remove    Uninstall Operator's skills and what it wrote in AGENTS.md / CLAUDE.md
+  remove    Uninstall Operator's skills and what it wrote in OPERATOR.md / AGENTS.md / CLAUDE.md
 
 Options:
   init:

@@ -13,7 +13,7 @@ export const NO_TRACKER_HINT = 'No tracker saved yet. Run: operator update --tra
 /**
  * Bring an install to the current catalog: refresh pstack, drop v2 Matt/Addy skills and the v2
  * `operator` router, re-add own skills from the payload, purge v2 managed `references/`, and
- * replace the AGENTS.md block. Never touches the rest of the repo.
+ * rewrite OPERATOR.md and the AGENTS.md block. Never touches the rest of the repo.
  *
  * @param {{
  *   cwd?: string,
@@ -106,7 +106,7 @@ export async function update(opts) {
   const notes = [];
   if (leftovers.length > 0) notes.push(`Removed v2 skills: ${leftovers.join(', ')}.`);
   if (refs.removed) notes.push('Removed v2 managed references/.');
-  log(['Operator updated. Skills and the AGENTS.md block are current.', ...notes].join('\n'));
+  log(['Operator updated. Skills, OPERATOR.md, and the AGENTS.md block are current.', ...notes].join('\n'));
   if (!tracker) log(NO_TRACKER_HINT);
 
   const legacy = legacyGlossaryFiles(cwd);
