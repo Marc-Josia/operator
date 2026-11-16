@@ -4,7 +4,7 @@ import { pathExists } from './fsutil.mjs';
 
 /**
  * TokenEconomizer (microsoft/TokenEconomizer) is a per-machine agent plugin, not a skill pack.
- * Operator never installs it; it only reports whether it is present so the router can compose with it.
+ * Operator never installs it; it only reports whether it is present.
  * Its state root is `$TOKENECONOMIZER_HOME`, else `~/.tokeneconomizer`, and the plugin writes
  * `bin/te` there at its first session start.
  *

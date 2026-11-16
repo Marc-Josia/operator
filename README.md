@@ -2,7 +2,7 @@
 
 Operator gives any coding agent (Claude Code, Cursor, Codex, and others) one working process built for a **Product Manager**. You say what you want, for whom, and why. The agent asks only product questions, decides the technical side and lists its choices so you can veto, builds in slices you can try, and stops only where you have to decide.
 
-There is no command to invoke. Once installed, the process is how the agent handles every request.
+There is no command to invoke. Operator installs skills and nothing else: it writes no file into your repo (no `OPERATOR.md`, no change to `AGENTS.md` or `CLAUDE.md`). Each skill's description tells the agent when to use it, so the agent picks the right one from what you say.
 
 ```bash
 npx --yes github:Marc-Josia/operator init
@@ -26,15 +26,11 @@ Each skill ends with a `## Hand-off` that names the next one, so the lanes chain
 
 **[pstack](https://github.com/cursor/plugins/tree/main/pstack) overlays**, unchanged: `unslop` (writing pass), `correct` (turns a repeated mistake into a check), `blast-radius` (what a change breaks outside the diff), `benchmark-checklist` (vets a measured perf number), `create-verification-skill` and `maintain-verification-skill` (a project skill that drives the real app), `principle-prove-it-works`, `principle-fix-root-causes`.
 
-**`OPERATOR.md`** at the repo root: the always-on router (the detector, the three gates, the PM rules, orchestration, and the overlays). Operator owns the whole file and `update` rewrites it.
-
-**A short managed block at the top of `AGENTS.md`** (between `<!-- operator:start -->` and `<!-- operator:end -->`) that points to `OPERATOR.md`: agents must read it in full before their first reply, and again after the context is compacted. Claude Code loads it on its own through an `@OPERATOR.md` import in that block. `init` also adds empty project sections after the block (`Project context`, `Commands`, `Conventions`, `Interface design`, `Known pitfalls`, `Project skills`); those belong to your project and `update` never touches them.
-
-**For Claude Code**, which does not read `AGENTS.md` by itself: an `@AGENTS.md` import line in `CLAUDE.md` (the file is created if missing; the line is never duplicated).
+**Nothing else.** Operator only installs skills (through `npx skills@latest`) and saves your agent and tracker choices in `.operator/state.json`. Agents discover the skills the way they discover any skill: from each `description`, which says when to use it and when not.
 
 ## How it works
 
-The agent sizes the work first. A one-sentence fix: make it, run the checks, commit. A clear, one-session change: a short plan, then build. A loose idea: `grill` (shared understanding), `spec`, `tickets`, then `implement`. A vision too big for one session: `wayfinder` cuts it into milestones first. Production skills (`security`, `observability`, `ci`, `migration`, `ship`, `performance`) run only when their trigger holds. `retro` closes medium or larger work.
+Skills trigger on their own from their descriptions, and they chain through their `## Hand-off`. The agent sizes the work first. A one-sentence fix: make it, run the checks, commit. A clear, one-session change: a short plan, then build. A loose idea: `grill` (shared understanding), `spec`, `tickets`, then `implement`. A vision too big for one session: `wayfinder` cuts it into milestones first. Production skills (`security`, `observability`, `ci`, `migration`, `ship`, `performance`) run only when their trigger holds. `retro` closes medium or larger work.
 
 The agent never works on `main`, `master`, `develop`, or `staging`: it branches off first, commits its work without being asked when it is done, and never merges into those branches without your go.
 
@@ -56,13 +52,13 @@ The PR lifecycle skills (`babysit`, `modernize`, the cross-model review) are ada
 
 **Orchestration.** The agent you talk to orchestrates. Each ticket goes to a subagent in its own git worktree, tickets with no blocking edge run in parallel, and the main agent integrates and verifies. An agent without subagents or worktrees runs the same tickets one after another.
 
-**Where specs and tickets live.** `init` asks: local markdown (`docs/changes/<id>/`), GitHub issues, Linear, or anything else you type. The answer is written as one line under `## Project context` in `AGENTS.md` (`Specs and tickets live in: …`). When the platform's tool is missing (no `gh`, no Linear MCP), the agent says so and falls back to local markdown.
+**Where specs and tickets live.** `init` asks: local markdown (`docs/changes/<id>/`), GitHub issues, Linear, or anything else you type. The answer is saved in `.operator/state.json` (`tracker`: `local`, `github`, `linear`, or your text), and the skills read it from there; missing means local markdown. Nothing is written to `AGENTS.md`. When the platform's tool is missing (no `gh`, no Linear MCP), the agent says so and falls back to local markdown.
 
 ## Commands
 
 ```bash
 npx --yes github:Marc-Josia/operator init      # install, ask agents and tracker
-npx --yes github:Marc-Josia/operator update    # refresh skills and the managed block
+npx --yes github:Marc-Josia/operator update    # refresh skills, clean what v3 wrote
 npx --yes github:Marc-Josia/operator status    # what is installed, what is left over
 npx --yes github:Marc-Josia/operator remove    # uninstall what Operator added
 ```
@@ -88,23 +84,32 @@ operator init -g --agent cursor                 # user-wide instead of this proj
 
 Agents and tracker are saved in `.operator/state.json` (`~/.operator/state.json` with `-g`). `update` and `remove` reuse them; pass `--agent` or `--tracker` to change them.
 
-`status` lists own and pstack skills, leftover v2 skills, `OPERATOR.md` (missing fails the check), the `AGENTS.md` block, the `CLAUDE.md` import, the tracker line, and whether TokenEconomizer is present.
+`status` lists agents, the saved tracker, own and pstack skills with their locations, leftover v2 skills, anything an older Operator left in the repo (with "run `operator update`"), and whether TokenEconomizer is present. It exits non-zero when a skill is missing or a leftover remains.
 
-`remove` uninstalls own and pstack skills, deletes `OPERATOR.md`, strips the managed block, the tracker line, and the `CLAUDE.md` import line (deleting `CLAUDE.md` only if Operator created it), and deletes the state file.
+`remove` uninstalls own and pstack skills, cleans any v3 leftovers (below), and deletes the state file.
+
+## Upgrading from v3
+
+v4 stops writing into your repo. Run `operator update`: it refreshes the skills as before, then cleans what v3.x wrote, once, and logs one line per cleanup:
+
+- deletes `OPERATOR.md`;
+- removes the tracker line (`Specs and tickets live in: …`) and the managed block (`<!-- operator:start -->` to `<!-- operator:end -->`) from `AGENTS.md`; the file is deleted only when nothing but the empty sections `init` scaffolded is left, and your own text is never touched;
+- removes the `@AGENTS.md` line from `CLAUDE.md` only if Operator added it and `AGENTS.md` no longer exists (otherwise your own `AGENTS.md` would disappear for Claude Code); `CLAUDE.md` is deleted only if Operator created it and it is now empty. `remove` drops that line whenever Operator added it.
+
+Your tracker choice moves with you: it was already in `.operator/state.json`.
 
 ## Upgrading from v2
 
-What changes in v3:
+What changed in v3:
 
 - **Own skills instead of Matt Pocock and Addy Osmani packs.** 21 mission-style skills replace them; pstack is the only upstream source left.
-- **No `/operator` command.** `OPERATOR.md`, which the `AGENTS.md` block points to, is the router and is always on.
+- **No `/operator` command.**
 - **PM-first process.** Product-level questions only, three gates (understanding, breakdown, merge), a test kit at the end of every cycle.
 - **One simplify pass and one review per change**, with a high-risk review mode for sensitive changes.
 - **Tracker choice** on `init` (local markdown, GitHub, Linear, or free text), saved in `.operator/state.json` with the agents.
-- **Claude Code support** through an `@AGENTS.md` import in `CLAUDE.md`.
 - **No `references/` folder** copied into your repo any more.
 
-Run `operator update`. It removes the v2 skills still installed (the Matt Pocock and Addy Osmani packs and the v2 `operator` router), installs the own skills in their place, deletes the old managed `references/` folder (only the files its manifest lists), moves the saved agents into `.operator/state.json`, and rewrites the `AGENTS.md` block. There is no `/operator` command any more. If the repo still has a `CONTEXT.md` glossary, Operator tells you to rename it to `GLOSSARY.md` with `git mv`.
+Run `operator update`. It removes the v2 skills still installed (the Matt Pocock and Addy Osmani packs and the v2 `operator` router), installs the own skills in their place, deletes the old managed `references/` folder (only the files its manifest lists), moves the saved agents into `.operator/state.json`, and cleans the old `AGENTS.md` block. There is no `/operator` command any more. If the repo still has a `CONTEXT.md` glossary, Operator tells you to rename it to `GLOSSARY.md` with `git mv`.
 
 ## Optional: TokenEconomizer
 
@@ -118,7 +123,7 @@ claude plugin marketplace add "$PWD/TokenEconomizer"
 claude plugin install tokeneconomizer@tokeneconomizer
 ```
 
-Operator composes with it once it is present. `operator status` reports whether it is there. The router tells agents to treat a loop-guard redirect as a cue to change approach (or to run `debug` when the cause is unknown), never to weaken the checks to escape the loop (`constraints`). Injected facts that hold for the whole project are copied into `AGENTS.md`, because TokenEconomizer keeps them on one machine. When a step needs a tool that was pruned, the agent asks you to run `toolprune restore` instead of working around it.
+`operator status` reports whether it is there; it never counts toward the check.
 
 ## Develop
 
