@@ -1,6 +1,6 @@
 ---
 name: <folder name>
-description: <When to load this skill: the request or situation that triggers it, in one sentence.>
+description: <Use when …, naming the request or situation that triggers it, in the words a user would say, plus the neighbour skill to use instead when one fits better. Under 400 characters. It is the only text the agent sees before picking the skill.>
 ---
 
 <!-- Operator mission-skill template. Not installed. Copy to src/payload/skills/<name>/SKILL.md, keep these five sections in this order and no others, stay under 60 lines. Write intent and finish lines, never step-by-step "how": the model already knows how. -->

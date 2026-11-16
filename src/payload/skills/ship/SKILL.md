@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Use when a change is about to reach users (deploy, publish a package or app, flip a feature flag) and the cycle must end with a PM test kit, a rollout, and a rollback in place.
+description: Use when a change is about to reach users (deploy, release, go live, publish a package or app, flip a feature flag). Ends the cycle with a rollout, a rollback in place, and a PM test kit.
 ---
 
 ## Mission

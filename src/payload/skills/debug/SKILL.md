@@ -1,6 +1,6 @@
 ---
 name: debug
-description: Use when something is broken, throwing, failing, flaky, or slow and the cause is not already known.
+description: Use when something is broken, throwing, failing, flaky, or slow and the cause is not already known (a bug report, an error message, a red test or CI run, "it does not work").
 ---
 
 ## Mission
@@ -12,7 +12,7 @@ Fix the bug where the system first went wrong, not where the symptom surfaced, a
 - One command reproduces the user's exact symptom: it was run and shown (secrets redacted), it goes red on this bug, gives the same verdict each run (or a pinned high rate for a flaky bug), takes seconds, and runs without a human.
 - The repro was cut down until every remaining part is needed to keep it red.
 - Several falsifiable hypotheses were ranked before testing; each probe tested one of them, changing one thing at a time. Slowness was measured before and after, not guessed.
-- The fix is at the root cause (`principle-fix-root-causes`); the commit says what the cause was.
+- The fix is at the root cause (`principle-fix-root-causes`), committed unasked on a work branch, never on `main`, `master`, `develop`, or `staging`; the commit says what the cause was.
 - A regression test at a seam that exercises the real bug pattern failed before the fix and passes after. No such seam exists: that is recorded as a finding for `architecture`.
 - The original, un-minimised repro now passes; the full suite and `CONSTRAINTS.md` commands pass.
 - Temporary logs and throwaway harnesses are removed.

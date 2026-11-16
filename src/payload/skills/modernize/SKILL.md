@@ -1,6 +1,6 @@
 ---
 name: modernize
-description: Use when an old or stale pull request or branch must be brought up to date, rebased, or judged on whether it should still exist.
+description: Use when an old or stale pull request or branch must be brought up to date, rebased, revived, or judged on whether it should still exist.
 ---
 
 ## Mission

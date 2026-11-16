@@ -1,6 +1,6 @@
 ---
 name: ci
-description: Use when no CI runs the project's checks on every change, or when a change edits the pipeline (workflows, required checks, deploy steps).
+description: Use when no CI runs the project's checks on every change, when the user asks to set up CI, or when a change edits the pipeline (workflows, required checks, deploy steps).
 ---
 
 ## Mission

@@ -1,7 +1,7 @@
 {
   "name": "@marcjosia/operator",
-  "version": "3.2.0",
-  "description": "Operator — a PM-first process for any coding agent: its own mission-style skills plus pstack overlays, always on, nothing to invoke.",
+  "version": "4.0.0",
+  "description": "Operator — PM-first skills for any coding agent: its own mission-style skills plus pstack overlays, which the agent discovers and triggers from their descriptions. Nothing to invoke.",
   "type": "module",
   "bin": {
     "operator": "src/bin/operator.mjs"

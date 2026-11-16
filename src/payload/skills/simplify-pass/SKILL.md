@@ -1,6 +1,6 @@
 ---
 name: simplify-pass
-description: Use once per medium or larger change, right after the build and before any review, so a fresh agent makes the new code simpler without changing what it does.
+description: Use right after a medium or larger change is built and before any review, so a fresh agent that did not write it makes the new code simpler without changing behaviour. Not for a small change.
 ---
 
 ## Mission
@@ -9,7 +9,7 @@ Ship the simplest code that does what was agreed. The builder is too close to it
 
 ## Done when
 
-- The pass ran in a fresh subagent that did not build the change, given the diff against its base, the spec or ticket, `AGENTS.md` and `CONSTRAINTS.md`, never the builder's reasoning. No subagents available: this session reread the diff from scratch, and the PM was told why.
+- The pass ran in a fresh subagent that did not build the change, given the diff against its base, the spec or ticket, the project's instruction files and `CONSTRAINTS.md`, never the builder's reasoning. No subagents available: this session reread the diff from scratch, and the PM was told why.
 - A spec or several tickets got one pass over the integrated change, so duplication across tickets is caught, not one pass per ticket.
 - Only code the change added or touched was simplified: dead code, duplicates, needless indirection or abstraction, defensive branches for cases that cannot happen, names that hide intent, existing helpers reimplemented.
 - Each simplification is listed one line each (what, why it is simpler), or the pass reported "nothing worth simplifying" and changed nothing.

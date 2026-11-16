@@ -1,6 +1,6 @@
 ---
 name: security
-description: Use when a change touches auth, permissions, untrusted input (forms, uploads, webhooks, URLs the server fetches, model output), secrets, personal data, or a third party; also as an overlay while that code is being built.
+description: Use when a change touches auth, permissions, untrusted input (forms, uploads, webhooks, URLs the server fetches, model output), secrets, personal data, or a third party, while that code is being built and again before it merges.
 ---
 
 ## Mission

@@ -1,6 +1,6 @@
 ---
 name: performance
-description: Use when there is a measured performance problem (users report slowness, a budget fails), Core Web Vitals need work, an N+1 query appears, or someone claims a speedup or regression; every number goes through benchmark-checklist.
+description: Use when there is a measured performance problem (users report slowness, a budget fails), Core Web Vitals need work, an N+1 query appears, or someone claims a speedup or regression. Every number goes through `benchmark-checklist`.
 ---
 
 ## Mission

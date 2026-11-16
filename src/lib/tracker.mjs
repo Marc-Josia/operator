@@ -1,12 +1,9 @@
 import readline from 'node:readline';
-import { OperatorError, pathExists, readText, writeText } from './fsutil.mjs';
-import { END_MARKER, START_MARKER, agentsMdPath } from './agents-md.mjs';
+import { OperatorError } from './fsutil.mjs';
 
-export const TRACKER_PREFIX = 'Specs and tickets live in:';
-export const PROJECT_CONTEXT_HEADING = '## Project context';
 export const DEFAULT_TRACKER = 'local';
 
-/** Preset trackers: the value saved in state, and the text written after the prefix. */
+/** Preset trackers: the value saved in `.operator/state.json`, and how the prompt shows it. */
 export const TRACKER_CHOICES = [
   { id: 'local', label: 'Local markdown (docs/changes/<id>/)', text: 'local markdown (`docs/changes/<id>/`)' },
   { id: 'github', label: 'GitHub issues', text: 'GitHub issues' },
@@ -29,11 +26,6 @@ export function normalizeTracker(value) {
 /** @param {string} tracker */
 export function trackerText(tracker) {
   return TRACKER_CHOICES.find((choice) => choice.id === tracker)?.text ?? tracker;
-}
-
-/** @param {string} tracker */
-export function trackerLine(tracker) {
-  return `${TRACKER_PREFIX} ${trackerText(tracker)}`;
 }
 
 /**
@@ -111,101 +103,4 @@ export async function resolveTracker(opts) {
   const stdin = opts.stdin ?? process.stdin;
   if (opts.yes || !stdin.isTTY) return current;
   return promptTracker({ stdin, stdout: opts.stdout, current });
-}
-
-/**
- * Line indexes of the managed block (START..END markers), so the tracker line only ever
- * lives in the project part of AGENTS.md: outside the markers.
- * @param {string[]} lines
- */
-function blockRange(lines) {
-  const start = lines.findIndex((l) => l.trim() === START_MARKER);
-  if (start === -1) return { start: -1, end: -1 };
-  const rel = lines.slice(start).findIndex((l) => l.trim() === END_MARKER);
-  return rel === -1 ? { start: -1, end: -1 } : { start, end: start + rel };
-}
-
-/**
- * First matching line outside the managed block; lines after the block win over lines before it.
- * @param {string[]} lines
- * @param {(line: string) => boolean} match
- */
-function findProjectLine(lines, match) {
-  const { start, end } = blockRange(lines);
-  const after = lines.findIndex((l, i) => i > end && match(l));
-  if (after !== -1) return after;
-  return lines.findIndex((l, i) => (start === -1 || i < start) && match(l));
-}
-
-/** @param {string} line */
-function isTrackerLine(line) {
-  return line.trim().startsWith(TRACKER_PREFIX);
-}
-
-/** @param {string} line */
-function isContextHeading(line) {
-  return line.trim() === PROJECT_CONTEXT_HEADING;
-}
-
-/**
- * Write the one tracker line under `## Project context`, in the project part of AGENTS.md
- * (never inside the managed block). Replaces an existing line; never duplicates.
- * @param {string} cwd
- * @param {string} tracker
- */
-export function upsertTrackerLine(cwd, tracker) {
-  const filePath = agentsMdPath(cwd);
-  const existing = pathExists(filePath) ? readText(filePath) : '';
-  const line = trackerLine(tracker);
-  let lines = existing.split('\n');
-  const found = findProjectLine(lines, isTrackerLine);
-  if (found !== -1) {
-    const { start, end } = blockRange(lines);
-    lines[found] = line;
-    // Drop any stray duplicate outside the block.
-    lines = lines.filter((l, i) => i === found || (i >= start && i <= end) || !isTrackerLine(l));
-    const next = lines.join('\n');
-    writeText(filePath, next);
-    return { changed: next !== existing };
-  }
-  const heading = findProjectLine(lines, isContextHeading);
-  if (heading !== -1) {
-    const insert = ['', line];
-    const after = lines[heading + 1];
-    if (after !== undefined && after.trim() !== '') insert.push('');
-    lines.splice(heading + 1, 0, ...insert);
-    writeText(filePath, lines.join('\n'));
-    return { changed: true };
-  }
-  const sep = existing.length === 0 ? '' : existing.endsWith('\n') ? '\n' : '\n\n';
-  writeText(filePath, `${existing}${sep}${PROJECT_CONTEXT_HEADING}\n\n${line}\n`);
-  return { changed: true };
-}
-
-/**
- * The tracker line currently written in the project part of AGENTS.md, if any.
- * @param {string} cwd
- */
-export function readTrackerLine(cwd) {
-  const filePath = agentsMdPath(cwd);
-  if (!pathExists(filePath)) return undefined;
-  const lines = readText(filePath).split('\n');
-  const found = findProjectLine(lines, isTrackerLine);
-  return found === -1 ? undefined : lines[found].trim();
-}
-
-/**
- * Remove the tracker line Operator wrote (and the blank line before it). Used by `remove`.
- * @param {string} cwd
- */
-export function stripTrackerLine(cwd) {
-  const filePath = agentsMdPath(cwd);
-  if (!pathExists(filePath)) return { removed: false };
-  const lines = readText(filePath).split('\n');
-  const found = findProjectLine(lines, isTrackerLine);
-  if (found === -1) return { removed: false };
-  const from = found > 0 && lines[found - 1].trim() === '' ? found - 1 : found;
-  lines.splice(from, found - from + 1);
-  writeText(filePath, lines.join('\n'));
-  return { removed: true };
 }

@@ -6,19 +6,22 @@ import { update } from '../lib/update.mjs';
 import { status } from '../lib/status.mjs';
 import { remove } from '../lib/remove.mjs';
 
-const HELP = `operator — a PM-first process for any coding agent: own mission skills + pstack overlays
+const HELP = `operator — PM-first skills for any coding agent: own mission skills + pstack overlays
 
 Usage: operator <command> [options]
 
 Commands:
-  init      Install pstack and Operator's own skills, write OPERATOR.md and the
-            AGENTS.md block that points to it, the tracker line, and (Claude Code)
-            the @AGENTS.md import in CLAUDE.md
+  init      Install pstack and Operator's own skills, and save your agents and
+            tracker choice in .operator/state.json. Writes nothing else: no
+            OPERATOR.md, no AGENTS.md or CLAUDE.md changes
   update    Refresh pstack, re-add own skills, remove v2 Matt/Addy skills and the
-            v2 operator skill, purge v2 managed references/, rewrite OPERATOR.md and the AGENTS.md block
-  status    Show installed skills, leftover v2 skills, OPERATOR.md, the AGENTS.md block, the
-            CLAUDE.md import, the tracker, and whether TokenEconomizer is present
-  remove    Uninstall Operator's skills and what it wrote in OPERATOR.md / AGENTS.md / CLAUDE.md
+            v2 operator skill, purge v2 managed references/, and clean what v3
+            wrote (OPERATOR.md, the AGENTS.md block and tracker line, the
+            CLAUDE.md import)
+  status    Show installed skills, leftover v2 skills, leftovers from older
+            Operator versions, the saved tracker, and whether TokenEconomizer
+            is present
+  remove    Uninstall Operator's skills, clean any v3 leftovers, delete the state
 
 Options:
   init:
@@ -27,7 +30,8 @@ Options:
     With no --tracker, Operator asks where specs and tickets live (TTY only);
     -y keeps the saved choice, or local.
   init / update:
-    --tracker x    where specs and tickets live: local (docs/changes/<id>/),
+    --tracker x    where specs and tickets live, saved in .operator/state.json:
+                   local (docs/changes/<id>/),
                    github, linear, or any text ("Jira project WEB")
   init / update / remove:
     --agent a,b    target agents (cursor, claude-code, codex, opencode, …)
@@ -40,7 +44,8 @@ Options:
   --version, -v    print the package version
   --help, -h       show this help
 
-After init, describe your idea to your agent in plain words. Nothing to invoke.
+After init, describe your idea to your agent in plain words. Nothing to invoke:
+the skills trigger on their own from their descriptions.
 
 Exit codes: 0 ok, 1 failure, 2 usage error.
 `;
