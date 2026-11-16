@@ -8,7 +8,7 @@ import { readState, writeState } from './state.mjs';
 import { cleanupLegacyFiles } from './legacy-files.mjs';
 import { legacyGlossaryFiles, legacyGlossaryWarning } from './glossary.mjs';
 
-export const NO_TRACKER_HINT = 'No tracker saved yet. Run: operator update --tracker local|github|linear|"<where>"';
+export const NO_TRACKER_HINT = 'No tracker saved: specs and tickets go to docs/changes/<id>/. To change it: operator update --tracker local|github|linear|"<where>"';
 
 /**
  * Bring an install to the current catalog: refresh pstack, drop v2 Matt/Addy skills and the v2
