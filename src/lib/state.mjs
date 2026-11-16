@@ -8,6 +8,8 @@ export const STATE_FILE = 'state.json';
 export const STATE_VERSION = 3;
 
 /**
+ * v3.x only: what Operator added to CLAUDE.md, kept until `update` / `remove` cleans it.
+ *
  * @typedef {{
  *   importAdded: boolean,
  *   fileCreated: boolean,

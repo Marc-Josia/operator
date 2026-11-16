@@ -1,12 +1,8 @@
-import { readText } from './fsutil.mjs';
-import { agentsBlockPath, loadCatalog, operatorMdPayloadPath, ownSkillNames, payloadDir } from './catalog.mjs';
+import { loadCatalog, ownSkillNames, payloadDir } from './catalog.mjs';
 import { addSkills } from './skills.mjs';
-import { scaffoldProjectSections, upsertAgentsBlock } from './agents-md.mjs';
-import { writeOperatorMd } from './operator-md.mjs';
 import { destRoot } from './scan.mjs';
 import { resolveAgents } from './target-agents.mjs';
-import { resolveTracker, upsertTrackerLine } from './tracker.mjs';
-import { ensureClaudeImport, targetsClaudeCode } from './claude-md.mjs';
+import { resolveTracker } from './tracker.mjs';
 import { readState, writeState } from './state.mjs';
 import { legacyGlossaryFiles, legacyGlossaryWarning } from './glossary.mjs';
 
@@ -15,55 +11,9 @@ Operator is installed.
 
 Next, open your coding agent in this repo and describe your idea in plain words:
 what you want, for whom, and why. There is nothing to invoke and no setup command.
-The agent asks a few product questions, decides the technical side, and stops
-only when you need to decide.
+The skills trigger on their own from what you say. The agent asks a few product
+questions, decides the technical side, and stops only when you need to decide.
 `.trim();
-
-/**
- * Write everything Operator owns in the project, after the skills are installed:
- * OPERATOR.md, the AGENTS.md block that points to it, the tracker line, the CLAUDE.md import (Claude Code), and the state file.
- * Shared by `init` and `update`.
- *
- * @param {{
- *   cwd: string,
- *   root: string,
- *   packageRoot: string,
- *   agents: string[],
- *   tracker?: string,
- *   state: import('./state.mjs').OperatorState,
- *   scaffold?: boolean,
- * }} opts
- */
-export function writeProjectFiles(opts) {
-  writeOperatorMd(opts.cwd, readText(operatorMdPayloadPath(opts.packageRoot)));
-  upsertAgentsBlock({
-    cwd: opts.cwd,
-    block: readText(agentsBlockPath(opts.packageRoot)),
-  });
-  if (opts.scaffold) scaffoldProjectSections(opts.cwd);
-  if (opts.tracker) upsertTrackerLine(opts.cwd, opts.tracker);
-
-  let claudeMd = opts.state.claudeMd;
-  if (targetsClaudeCode(opts.agents)) {
-    const result = ensureClaudeImport(opts.cwd);
-    if (result.added) {
-      claudeMd = {
-        importAdded: true,
-        // Re-adding a line the user deleted must not claim Operator created their file.
-        fileCreated: result.created || Boolean(claudeMd?.fileCreated && claudeMd.importAdded),
-      };
-    }
-  }
-
-  const next = {
-    ...opts.state,
-    agents: opts.agents,
-    ...(opts.tracker ? { tracker: opts.tracker } : {}),
-    ...(claudeMd ? { claudeMd } : {}),
-  };
-  writeState(opts.root, next);
-  return next;
-}
 
 /**
  * @param {{
@@ -128,15 +78,8 @@ export async function init(opts) {
     ...flags,
   });
 
-  writeProjectFiles({
-    cwd,
-    root,
-    packageRoot: opts.packageRoot,
-    agents,
-    tracker,
-    state,
-    scaffold: true,
-  });
+  // The only file Operator writes. A v3 `claudeMd` record is kept so `update` / `remove` can still clean it.
+  writeState(root, { ...state, agents, tracker });
 
   log(NEXT_STEPS);
 
