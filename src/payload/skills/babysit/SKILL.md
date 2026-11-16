@@ -1,6 +1,6 @@
 ---
 name: babysit
-description: Use when a pull request is open and must get through CI, review bots and base-branch drift before the merge gate, or when the PM asks to watch a PR.
+description: Use when a pull request is open and must get through CI, review bots, and base-branch drift before the merge gate, or when the PM asks to watch or fix up a PR.
 ---
 
 ## Mission

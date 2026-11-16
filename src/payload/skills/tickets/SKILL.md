@@ -1,6 +1,6 @@
 ---
 name: tickets
-description: Use when a spec exists without tickets, or the user asks to break a spec, plan, or conversation into work items. Opens the breakdown gate.
+description: Use when a spec exists without tickets, or the user asks to break a spec, plan, or milestone into tickets, issues, or tasks. Cuts vertical slices that agents can build in parallel and ends at the breakdown gate.
 ---
 
 ## Mission
@@ -15,7 +15,7 @@ Cut the spec into tickets the PM can see and try one by one, and that agents can
 - A blocking edge exists only where a ticket needs another's output (code, data shape, a decision), never for order or neatness. Two tickets that would rewrite the same files are merged or chained so their worktrees cannot collide.
 - The dependency graph is shown (ASCII is fine), with the tickets that can start at once visible at a glance.
 - The PM approved the breakdown. This is the breakdown gate.
-- The tickets are where the AGENTS.md line under `## Project context` says ("Specs and tickets live in: …"), in dependency order, with native blocking links where the platform has them. No line: `docs/changes/<change-id>/tickets.md` next to the spec. Platform tool missing (no `gh`, no Linear MCP): local markdown, and the PM was told why in one line.
+- The tickets are where the tracker field of `.operator/state.json` says, in dependency order, with native blocking links where the platform has them. Missing or local: `docs/changes/<change-id>/tickets.md` next to the spec. Platform tool missing (no `gh`, no Linear MCP): local markdown, and the PM was told why in one line.
 
 ## Never
 

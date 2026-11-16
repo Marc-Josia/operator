@@ -1,6 +1,6 @@
 ---
 name: spec
-description: Use when the PM has confirmed a shared understanding of a feature and no spec exists yet, or when the user asks to write one.
+description: Use when the PM confirmed a shared understanding of a feature and no spec exists yet, or the user asks for a spec, a PRD, or written requirements. Not for a change that fits one session with a short plan.
 ---
 
 ## Mission
@@ -9,8 +9,8 @@ Turn the confirmed understanding into one spec an agent can build from without a
 
 ## Done when
 
-- The spec is where the AGENTS.md line under `## Project context` says ("Specs and tickets live in: …"). No line: local markdown in `docs/changes/<change-id>/spec.md`, with `<change-id>` a short kebab-case name.
-- When that line names a platform whose tool is missing here (no `gh`, no Linear MCP), the spec is in local markdown and the PM was told why in one line.
+- The spec is where the tracker field of `.operator/state.json` says (in the repo, else `~/.operator/state.json`): missing or local, `docs/changes/<change-id>/spec.md` with `<change-id>` a short kebab-case name; github, GitHub issues; linear, Linear; any other text names the place.
+- When the tracker names a platform whose tool is missing here (no `gh`, no Linear MCP), the spec is in local markdown and the PM was told why in one line.
 - Product part, in the PM's words and the glossary's terms: the problem, who has it, what they can do once it ships (user stories), the journey the PM will try to know it works, what is out of scope.
 - Technical part, decided by the agent: one line per decision (what changes, data shape, interfaces, the seams where tests prove the journey, risks). Each line can be vetoed on its own.
 - Every claim traces to the conversation, the glossary, or the code. No file paths or code, except a state shape or schema a prototype settled, trimmed to the decision.
@@ -21,7 +21,7 @@ Turn the confirmed understanding into one spec an agent can build from without a
 - Re-interview the PM on what the grill already settled, or ask them a technical question.
 - Invent product behavior the conversation did not settle. A gap is a question, not an assumption.
 - Write horizontal plans (a backend phase, then a frontend phase) into the spec; slicing belongs to `tickets`.
-- Publish to a platform you cannot reach, or silently pick another location than the tracker line.
+- Publish to a platform you cannot reach, or silently pick another location than the tracker.
 
 ## Stop and ask
 

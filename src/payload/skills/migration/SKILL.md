@@ -1,6 +1,6 @@
 ---
 name: migration
-description: Use when old code, a feature, or an API is leaving, or when a production database schema changes (rename, drop, or retype a column or table), so it lands as expand/contract with no data loss or downtime.
+description: Use when old code, a feature, or an API is being removed, or when a production database schema changes (rename, drop, or retype a column or table), so it lands as expand and contract with no data loss or downtime.
 ---
 
 ## Mission

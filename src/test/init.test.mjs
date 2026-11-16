@@ -3,8 +3,6 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  agentsBlockPath,
-  operatorMdPayloadPath,
   allCatalogSkills,
   legacyOnlySkillNames,
   loadCatalog,
@@ -16,8 +14,8 @@ import { init, NEXT_STEPS } from '../lib/init.mjs';
 import { update, NO_TRACKER_HINT } from '../lib/update.mjs';
 import { remove } from '../lib/remove.mjs';
 import { status } from '../lib/status.mjs';
-import { END_MARKER, START_MARKER } from '../lib/agents-md.mjs';
-import { statePath } from '../lib/state.mjs';
+import { END_MARKER, START_MARKER } from '../lib/legacy-files.mjs';
+import { statePath, writeState } from '../lib/state.mjs';
 import { markerPath } from '../lib/references.mjs';
 import { packageRoot, tmpDir, writeSkill, writeV2References, V2_REF_FILES } from './helpers.mjs';
 
@@ -64,19 +62,43 @@ function readState(cwd) {
   return JSON.parse(fs.readFileSync(statePath(cwd), 'utf8'));
 }
 
-function readAgentsMd(cwd) {
-  return fs.readFileSync(path.join(cwd, 'AGENTS.md'), 'utf8');
+function read(cwd, file) {
+  return fs.readFileSync(path.join(cwd, file), 'utf8');
 }
 
-function count(text, needle) {
-  return text.split(needle).length - 1;
+function exists(cwd, file) {
+  return fs.existsSync(path.join(cwd, file));
 }
 
-/** AGENTS.md without the managed block: the block's own text may mention the same headings. */
-function outsideBlock(text) {
-  const start = text.indexOf(START_MARKER);
-  const end = text.indexOf(END_MARKER);
-  return start === -1 ? text : text.slice(0, start) + text.slice(end + END_MARKER.length);
+const SCAFFOLD = [
+  'Project context',
+  'Commands',
+  'Conventions',
+  'Interface design',
+  'Known pitfalls',
+  'Project skills',
+].map((title) => `## ${title}\n`).join('\n');
+
+/**
+ * Lay out what Operator v3.2 wrote: OPERATOR.md, the AGENTS.md block, the empty project sections,
+ * the tracker line, the CLAUDE.md import, and the state record of the import.
+ * `userText` is appended to AGENTS.md after the scaffold (the user's own content).
+ */
+function writeV3Install(cwd, { claudeMd = '@AGENTS.md\n', userText = '', tracker = 'github', fileCreated = true } = {}) {
+  fs.writeFileSync(path.join(cwd, 'OPERATOR.md'), '# Operator\n\nThe process.\n', 'utf8');
+  const scaffold = SCAFFOLD.replace('## Project context\n', '## Project context\n\nSpecs and tickets live in: GitHub issues\n');
+  fs.writeFileSync(
+    path.join(cwd, 'AGENTS.md'),
+    `${START_MARKER}\nRead @OPERATOR.md first.\n${END_MARKER}\n\n${scaffold}${userText}`,
+    'utf8',
+  );
+  if (claudeMd !== null) fs.writeFileSync(path.join(cwd, 'CLAUDE.md'), claudeMd, 'utf8');
+  writeState(cwd, {
+    version: 3,
+    agents: ['claude-code'],
+    tracker,
+    claudeMd: { importAdded: true, fileCreated },
+  });
 }
 
 test('init installs pstack, then own skills from the payload, in one call each', async () => {
@@ -99,27 +121,25 @@ test('init installs pstack, then own skills from the payload, in one call each',
     assert.ok(args.includes('--copy'));
     assert.deepEqual(agentArgs(args), ['cursor']);
   }
-  assert.equal(fs.existsSync(path.join(cwd, 'references')), false, 'v3 installs no references/');
+  assert.equal(exists(cwd, 'references'), false, 'v4 installs no references/');
 });
 
-test('init writes the AGENTS.md block, project sections, the tracker line, and the state file', async () => {
+test('init writes only the state file: no AGENTS.md, CLAUDE.md, or OPERATOR.md', async () => {
   const cwd = tmpDir();
   const root = packageRoot();
-  await init({ cwd, packageRoot: root, agents: ['cursor'], yes: true, runner: async () => {}, log: quiet });
+  await init({ cwd, packageRoot: root, agents: ['cursor', 'claude-code'], yes: true, runner: async () => {}, log: quiet });
+  assert.deepEqual(readState(cwd), { version: 3, agents: ['cursor', 'claude-code'], tracker: 'local' });
+  assert.deepEqual(fs.readdirSync(cwd), ['.operator']);
+});
 
-  const text = readAgentsMd(cwd);
-  const block = fs.readFileSync(agentsBlockPath(root), 'utf8').trimEnd();
-  assert.ok(text.startsWith(`${START_MARKER}\n${block}\n${END_MARKER}\n`));
-  const project = text.slice(text.indexOf(END_MARKER));
-  assert.ok(project.includes('\n## Project context\n\nSpecs and tickets live in: local markdown (`docs/changes/<id>/`)\n\n## Commands\n'));
-  assert.ok(project.includes('\n## Known pitfalls\n'));
-  assert.deepEqual(readState(cwd), { version: 3, agents: ['cursor'], tracker: 'local' });
-  assert.equal(fs.existsSync(path.join(cwd, 'CLAUDE.md')), false, 'no CLAUDE.md without claude-code');
-  assert.equal(
-    fs.readFileSync(path.join(cwd, 'OPERATOR.md'), 'utf8'),
-    `${fs.readFileSync(operatorMdPayloadPath(root), 'utf8').trimEnd()}\n`,
-    'OPERATOR.md holds the full process',
-  );
+test('init leaves existing AGENTS.md and CLAUDE.md byte for byte as they are', async () => {
+  const cwd = tmpDir();
+  fs.writeFileSync(path.join(cwd, 'AGENTS.md'), '# Mine\n\nnpm test\n', 'utf8');
+  fs.writeFileSync(path.join(cwd, 'CLAUDE.md'), '# Team notes\n', 'utf8');
+  await init({ cwd, packageRoot: packageRoot(), agents: ['claude-code'], yes: true, runner: async () => {}, log: quiet });
+  assert.equal(read(cwd, 'AGENTS.md'), '# Mine\n\nnpm test\n');
+  assert.equal(read(cwd, 'CLAUDE.md'), '# Team notes\n');
+  assert.deepEqual(fs.readdirSync(cwd).sort(), ['.operator', 'AGENTS.md', 'CLAUDE.md']);
 });
 
 test('init next steps say to describe the idea in plain words, nothing to invoke', async () => {
@@ -141,7 +161,7 @@ test('init next steps say to describe the idea in plain words, nothing to invoke
   assert.ok(!NEXT_STEPS.includes('setup-matt-pocock-skills'));
 });
 
-test('init asks for the tracker; init again or --tracker replaces the line, never duplicates it', async () => {
+test('init asks for the tracker and saves it in the state file only', async () => {
   const cwd = tmpDir();
   const root = packageRoot();
   /** @type {string[]} */
@@ -158,7 +178,6 @@ test('init asks for the tracker; init again or --tracker replaces the line, neve
     log: quiet,
   });
   assert.deepEqual(asked, ['local']);
-  assert.ok(readAgentsMd(cwd).includes('\nSpecs and tickets live in: GitHub issues\n'));
   assert.equal(readState(cwd).tracker, 'github');
 
   await init({
@@ -176,32 +195,10 @@ test('init asks for the tracker; init again or --tracker replaces the line, neve
   assert.equal(readState(cwd).tracker, 'linear');
 
   await init({ cwd, packageRoot: root, agents: ['cursor'], yes: true, tracker: 'Jira project WEB', runner: async () => {}, log: quiet });
-  let text = readAgentsMd(cwd);
-  assert.equal(count(outsideBlock(text), 'Specs and tickets live in:'), 1);
-  assert.ok(text.includes('\nSpecs and tickets live in: Jira project WEB\n'));
-  assert.equal(count(outsideBlock(text), '## Project context'), 1);
   assert.equal(readState(cwd).tracker, 'Jira project WEB');
-
   await init({ cwd, packageRoot: root, agents: ['cursor'], yes: true, runner: async () => {}, log: quiet });
-  text = readAgentsMd(cwd);
   assert.equal(readState(cwd).tracker, 'Jira project WEB', '-y keeps the saved choice');
-  assert.equal(count(outsideBlock(text), 'Specs and tickets live in:'), 1);
-});
-
-test('the tracker line reuses an existing Project context heading outside the block, keeping user text', async () => {
-  const cwd = tmpDir();
-  fs.writeFileSync(
-    path.join(cwd, 'AGENTS.md'),
-    '# My app\n\n## Project context\nA shop for bikes.\n\n## Commands\n\nnpm test\n',
-    'utf8',
-  );
-  await init({ cwd, packageRoot: packageRoot(), agents: ['cursor'], yes: true, tracker: 'LINEAR', runner: async () => {}, log: quiet });
-  const text = readAgentsMd(cwd);
-  assert.ok(text.indexOf(END_MARKER) < text.indexOf('# My app'), 'the pointer goes on top');
-  const project = outsideBlock(text);
-  assert.ok(project.includes('## Project context\n\nSpecs and tickets live in: Linear\n\nA shop for bikes.\n'));
-  assert.equal(count(project, '## Project context'), 1, 'the user heading before the block is reused, not duplicated');
-  assert.equal(count(outsideBlock(text), 'Specs and tickets live in:'), 1);
+  assert.deepEqual(fs.readdirSync(cwd), ['.operator']);
 });
 
 test('init -y without --agent fails', async () => {
@@ -211,48 +208,107 @@ test('init -y without --agent fails', async () => {
   );
 });
 
-test('init for claude-code creates CLAUDE.md with the @AGENTS.md import and records it', async () => {
+test('init on a v3 install touches no v3 file and keeps the CLAUDE.md record for update', async () => {
   const cwd = tmpDir();
-  const root = packageRoot();
-  const { calls, runner } = fakeSkillsCli(cwd);
-  await init({ cwd, packageRoot: root, runner, promptFn: async () => ['claude-code'], yes: true, log: quiet });
-  for (const args of calls) assert.deepEqual(agentArgs(args), ['claude-code']);
-  assert.equal(fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf8'), '@AGENTS.md\n');
-  assert.deepEqual(readState(cwd).claudeMd, { importAdded: true, fileCreated: true });
-
-  await update({ cwd, packageRoot: root, runner, log: quiet });
-  assert.equal(fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf8'), '@AGENTS.md\n', 'never duplicated');
+  writeV3Install(cwd);
+  await init({ cwd, packageRoot: packageRoot(), agents: ['claude-code'], yes: true, runner: async () => {}, log: quiet });
+  assert.ok(exists(cwd, 'OPERATOR.md'));
+  assert.ok(read(cwd, 'AGENTS.md').includes(START_MARKER));
+  assert.equal(read(cwd, 'CLAUDE.md'), '@AGENTS.md\n');
   assert.deepEqual(readState(cwd).claudeMd, { importAdded: true, fileCreated: true });
 });
 
-test('an existing CLAUDE.md gets the import appended once; remove deletes only that line', async () => {
+test('update cleans a v3.2 install whose AGENTS.md holds only Operator scaffolding', async () => {
   const cwd = tmpDir();
   const root = packageRoot();
-  fs.writeFileSync(path.join(cwd, 'CLAUDE.md'), '# Team notes\n\nBe kind.\n', 'utf8');
-  await init({ cwd, packageRoot: root, agents: ['cursor', 'claude-code'], yes: true, runner: async () => {}, log: quiet });
-  assert.equal(fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf8'), '# Team notes\n\nBe kind.\n\n@AGENTS.md\n');
-  assert.deepEqual(readState(cwd).claudeMd, { importAdded: true, fileCreated: false });
+  writeV3Install(cwd);
+  /** @type {string[]} */
+  const logs = [];
+  await update({ cwd, packageRoot: root, runner: async () => {}, log: (m) => logs.push(m) });
 
-  await init({ cwd, packageRoot: root, agents: ['cursor', 'claude-code'], yes: true, runner: async () => {}, log: quiet });
-  assert.equal(count(fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf8'), '@AGENTS.md'), 1);
+  assert.equal(exists(cwd, 'OPERATOR.md'), false);
+  assert.equal(exists(cwd, 'AGENTS.md'), false, 'only the empty scaffold was left, so the file goes');
+  assert.equal(exists(cwd, 'CLAUDE.md'), false, 'Operator created it and only the import was in it');
+  assert.deepEqual(readState(cwd), { version: 3, agents: ['claude-code'], tracker: 'github' });
+  assert.ok(logs.some((m) => m.includes('Removed OPERATOR.md')));
+  assert.ok(logs.some((m) => m.includes('Deleted AGENTS.md')));
+  assert.ok(logs.some((m) => m.includes('Deleted CLAUDE.md')));
+  assert.ok(!logs.includes(NO_TRACKER_HINT), 'the tracker survives in state');
+});
 
+test('update keeps the user text in AGENTS.md and the import that still feeds it to Claude Code', async () => {
+  const cwd = tmpDir();
+  const root = packageRoot();
+  writeV3Install(cwd, { userText: '\n## Notes\n\nUse pnpm.\n' });
+  fs.writeFileSync(
+    path.join(cwd, 'AGENTS.md'),
+    read(cwd, 'AGENTS.md').replace('## Commands\n', '## Commands\n\nnpm test\n'),
+    'utf8',
+  );
+  /** @type {string[]} */
+  const logs = [];
+  await update({ cwd, packageRoot: root, runner: async () => {}, log: (m) => logs.push(m) });
+
+  assert.equal(exists(cwd, 'OPERATOR.md'), false);
+  const text = read(cwd, 'AGENTS.md');
+  assert.ok(!text.includes(START_MARKER));
+  assert.ok(!text.includes('Read @OPERATOR.md'));
+  assert.ok(!text.includes('Specs and tickets live in:'));
+  assert.ok(text.includes('## Commands\n\nnpm test\n'));
+  assert.ok(text.includes('## Notes\n\nUse pnpm.\n'));
+  assert.ok(text.startsWith('## Project context\n'));
+  assert.equal(read(cwd, 'CLAUDE.md'), '@AGENTS.md\n', 'the import stays: AGENTS.md still has user content');
+  assert.deepEqual(readState(cwd).claudeMd, { importAdded: true, fileCreated: true });
+  assert.ok(logs.some((m) => m.includes('Removed the Operator block')));
+  assert.ok(logs.some((m) => m.includes('Removed the tracker line')));
+  assert.ok(!logs.some((m) => m.includes('CLAUDE.md')));
+
+  // Nothing left to clean: the import is not a leftover and a second update is a no-op.
+  const skills = managedSkillNames(loadCatalog(root));
+  for (const name of skills) writeSkill(cwd, SKILLS_DIR, name);
+  assert.equal(status({ cwd, packageRoot: root, env: {}, homedir: tmpDir(), log: quiet }).ok, true);
+  const before = read(cwd, 'AGENTS.md');
+  await update({ cwd, packageRoot: root, runner: async () => {}, log: quiet });
+  assert.equal(read(cwd, 'AGENTS.md'), before);
+
+  // remove drops the import whenever Operator added it, and CLAUDE.md with it (Operator created it).
   await remove({ cwd, packageRoot: root, runner: async () => {}, log: quiet });
-  assert.equal(fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf8'), '# Team notes\n\nBe kind.\n');
+  assert.equal(exists(cwd, 'CLAUDE.md'), false);
+  assert.equal(read(cwd, 'AGENTS.md'), before, 'the user AGENTS.md is untouched');
+  assert.equal(exists(cwd, '.operator'), false);
 });
 
-test('a CLAUDE.md that already imports AGENTS.md is left alone, also by remove', async () => {
+test('update removes only the import line from a CLAUDE.md the user owns', async () => {
   const cwd = tmpDir();
-  const root = packageRoot();
-  const original = '@AGENTS.md\n\n# Mine\n';
-  fs.writeFileSync(path.join(cwd, 'CLAUDE.md'), original, 'utf8');
-  await init({ cwd, packageRoot: root, agents: ['claude-code'], yes: true, runner: async () => {}, log: quiet });
-  assert.equal(fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf8'), original);
+  writeV3Install(cwd, { claudeMd: '# Team notes\n\nBe kind.\n\n@AGENTS.md\n', fileCreated: false });
+  await update({ cwd, packageRoot: packageRoot(), runner: async () => {}, log: quiet });
+  assert.equal(exists(cwd, 'AGENTS.md'), false);
+  assert.equal(read(cwd, 'CLAUDE.md'), '# Team notes\n\nBe kind.\n');
   assert.equal(readState(cwd).claudeMd, undefined);
-  await remove({ cwd, packageRoot: root, runner: async () => {}, log: quiet });
-  assert.equal(fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf8'), original);
 });
 
-test('remove uninstalls own + pstack without --copy and cleans every file Operator wrote', async () => {
+test('update leaves an @AGENTS.md line Operator did not add', async () => {
+  const cwd = tmpDir();
+  writeV3Install(cwd);
+  writeState(cwd, { version: 3, agents: ['claude-code'], tracker: 'github' });
+  await update({ cwd, packageRoot: packageRoot(), runner: async () => {}, log: quiet });
+  assert.equal(exists(cwd, 'AGENTS.md'), false);
+  assert.equal(read(cwd, 'CLAUDE.md'), '@AGENTS.md\n', 'not recorded in state, so not ours');
+});
+
+test('update on a v4 install changes nothing in the repo', async () => {
+  const cwd = tmpDir();
+  fs.writeFileSync(path.join(cwd, 'AGENTS.md'), '# Mine\n', 'utf8');
+  await init({ cwd, packageRoot: packageRoot(), agents: ['cursor'], yes: true, runner: async () => {}, log: quiet });
+  /** @type {string[]} */
+  const logs = [];
+  await update({ cwd, packageRoot: packageRoot(), runner: async () => {}, log: (m) => logs.push(m) });
+  assert.deepEqual(logs, ['Operator updated. Skills are current.']);
+  assert.deepEqual(fs.readdirSync(cwd).sort(), ['.operator', 'AGENTS.md']);
+  assert.equal(read(cwd, 'AGENTS.md'), '# Mine\n');
+});
+
+test('remove uninstalls own + pstack without --copy and deletes the state', async () => {
   const cwd = tmpDir();
   const root = packageRoot();
   const catalog = loadCatalog(root);
@@ -265,24 +321,31 @@ test('remove uninstalls own + pstack without --copy and cleans every file Operat
   assert.deepEqual(calls[0].slice(3, calls[0].indexOf('--agent')), managedSkillNames(catalog));
   assert.deepEqual(agentArgs(calls[0]), ['claude-code'], 'agents come from the state file');
   assert.ok(!calls[0].includes('--copy'));
-  assert.equal(fs.existsSync(path.join(cwd, 'AGENTS.md')), false);
-  assert.equal(fs.existsSync(path.join(cwd, 'OPERATOR.md')), false);
-  assert.equal(fs.existsSync(path.join(cwd, 'CLAUDE.md')), false);
-  assert.equal(fs.existsSync(statePath(cwd)), false);
-  assert.equal(fs.existsSync(path.join(cwd, '.operator')), false);
+  assert.equal(exists(cwd, '.operator'), false);
+  assert.deepEqual(fs.readdirSync(cwd), []);
 });
 
-test('remove keeps user text in AGENTS.md and drops only the tracker line', async () => {
+test('remove cleans a v3.2 install and keeps the user text in AGENTS.md', async () => {
   const cwd = tmpDir();
-  const root = packageRoot();
-  await init({ cwd, packageRoot: root, agents: ['cursor'], yes: true, runner: async () => {}, log: quiet });
-  const text = readAgentsMd(cwd).replace('## Commands\n', '## Commands\n\nnpm test\n');
-  fs.writeFileSync(path.join(cwd, 'AGENTS.md'), text, 'utf8');
-  await remove({ cwd, packageRoot: root, runner: async () => {}, log: quiet });
-  const after = readAgentsMd(cwd);
-  assert.ok(!after.includes(START_MARKER));
-  assert.ok(!after.includes('Specs and tickets live in:'));
-  assert.ok(after.includes('## Project context\n\n## Commands\n\nnpm test\n'));
+  writeV3Install(cwd, { userText: '\n## Notes\n\nUse pnpm.\n' });
+  /** @type {string[]} */
+  const logs = [];
+  await remove({ cwd, packageRoot: packageRoot(), runner: async () => {}, log: (m) => logs.push(m) });
+  assert.equal(exists(cwd, 'OPERATOR.md'), false);
+  const text = read(cwd, 'AGENTS.md');
+  assert.ok(!text.includes(START_MARKER));
+  assert.ok(!text.includes('Specs and tickets live in:'));
+  assert.ok(text.includes('## Notes\n\nUse pnpm.\n'));
+  assert.equal(exists(cwd, 'CLAUDE.md'), false, 'remove drops the import even though AGENTS.md stays');
+  assert.equal(exists(cwd, '.operator'), false);
+  assert.ok(logs[0].includes('Operator skills removed.'));
+});
+
+test('remove on a v3 install with only the scaffold deletes AGENTS.md too', async () => {
+  const cwd = tmpDir();
+  writeV3Install(cwd);
+  await remove({ cwd, packageRoot: packageRoot(), runner: async () => {}, log: quiet });
+  assert.deepEqual(fs.readdirSync(cwd), []);
 });
 
 test('update on a v2 install leaves only own + pstack skills and purges managed references', async () => {
@@ -330,26 +393,20 @@ test('update on a v2 install leaves only own + pstack skills and purges managed 
 
   assert.deepEqual(installedNames(cwd), [...managedSkillNames(catalog), 'my-project-skill'].sort());
 
-  for (const file of V2_REF_FILES) assert.equal(fs.existsSync(path.join(cwd, 'references', file)), false);
+  for (const file of V2_REF_FILES) assert.equal(exists(cwd, path.join('references', file)), false);
   assert.equal(fs.existsSync(markerPath(cwd)), false);
-  assert.equal(fs.readFileSync(path.join(cwd, 'references', 'keep-me.md'), 'utf8'), 'mine');
+  assert.equal(read(cwd, path.join('references', 'keep-me.md')), 'mine');
 
-  assert.deepEqual(readState(cwd), {
-    version: 3,
-    agents: ['claude-code'],
-    claudeMd: { importAdded: true, fileCreated: true },
-  });
-  assert.equal(fs.readFileSync(path.join(cwd, 'CLAUDE.md'), 'utf8'), '@AGENTS.md\n');
+  assert.deepEqual(readState(cwd), { version: 3, agents: ['claude-code'] });
+  assert.equal(exists(cwd, 'CLAUDE.md'), false, 'v4 never creates it');
 
-  const text = readAgentsMd(cwd);
-  assert.ok(text.startsWith('# Keep me\n'));
+  const text = read(cwd, 'AGENTS.md');
   assert.ok(!text.includes('OLD V2 BLOCK'));
-  assert.ok(text.includes(fs.readFileSync(agentsBlockPath(root), 'utf8').trimEnd()));
+  assert.ok(text.includes('# Keep me'));
   assert.ok(text.includes('## Commands\n\nnpm test\n'));
-  assert.ok(!outsideBlock(text).includes('Specs and tickets live in:'), 'update does not invent a tracker');
   assert.ok(logs.includes(NO_TRACKER_HINT));
-  assert.ok(logs[0].includes('Removed v2 skills'));
-  assert.ok(logs[0].includes('Removed v2 managed references/.'));
+  assert.ok(logs.some((m) => m.includes('Removed v2 skills')));
+  assert.ok(logs.some((m) => m.includes('Removed v2 managed references/.')));
 
   const after = status({ cwd, packageRoot: root, env: {}, homedir: tmpDir(), log: quiet });
   assert.equal(after.ok, true);
@@ -362,13 +419,10 @@ test('update keeps the saved tracker; --tracker on update changes it', async () 
   await init({ cwd, packageRoot: root, agents: ['cursor'], yes: true, tracker: 'github', runner: async () => {}, log: quiet });
   await update({ cwd, packageRoot: root, runner: async () => {}, log: quiet });
   assert.equal(readState(cwd).tracker, 'github');
-  assert.equal(count(outsideBlock(readAgentsMd(cwd)), 'Specs and tickets live in: GitHub issues'), 1);
 
   await update({ cwd, packageRoot: root, tracker: 'linear', runner: async () => {}, log: quiet });
   assert.equal(readState(cwd).tracker, 'linear');
-  const text = readAgentsMd(cwd);
-  assert.equal(count(outsideBlock(text), 'Specs and tickets live in:'), 1);
-  assert.ok(text.includes('Specs and tickets live in: Linear'));
+  assert.deepEqual(fs.readdirSync(cwd), ['.operator']);
 });
 
 test('update adds pstack skills that are not installed yet', async () => {
@@ -397,11 +451,11 @@ test('remove on a v2 install reads agents from the old manifest and purges its r
   const { calls, runner } = fakeSkillsCli(cwd);
   await remove({ cwd, packageRoot: root, runner, log: quiet });
   assert.deepEqual(agentArgs(calls[0]), ['codex']);
-  assert.equal(fs.existsSync(path.join(cwd, 'references')), false);
+  assert.equal(exists(cwd, 'references'), false);
   assert.equal(fs.existsSync(statePath(cwd)), false);
 });
 
-test('status reports leftover v2 skills, the CLAUDE.md import, and the tracker; references do not count', async () => {
+test('status reports skills, the saved tracker, and leftover v2 skills; references do not count', async () => {
   const cwd = tmpDir();
   const root = packageRoot();
   const catalog = loadCatalog(root);
@@ -419,14 +473,12 @@ test('status reports leftover v2 skills, the CLAUDE.md import, and the tracker; 
   out = [];
   const complete = status({ cwd, packageRoot: root, env: {}, homedir, log });
   assert.equal(complete.ok, true);
-  assert.equal(complete.claudeMd.expected, true);
-  assert.equal(complete.claudeMd.imports, true);
-  assert.equal(complete.tracker.saved, 'github');
+  assert.equal(complete.tracker, 'github');
   assert.ok(out[0].includes('Skills: 31/31 installed'));
-  assert.ok(out[0].includes('CLAUDE.md: imports AGENTS.md'));
-  assert.ok(out[0].includes('OPERATOR.md: current'));
-  assert.ok(out[0].includes('Tracker: Specs and tickets live in: GitHub issues'));
+  assert.ok(out[0].includes('Tracker: github'));
+  assert.ok(out[0].includes('Agents: claude-code'));
   assert.ok(!out[0].includes('References'));
+  assert.ok(!out[0].includes('older Operator'));
 
   writeSkill(cwd, SKILLS_DIR, 'operator');
   writeSkill(cwd, SKILLS_DIR, 'tdd');
@@ -441,35 +493,50 @@ test('status reports leftover v2 skills, the CLAUDE.md import, and the tracker; 
   fs.rmSync(path.join(cwd, SKILLS_DIR, 'operator'), { recursive: true });
   fs.rmSync(path.join(cwd, SKILLS_DIR, 'tdd'), { recursive: true });
   assert.equal(status({ cwd, packageRoot: root, env: {}, homedir, log: quiet }).ok, true, 'v2 references alone do not fail ok');
-
-  fs.writeFileSync(path.join(cwd, 'OPERATOR.md'), 'edited\n', 'utf8');
-  out = [];
-  assert.equal(status({ cwd, packageRoot: root, env: {}, homedir, log }).ok, true, 'a stale OPERATOR.md is reported, not failed');
-  assert.ok(out[0].includes('OPERATOR.md: differs from this version'));
-  fs.rmSync(path.join(cwd, 'OPERATOR.md'));
-  out = [];
-  assert.equal(status({ cwd, packageRoot: root, env: {}, homedir, log }).ok, false, 'a missing OPERATOR.md fails ok');
-  assert.ok(out[0].includes('OPERATOR.md: missing'));
-  fs.writeFileSync(path.join(cwd, 'OPERATOR.md'), fs.readFileSync(operatorMdPayloadPath(root), 'utf8'), 'utf8');
-
-  fs.writeFileSync(path.join(cwd, 'CLAUDE.md'), '# no import\n', 'utf8');
-  out = [];
-  const noImport = status({ cwd, packageRoot: root, env: {}, homedir, log });
-  assert.equal(noImport.ok, false);
-  assert.ok(out[0].includes('CLAUDE.md: missing the @AGENTS.md import'));
 });
 
-test('status skips the CLAUDE.md check when claude-code is not a saved agent', async () => {
+test('status hints when no tracker is saved', async () => {
   const cwd = tmpDir();
-  const root = packageRoot();
-  await init({ cwd, packageRoot: root, agents: ['cursor'], yes: true, runner: async () => {}, log: quiet });
-  for (const name of managedSkillNames(loadCatalog(root))) writeSkill(cwd, SKILLS_DIR, name);
   /** @type {string[]} */
   const out = [];
-  const result = status({ cwd, packageRoot: root, env: {}, homedir: tmpDir(), log: (m) => out.push(m) });
-  assert.equal(result.ok, true);
-  assert.equal(result.claudeMd.expected, false);
-  assert.ok(!out[0].includes('CLAUDE.md'));
+  status({ cwd, packageRoot: packageRoot(), env: {}, homedir: tmpDir(), log: (m) => out.push(m) });
+  assert.ok(out[0].includes('Tracker: not set'));
+  assert.ok(out[0].includes('Agents: none saved'));
+});
+
+test('status reports what an older Operator left and fails ok until update cleans it', async () => {
+  const cwd = tmpDir();
+  const root = packageRoot();
+  const homedir = tmpDir();
+  writeV3Install(cwd);
+  for (const name of managedSkillNames(loadCatalog(root))) writeSkill(cwd, SKILLS_DIR, name);
+
+  /** @type {string[]} */
+  const out = [];
+  const result = status({ cwd, packageRoot: root, env: {}, homedir, log: (m) => out.push(m) });
+  assert.equal(result.ok, false);
+  assert.deepEqual(
+    { ...result.legacyFiles },
+    { operatorMd: true, agentsBlock: true, trackerLine: true, claudeImport: true, any: true },
+  );
+  assert.ok(out[0].includes('run operator update'));
+  assert.ok(out[0].includes('OPERATOR.md'));
+  assert.ok(out[0].includes('AGENTS.md: Operator block'));
+  assert.ok(out[0].includes('AGENTS.md: tracker line'));
+  assert.ok(out[0].includes('CLAUDE.md: @AGENTS.md import'));
+
+  await update({ cwd, packageRoot: root, runner: async () => {}, log: quiet });
+  assert.equal(status({ cwd, packageRoot: root, env: {}, homedir, log: quiet }).ok, true);
+});
+
+test('status does not call the import a leftover while AGENTS.md still has user content', async () => {
+  const cwd = tmpDir();
+  const root = packageRoot();
+  writeV3Install(cwd, { userText: '\n## Notes\n\nUse pnpm.\n' });
+  for (const name of managedSkillNames(loadCatalog(root))) writeSkill(cwd, SKILLS_DIR, name);
+  const result = status({ cwd, packageRoot: root, env: {}, homedir: tmpDir(), log: quiet });
+  assert.equal(result.legacyFiles.agentsBlock, true);
+  assert.equal(result.legacyFiles.claudeImport, false);
 });
 
 test('status reports TokenEconomizer when its launcher exists, without affecting ok', async () => {

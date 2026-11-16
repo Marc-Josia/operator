@@ -1,11 +1,11 @@
 ---
 name: grill
-description: Use when the user brings an idea, feature, or plan that is not yet understood well enough to spec, with or without a repo. Opens the understanding gate.
+description: Use when the user describes something they want built or changed (a feature, an idea, a product, a plan) and what ships, for whom, or how we will know it works is not settled yet. Asks product questions only and ends at the understanding gate. Not for a change the user already stated in one sentence (that is `implement`).
 ---
 
 ## Mission
 
-Reach a shared understanding with the Product Manager of what to build, in product terms, before anything is written. The PM owns who, what problem, and what success looks like; the agent owns every technical choice. Everything downstream rests on this, so nothing in it may be a guess.
+Reach a shared understanding with the user, the Product Manager (PM), of what to build, in product terms, before anything is written. The PM owns who, what problem, and what success looks like; the agent owns every technical choice. Everything downstream rests on this, so nothing in it may be a guess.
 
 ## Done when
 

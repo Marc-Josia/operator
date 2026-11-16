@@ -1,6 +1,6 @@
 ---
 name: wayfinder
-description: Use when a vision is too big for one grill-to-spec session (several releases, a new product, a large overhaul) and needs to be cut into milestones first.
+description: Use when a vision is too big for one session (a new product, several releases, a large overhaul) and must first be cut into milestones the PM can try. Not for a single feature (that is `grill`).
 ---
 
 ## Mission
@@ -13,7 +13,7 @@ Turn a big, foggy vision into a short, ordered list of milestones, each one some
 - Each milestone is one line: what a user can do once it lands, and how the PM will try it. No milestone is invisible work; foundations ride inside the first milestone that needs them, said in one line.
 - The PM ordered the milestones by product value. A technical dependency that forces a different order is stated in one line and kept unless they veto.
 - What is past the destination is listed as out of scope. What is in scope but still too vague to cut is listed loosely as later, not forced into milestones.
-- The map is saved where the AGENTS.md line under `## Project context` says ("Specs and tickets live in: …"); no line: `docs/changes/<change-id>/milestones.md`; platform tool missing (no `gh`, no Linear MCP): the same, and the PM was told why in one line.
+- The map is saved where the tracker field of `.operator/state.json` says; missing or local: `docs/changes/<change-id>/milestones.md`; platform tool missing (no `gh`, no Linear MCP): the same, and the PM was told why in one line.
 - After each milestone ships, the map is updated: milestone marked done with a one-line outcome, newly clear later items turned into milestones, the PM re-confirmed the order.
 
 ## Never

@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Use when writing or updating a pull request body.
+description: Use when opening a pull request, or writing or updating its title or description.
 ---
 
 ## Mission

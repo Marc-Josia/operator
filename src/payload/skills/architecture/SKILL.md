@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Use when module or seam friction remains after a review, when a bug had no good seam for its regression test, or when a deepening scan of the codebase is asked for.
+description: Use when module or seam friction remains after a review, when a bug had no good seam for its regression test, or when the user asks to improve the structure of the codebase or find what to refactor.
 ---
 
 ## Mission
