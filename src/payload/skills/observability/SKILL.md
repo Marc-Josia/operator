@@ -15,7 +15,7 @@ When something breaks for users in production, the team learns it from an alert 
 - External calls log endpoint, status, latency, and attempt count, never payloads.
 - A failure was induced on a real environment (preview or staging) and located by request ID from telemetry alone, without reading the source.
 - Actual log output was read: structured fields, no `[object Object]`, no secret, token, or full personal data.
-- Repo setup: an unhandled error from the deployed app shows up in the error tracker; at least one alert fires on a symptom users feel (error rate, latency, queue age), has a three-line runbook in `docs/runbooks/` (what it means, first check, who to call), and was test-fired once to the right channel; the tools and where to find them are recorded in the project part of `AGENTS.md`.
+- Repo setup: an unhandled error from the deployed app shows up in the error tracker; at least one alert fires on a symptom users feel (error rate, latency, queue age), has a three-line runbook in `docs/runbooks/` (what it means, first check, who to call), and was test-fired once to the right channel; the tools and where to find them are listed in `docs/runbooks/README.md`.
 
 ## Never
 

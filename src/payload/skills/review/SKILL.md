@@ -1,6 +1,6 @@
 ---
 name: review
-description: Use once per medium or larger change, to check it against its spec or ticket and the project standards; after the build by default, or in high-risk mode before a high-risk merge.
+description: Use once per medium or larger change, after `simplify-pass`, to check it against its spec or ticket and the project standards, or when the user asks for a code review. A high-risk change (auth, input, secrets, personal data, a third party, a migration, a public interface, a release to users) gets high-risk mode instead, after the production checks.
 ---
 
 ## Mission

@@ -1,6 +1,6 @@
 ---
 name: constraints
-description: Use before the first build of a new project or significant feature when the repo has no CONSTRAINTS.md, when the PM wants a quality dimension enforced, or when an agent weakens a check, test, or threshold to get to green.
+description: Use before the first build of a new project or significant feature when the repo has no CONSTRAINTS.md, when the PM wants a quality (speed, accessibility, reliability, data safety) enforced, or when an agent is about to skip, weaken, or delete a test, check, or threshold to get to green.
 ---
 
 ## Mission
@@ -16,13 +16,13 @@ Write this project's quality bar down as commands that run, so every change, by 
 - Every command in it was run today: the floor passes on the current code, and each enforced row fails on a known violation and passes on a clean control.
 - At least one check is external (a scanner, a standard, a real browser), not only the project's own tests.
 - Checks that take more than a few seconds stay out of the edit loop.
-- `AGENTS.md` points at it in one line: read `CONSTRAINTS.md` before writing code; its commands gate every change; never weaken it to pass.
 - When guarding: the weakening in the diff is reverted and the code fixed instead, or the PM accepted it as a dated exception with a reason.
 
 ## Never
 
 - Silence a check, skip or delete a test, strip an assertion, lower a threshold, or add an exception row to get to green.
 - Change `CONSTRAINTS.md` in the same commit as the code that was failing it.
+- Escape a loop of failures (a TokenEconomizer loop-guard redirect included) by lowering the bar: change approach, or `debug` when the cause is unknown.
 - Write a number with no command behind it, or a command that cannot run in this repo (a page audit with no URL to hit).
 - Set a target the code fails today with no ratchet; hold today's value instead.
 - Hand-roll a checker when the stack already has a standard tool for it.

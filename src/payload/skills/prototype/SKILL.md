@@ -1,6 +1,6 @@
 ---
 name: prototype
-description: Use when what a screen should look like, or how a flow or state should behave, is still open and the PM needs to see it to decide.
+description: Use when how a screen should look, or how a flow or state should behave, is still open and the PM needs to see or click something to decide (a mockup, design variants, a clickable demo). Throwaway, never merged.
 ---
 
 ## Mission

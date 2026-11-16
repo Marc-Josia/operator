@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { operatorMdPayloadPath, loadCatalog, ownSkillNames, payloadDir } from '../lib/catalog.mjs';
+import { loadCatalog, ownSkillNames, payloadDir } from '../lib/catalog.mjs';
 import { packageRoot } from './helpers.mjs';
 
 /**
  * Skill-shaped backticked tokens (lowercase kebab) that are not skills: folders, code,
- * frontmatter keys, CLIs, git branches, and pstack hand-offs the block says are not installed.
+ * frontmatter keys, CLIs, git branches, and pstack hand-offs that are not installed.
  */
 const NOT_SKILLS = new Set([
   'any', 'eval', 'gh', 'name', 'description',
@@ -41,15 +41,14 @@ function section(text, heading) {
 }
 
 const skillText = new Map(own.map((name) => [name, read(path.join(skillsDir, name, 'SKILL.md'))]));
-const block = read(operatorMdPayloadPath(packageRoot()));
 
 test('catalog ownSkills equals the skill folders in the payload', () => {
   const folders = fs.readdirSync(skillsDir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
   assert.deepEqual([...folders].sort(), [...own].sort());
 });
 
-test('every skill name used in an own skill or OPERATOR.md is an own or pstack skill', () => {
-  for (const [name, text] of [...skillText, ['operator.md', block]]) {
+test('every skill name used in an own skill is an own or pstack skill', () => {
+  for (const [name, text] of skillText) {
     const unknown = skillTokens(text).filter((token) => !installed.has(token));
     assert.deepEqual([...new Set(unknown)], [], `${name} names skills that are not installed`);
   }
@@ -62,17 +61,29 @@ test('every own skill hands off only to existing skills', () => {
   }
 });
 
-test('every own skill is reachable from OPERATOR.md, directly or through Hand-offs', () => {
-  const reached = new Set(skillTokens(block).filter((token) => skillText.has(token)));
-  const queue = [...reached];
-  while (queue.length > 0) {
-    const next = skillTokens(section(skillText.get(queue.shift()) ?? '', 'Hand-off'));
-    for (const token of next) {
-      if (skillText.has(token) && !reached.has(token)) {
-        reached.add(token);
-        queue.push(token);
-      }
+/** @param {string} text */
+function description(text) {
+  return /^description: (.*)$/m.exec(text)?.[1] ?? '';
+}
+
+/** The agent picks a skill from its description alone, and the listing shares one budget across every installed skill. */
+const MAX_DESCRIPTION = 400;
+const MAX_DESCRIPTIONS_TOTAL = 6000;
+
+test('every own skill description leads with its trigger and stays short', () => {
+  for (const [name, text] of skillText) {
+    const desc = description(text);
+    assert.match(desc, /^Use /, `${name}: description must start with its trigger`);
+    assert.ok(desc.length <= MAX_DESCRIPTION, `${name}: description is ${desc.length} chars, max ${MAX_DESCRIPTION}`);
+  }
+  const total = [...skillText.values()].reduce((sum, text) => sum + description(text).length, 0);
+  assert.ok(total <= MAX_DESCRIPTIONS_TOTAL, `own descriptions total ${total} chars, max ${MAX_DESCRIPTIONS_TOTAL}`);
+});
+
+test('no own skill points agents at files Operator no longer writes', () => {
+  for (const [name, text] of skillText) {
+    for (const gone of ['OPERATOR.md', 'operator:start', 'operator:end', 'Specs and tickets live in', '## Project context']) {
+      assert.ok(!text.includes(gone), `${name} mentions ${gone}`);
     }
   }
-  assert.deepEqual(own.filter((name) => !reached.has(name)), []);
 });
